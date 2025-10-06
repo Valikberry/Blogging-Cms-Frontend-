@@ -7,7 +7,7 @@ interface RichTextProps {
   className?: string
 }
 
-export function RichText({ content, className = '' }: RichTextProps) {
+ function RichText({ content, className = '' }: RichTextProps) {
   if (!content) {
     return null
   }
@@ -19,5 +19,5 @@ export function RichText({ content, className = '' }: RichTextProps) {
   )
 }
 
-
+export default RichText
 
