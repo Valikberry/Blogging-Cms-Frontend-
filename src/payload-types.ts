@@ -108,7 +108,7 @@ export interface Config {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
   };
-  locale: null;
+  locale: 'en' | 'fr' | 'rw';
   user: User & {
     collection: 'users';
   };
@@ -149,49 +149,65 @@ export interface Page {
   id: string;
   title: string;
   hero: {
-    type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact';
-    richText?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
-    links?:
-      | {
-          link: {
-            type?: ('reference' | 'custom') | null;
-            newTab?: boolean | null;
-            reference?:
-              | ({
-                  relationTo: 'pages';
-                  value: string | Page;
-                } | null)
-              | ({
-                  relationTo: 'posts';
-                  value: string | Post;
-                } | null);
-            url?: string | null;
+    type: 'default' | 'postList';
+    postListConfig?: {
+      /**
+       * Main heading for the post list section
+       */
+      title: string;
+      /**
+       * Introductory text shown above category tabs
+       */
+      description: string;
+      /**
+       * Tab navigation for filtering posts by category
+       */
+      categories?:
+        | {
+            /**
+             * Display label for the tab (e.g., "New", "Hot")
+             */
             label: string;
             /**
-             * Choose how the link should be rendered.
+             * Icon to display next to the label
              */
-            appearance?: ('default' | 'outline') | null;
-          };
-          id?: string | null;
-        }[]
-      | null;
-    media?: (string | null) | Media;
+            icon: 'new' | 'hot' | 'stories' | 'subscribe' | 'featured' | 'all';
+            filterType: 'category' | 'featured' | 'all';
+            /**
+             * Select categories to filter posts
+             */
+            filterCategories?: (string | Category)[] | null;
+            sortBy?: ('publishedAt' | 'publishedAt_asc' | 'title' | 'viewCount') | null;
+            id?: string | null;
+          }[]
+        | null;
+      /**
+       * Number of posts to display per page
+       */
+      postsPerPage?: number | null;
+      /**
+       * Group posts by date (e.g., "Sep 16", "Sep 15")
+       */
+      groupByDate?: boolean | null;
+      /**
+       * Show "Submitted by" text below posts
+       */
+      showSubmitter?: boolean | null;
+      /**
+       * Format for displaying dates
+       */
+      dateFormat?: ('short' | 'long' | 'full') | null;
+      /**
+       * Enable pagination for posts
+       */
+      enablePagination?: boolean | null;
+      /**
+       * Background color for the post list section
+       */
+      backgroundColor?: ('gray' | 'white' | 'light') | null;
+    };
   };
-  layout: (CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock)[];
+  layout?: (CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock)[] | null;
   meta?: {
     title?: string | null;
     /**
@@ -209,12 +225,102 @@ export interface Page {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: string;
+  title: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  parent?: (string | null) | Category;
+  breadcrumbs?:
+    | {
+        doc?: (string | null) | Category;
+        url?: string | null;
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CallToActionBlock".
+ */
+export interface CallToActionBlock {
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  links?:
+    | {
+        link: {
+          type?: ('reference' | 'custom') | null;
+          newTab?: boolean | null;
+          reference?:
+            | ({
+                relationTo: 'pages';
+                value: string | Page;
+              } | null)
+            | ({
+                relationTo: 'posts';
+                value: string | Post;
+              } | null);
+          url?: string | null;
+          label: string;
+          /**
+           * Choose how the link should be rendered.
+           */
+          appearance?: ('default' | 'outline') | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'cta';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
 export interface Post {
   id: string;
+  /**
+   * Post title that appears in lists and detail page
+   */
   title: string;
+  /**
+   * Short description shown in post lists (optional)
+   */
+  excerpt?: string | null;
+  /**
+   * Main image displayed at the top of the post
+   */
   heroImage?: (string | null) | Media;
+  /**
+   * Embed video from YouTube, Vimeo, or other platforms
+   */
+  videoEmbed?: {
+    enabled?: boolean | null;
+    /**
+     * YouTube URL (e.g., https://www.youtube.com/watch?v=VIDEO_ID or https://youtu.be/VIDEO_ID) or Vimeo URL (e.g., https://vimeo.com/VIDEO_ID). Regular URLs will be auto-converted to embed format.
+     */
+    embedUrl?: string | null;
+    aspectRatio?: ('16-9' | '4-3' | '1-1') | null;
+  };
   content: {
     root: {
       type: string;
@@ -230,8 +336,17 @@ export interface Post {
     };
     [k: string]: unknown;
   };
+  /**
+   * Categorize this post for filtering
+   */
+  categories: (string | Category)[];
+  tags?:
+    | {
+        tag?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   relatedPosts?: (string | Post)[] | null;
-  categories?: (string | Category)[] | null;
   meta?: {
     title?: string | null;
     /**
@@ -240,14 +355,32 @@ export interface Post {
     image?: (string | null) | Media;
     description?: string | null;
   };
-  publishedAt?: string | null;
+  /**
+   * Date shown in post lists (defaults to publish date)
+   */
+  publishedAt: string;
+  /**
+   * Primary authors of this post
+   */
   authors?: (string | User)[] | null;
+  /**
+   * Name of person who submitted this (e.g., "Zara Swanson")
+   */
+  submittedBy?: string | null;
   populatedAuthors?:
     | {
         id?: string | null;
         name?: string | null;
       }[]
     | null;
+  /**
+   * Feature this post (appears first in lists)
+   */
+  featured?: boolean | null;
+  /**
+   * Number of times this post has been viewed
+   */
+  viewCount?: number | null;
   slug?: string | null;
   slugLock?: boolean | null;
   updatedAt: string;
@@ -348,27 +481,6 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
- */
-export interface Category {
-  id: string;
-  title: string;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  parent?: (string | null) | Category;
-  breadcrumbs?:
-    | {
-        doc?: (string | null) | Category;
-        url?: string | null;
-        label?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -391,54 +503,6 @@ export interface User {
       }[]
     | null;
   password?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "CallToActionBlock".
- */
-export interface CallToActionBlock {
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  links?:
-    | {
-        link: {
-          type?: ('reference' | 'custom') | null;
-          newTab?: boolean | null;
-          reference?:
-            | ({
-                relationTo: 'pages';
-                value: string | Page;
-              } | null)
-            | ({
-                relationTo: 'posts';
-                value: string | Post;
-              } | null);
-          url?: string | null;
-          label: string;
-          /**
-           * Choose how the link should be rendered.
-           */
-          appearance?: ('default' | 'outline') | null;
-        };
-        id?: string | null;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'cta';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -999,23 +1063,28 @@ export interface PagesSelect<T extends boolean = true> {
     | T
     | {
         type?: T;
-        richText?: T;
-        links?:
+        postListConfig?:
           | T
           | {
-              link?:
+              title?: T;
+              description?: T;
+              categories?:
                 | T
                 | {
-                    type?: T;
-                    newTab?: T;
-                    reference?: T;
-                    url?: T;
                     label?: T;
-                    appearance?: T;
+                    icon?: T;
+                    filterType?: T;
+                    filterCategories?: T;
+                    sortBy?: T;
+                    id?: T;
                   };
-              id?: T;
+              postsPerPage?: T;
+              groupByDate?: T;
+              showSubmitter?: T;
+              dateFormat?: T;
+              enablePagination?: T;
+              backgroundColor?: T;
             };
-        media?: T;
       };
   layout?:
     | T
@@ -1130,10 +1199,24 @@ export interface FormBlockSelect<T extends boolean = true> {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  excerpt?: T;
   heroImage?: T;
+  videoEmbed?:
+    | T
+    | {
+        enabled?: T;
+        embedUrl?: T;
+        aspectRatio?: T;
+      };
   content?: T;
-  relatedPosts?: T;
   categories?: T;
+  tags?:
+    | T
+    | {
+        tag?: T;
+        id?: T;
+      };
+  relatedPosts?: T;
   meta?:
     | T
     | {
@@ -1143,12 +1226,15 @@ export interface PostsSelect<T extends boolean = true> {
       };
   publishedAt?: T;
   authors?: T;
+  submittedBy?: T;
   populatedAuthors?:
     | T
     | {
         id?: T;
         name?: T;
       };
+  featured?: T;
+  viewCount?: T;
   slug?: T;
   slugLock?: T;
   updatedAt?: T;
@@ -1552,6 +1638,22 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface Header {
   id: string;
+  topBar: {
+    socialLinks?:
+      | {
+          icon: 'facebook' | 'twitter' | 'youtube' | 'instagram';
+          url: string;
+          id?: string | null;
+        }[]
+      | null;
+    languageButton: {
+      /**
+       * Button text to open language switcher
+       */
+      label: string;
+      enabled?: boolean | null;
+    };
+  };
   navItems?:
     | {
         link: {
@@ -1572,6 +1674,7 @@ export interface Header {
         id?: string | null;
       }[]
     | null;
+  showSearch?: boolean | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1609,6 +1712,23 @@ export interface Footer {
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
+  topBar?:
+    | T
+    | {
+        socialLinks?:
+          | T
+          | {
+              icon?: T;
+              url?: T;
+              id?: T;
+            };
+        languageButton?:
+          | T
+          | {
+              label?: T;
+              enabled?: T;
+            };
+      };
   navItems?:
     | T
     | {
@@ -1623,6 +1743,7 @@ export interface HeaderSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  showSearch?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

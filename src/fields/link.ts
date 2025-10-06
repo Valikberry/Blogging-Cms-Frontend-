@@ -75,6 +75,7 @@ export const link: LinkType = ({ appearances, disableLabel = false, overrides = 
         condition: (_, siblingData) => siblingData?.type === 'reference',
       },
       label: 'Document to link to',
+      maxDepth: 1, // Add this line
       relationTo: ['pages', 'posts'],
       required: true,
     },

@@ -17,10 +17,29 @@ async function getGlobal(slug: Global, depth = 0) {
   return global
 }
 
-/**
- * Returns a unstable_cache function mapped with the cache tag for the slug
- */
-export const getCachedGlobal = (slug: Global, depth = 0) =>
-  unstable_cache(async () => getGlobal(slug, depth), [slug], {
-    tags: [`global_${slug}`],
-  })
+
+
+type Locale = 'en' | 'fr' 
+
+export const getCachedGlobal = (
+  slug: keyof Config['globals'], 
+  depth = 1, // Increase default depth to populate relationships
+  locale: Locale = 'en'
+) =>
+  unstable_cache(
+    async () => {
+      const payload = await getPayload({ config: configPromise })
+      
+      const global = await payload.findGlobal({
+        slug,
+        depth, // This is important for populating relationships
+        locale,
+      })
+
+      return global
+    },
+    [slug, locale, depth.toString()],
+    {
+      tags: [`global_${slug}_${locale}`],
+    },
+  )

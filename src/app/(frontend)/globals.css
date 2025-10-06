@@ -94,10 +94,9 @@
 }
 
 html {
-  opacity: 0;
+  opacity: 1;
 }
 
-html[data-theme='dark'],
-html[data-theme='light'] {
+html[data-theme='dark'] {
   opacity: initial;
 }

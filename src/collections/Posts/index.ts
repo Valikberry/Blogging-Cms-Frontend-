@@ -35,20 +35,21 @@ export const Posts: CollectionConfig<'posts'> = {
     read: authenticatedOrPublished,
     update: authenticated,
   },
-  // This config controls what's populated by default when a post is referenced
-  // https://payloadcms.com/docs/queries/select#defaultpopulate-collection-config-property
-  // Type safe if the collection slug generic is passed to `CollectionConfig` - `CollectionConfig<'posts'>
   defaultPopulate: {
     title: true,
     slug: true,
     categories: true,
+    publishedAt: true,
+    excerpt: true,
+    heroImage: true,
+    submittedBy: true,
     meta: {
       image: true,
       description: true,
     },
   },
   admin: {
-    defaultColumns: ['title', 'slug', 'updatedAt'],
+    defaultColumns: ['title', 'categories', 'publishedAt', 'updatedAt'],
     livePreview: {
       url: ({ data, req }) => {
         const path = generatePreviewPath({
@@ -56,7 +57,6 @@ export const Posts: CollectionConfig<'posts'> = {
           collection: 'posts',
           req,
         })
-
         return path
       },
     },
@@ -73,16 +73,68 @@ export const Posts: CollectionConfig<'posts'> = {
       name: 'title',
       type: 'text',
       required: true,
+      admin: {
+        description: 'Post title that appears in lists and detail page',
+      },
+    },
+    {
+      name: 'excerpt',
+      type: 'textarea',
+      admin: {
+        description: 'Short description shown in post lists (optional)',
+      },
+      maxLength: 200,
     },
     {
       type: 'tabs',
       tabs: [
         {
+          label: 'Content',
           fields: [
             {
               name: 'heroImage',
               type: 'upload',
               relationTo: 'media',
+              required: false,
+              admin: {
+                description: 'Main image displayed at the top of the post',
+              },
+            },
+            {
+              name: 'videoEmbed',
+              type: 'group',
+              admin: {
+                description: 'Embed video from YouTube, Vimeo, or other platforms',
+              },
+              fields: [
+                {
+                  name: 'enabled',
+                  type: 'checkbox',
+                  defaultValue: false,
+                  label: 'Enable Video Embed',
+                },
+                {
+                  name: 'embedUrl',
+                  type: 'text',
+                  admin: {
+                    condition: (_, siblingData) => siblingData?.enabled,
+                    description: 'YouTube URL (e.g., https://www.youtube.com/watch?v=VIDEO_ID or https://youtu.be/VIDEO_ID) or Vimeo URL (e.g., https://vimeo.com/VIDEO_ID). Regular URLs will be auto-converted to embed format.',
+                  },
+                },
+                {
+                  name: 'aspectRatio',
+                  type: 'select',
+                  defaultValue: '16-9',
+                  admin: {
+                    condition: (_, siblingData) => siblingData?.enabled,
+                  },
+                  options: [
+                    { label: '16:9 (Standard)', value: '16-9' },
+                    { label: '4:3 (Classic)', value: '4-3' },
+                    { label: '1:1 (Square)', value: '1-1' },
+                  ],
+                },
+              ],
             },
             {
               name: 'content',
@@ -99,14 +151,39 @@ export const Posts: CollectionConfig<'posts'> = {
                   ]
                 },
               }),
-              label: false,
+              label: 'Post Content',
               required: true,
             },
           ],
-          label: 'Content',
         },
         {
+          label: 'Metadata',
           fields: [
+            {
+              name: 'categories',
+              type: 'relationship',
+              admin: {
+                position: 'sidebar',
+                description: 'Categorize this post for filtering',
+              },
+              hasMany: true,
+              relationTo: 'categories',
+              required: true,
+            },
+            {
+              name: 'tags',
+              type: 'array',
+              admin: {
+                position: 'sidebar',
+              },
+              fields: [
+                {
+                  name: 'tag',
+                  type: 'text',
+                },
+              ],
+              label: 'Tags',
+            },
             {
               name: 'relatedPosts',
               type: 'relationship',
@@ -123,17 +200,7 @@ export const Posts: CollectionConfig<'posts'> = {
               hasMany: true,
               relationTo: 'posts',
             },
-            {
-              name: 'categories',
-              type: 'relationship',
-              admin: {
-                position: 'sidebar',
-              },
-              hasMany: true,
-              relationTo: 'categories',
-            },
           ],
-          label: 'Meta',
         },
         {
           name: 'meta',
@@ -150,13 +217,9 @@ export const Posts: CollectionConfig<'posts'> = {
             MetaImageField({
               relationTo: 'media',
             }),
-
             MetaDescriptionField({}),
             PreviewField({
-              // if the `generateUrl` function is configured
               hasGenerateFn: true,
-
-              // field paths to match the target field for data
               titlePath: 'meta.title',
               descriptionPath: 'meta.description',
             }),
@@ -172,6 +235,7 @@ export const Posts: CollectionConfig<'posts'> = {
           pickerAppearance: 'dayAndTime',
         },
         position: 'sidebar',
+        description: 'Date shown in post lists (defaults to publish date)',
       },
       hooks: {
         beforeChange: [
@@ -183,19 +247,27 @@ export const Posts: CollectionConfig<'posts'> = {
           },
         ],
       },
+      required: true,
     },
     {
       name: 'authors',
       type: 'relationship',
       admin: {
         position: 'sidebar',
+        description: 'Primary authors of this post',
       },
       hasMany: true,
       relationTo: 'users',
     },
+    {
+      name: 'submittedBy',
+      type: 'text',
+      admin: {
+        position: 'sidebar',
+        description: 'Name of person who submitted this (e.g., "Zara Swanson")',
+      },
+    },
     // This field is only used to populate the user data via the `populateAuthors` hook
-    // This is because the `user` collection has access control locked to protect user privacy
-    // GraphQL will also not return mutated user data that differs from the underlying schema
     {
       name: 'populatedAuthors',
       type: 'array',
@@ -217,6 +289,25 @@ export const Posts: CollectionConfig<'posts'> = {
         },
       ],
     },
+    {
+      name: 'featured',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        position: 'sidebar',
+        description: 'Feature this post (appears first in lists)',
+      },
+    },
+    {
+      name: 'viewCount',
+      type: 'number',
+      defaultValue: 0,
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+        description: 'Number of times this post has been viewed',
+      },
+    },
     ...slugField(),
   ],
   hooks: {
@@ -227,7 +318,7 @@ export const Posts: CollectionConfig<'posts'> = {
   versions: {
     drafts: {
       autosave: {
-        interval: 100, // We set this interval for optimal live preview
+        interval: 100,
       },
       schedulePublish: true,
     },

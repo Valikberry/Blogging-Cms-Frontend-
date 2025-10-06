@@ -1,13 +1,6 @@
+// heros/config.ts
 import type { Field } from 'payload'
-
-import {
-  FixedToolbarFeature,
-  HeadingFeature,
-  InlineToolbarFeature,
-  lexicalEditor,
-} from '@payloadcms/richtext-lexical'
-
-import { linkGroup } from '@/fields/linkGroup'
+import { PostListHero } from './PostList/config'
 
 export const hero: Field = {
   name: 'hero',
@@ -16,57 +9,29 @@ export const hero: Field = {
     {
       name: 'type',
       type: 'select',
-      defaultValue: 'lowImpact',
-      label: 'Type',
+      required: true,
+      defaultValue: 'default',
       options: [
         {
-          label: 'None',
-          value: 'none',
+          label: 'Default',
+          value: 'default',
         },
         {
-          label: 'High Impact',
-          value: 'highImpact',
+          label: 'Post List',
+          value: 'postList',
         },
-        {
-          label: 'Medium Impact',
-          value: 'mediumImpact',
-        },
-        {
-          label: 'Low Impact',
-          value: 'lowImpact',
-        },
+        // ... other hero types
       ],
-      required: true,
     },
+    // Add conditional fields for postList type
     {
-      name: 'richText',
-      type: 'richText',
-      editor: lexicalEditor({
-        features: ({ rootFeatures }) => {
-          return [
-            ...rootFeatures,
-            HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
-            FixedToolbarFeature(),
-            InlineToolbarFeature(),
-          ]
-        },
-      }),
-      label: false,
-    },
-    linkGroup({
-      overrides: {
-        maxRows: 2,
-      },
-    }),
-    {
-      name: 'media',
-      type: 'upload',
+      name: 'postListConfig',
+      type: 'group',
       admin: {
-        condition: (_, { type } = {}) => ['highImpact', 'mediumImpact'].includes(type),
+        condition: (_, siblingData) => siblingData?.type === 'postList',
       },
-      relationTo: 'media',
-      required: true,
+      fields: PostListHero.fields,
     },
+    // ... other hero fields
   ],
-  label: false,
 }

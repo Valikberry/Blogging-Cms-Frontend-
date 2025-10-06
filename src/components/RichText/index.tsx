@@ -1,81 +1,164 @@
-import { MediaBlock } from '@/blocks/MediaBlock/Component'
-import {
-  DefaultNodeTypes,
-  SerializedBlockNode,
-  SerializedLinkNode,
-  type DefaultTypedEditorState,
-} from '@payloadcms/richtext-lexical'
-import {
-  JSXConvertersFunction,
-  LinkJSXConverter,
-  RichText as ConvertRichText,
-} from '@payloadcms/richtext-lexical/react'
+// components/RichText/index.tsx
 
-import { CodeBlock, CodeBlockProps } from '@/blocks/Code/Component'
-
-import type {
-  BannerBlock as BannerBlockProps,
-  CallToActionBlock as CTABlockProps,
-  MediaBlock as MediaBlockProps,
-} from '@/payload-types'
-import { BannerBlock } from '@/blocks/Banner/Component'
-import { CallToActionBlock } from '@/blocks/CallToAction/Component'
-import { cn } from '@/utilities/ui'
-
-type NodeTypes =
-  | DefaultNodeTypes
-  | SerializedBlockNode<CTABlockProps | MediaBlockProps | BannerBlockProps | CodeBlockProps>
-
-const internalDocToHref = ({ linkNode }: { linkNode: SerializedLinkNode }) => {
-  const { value, relationTo } = linkNode.fields.doc!
-  if (typeof value !== 'object') {
-    throw new Error('Expected value to be an object')
-  }
-  const slug = value.slug
-  return relationTo === 'posts' ? `/posts/${slug}` : `/${slug}`
+interface RichTextProps {
+  content: any
+  className?: string
 }
 
-const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) => ({
-  ...defaultConverters,
-  ...LinkJSXConverter({ internalDocToHref }),
-  blocks: {
-    banner: ({ node }) => <BannerBlock className="col-start-2 mb-4" {...node.fields} />,
-    mediaBlock: ({ node }) => (
-      <MediaBlock
-        className="col-start-1 col-span-3"
-        imgClassName="m-0"
-        {...node.fields}
-        captionClassName="mx-auto max-w-[48rem]"
-        enableGutter={false}
-        disableInnerContainer={true}
-      />
-    ),
-    code: ({ node }) => <CodeBlock className="col-start-2" {...node.fields} />,
-    cta: ({ node }) => <CallToActionBlock {...node.fields} />,
-  },
-})
+export function RichText({ content, className = '' }: RichTextProps) {
+  if (!content) {
+    return null
+  }
 
-type Props = {
-  data: DefaultTypedEditorState
-  enableGutter?: boolean
-  enableProse?: boolean
-} & React.HTMLAttributes<HTMLDivElement>
-
-export default function RichText(props: Props) {
-  const { className, enableProse = true, enableGutter = true, ...rest } = props
   return (
-    <ConvertRichText
-      converters={jsxConverters}
-      className={cn(
-        'payload-richtext',
-        {
-          container: enableGutter,
-          'max-w-none': !enableGutter,
-          'mx-auto prose md:prose-md dark:prose-invert': enableProse,
-        },
-        className,
-      )}
-      {...rest}
-    />
+    <div className={`rich-text ${className}`}>
+      {serializeLexical({ nodes: content.root.children })}
+    </div>
+  )
+}
+
+// utilities/serializeLexical.tsx
+import React, { Fragment, JSX } from 'react'
+import escapeHTML from 'escape-html'
+import Link from 'next/link'
+import Image from 'next/image'
+
+interface SerializeLexicalProps {
+  nodes: any[]
+}
+
+export function serializeLexical({ nodes }: SerializeLexicalProps): JSX.Element {
+  return (
+    <Fragment>
+      {nodes?.map((node, index): JSX.Element | null => {
+        if (node.type === 'text') {
+          let text = <span dangerouslySetInnerHTML={{ __html: escapeHTML(node.text) }} />
+          if (node.format & 1) {
+            text = <strong key={index}>{text}</strong>
+          }
+          if (node.format & 2) {
+            text = <em key={index}>{text}</em>
+          }
+          if (node.format & 8) {
+            text = <code key={index}>{text}</code>
+          }
+          if (node.format & 16) {
+            text = <u key={index}>{text}</u>
+          }
+          if (node.format & 64) {
+            text = <s key={index}>{text}</s>
+          }
+          return <Fragment key={index}>{text}</Fragment>
+        }
+
+        if (!node) {
+          return null
+        }
+
+        switch (node.type) {
+          case 'heading':
+            const HeadingTag = node.tag as keyof JSX.IntrinsicElements
+            return <HeadingTag key={index}>{serializeLexical({ nodes: node.children })}</HeadingTag>
+
+          case 'paragraph':
+            return <p key={index}>{serializeLexical({ nodes: node.children })}</p>
+
+          case 'list':
+            const ListTag = node.tag as keyof JSX.IntrinsicElements
+            return <ListTag key={index}>{serializeLexical({ nodes: node.children })}</ListTag>
+
+          case 'listitem':
+            return <li key={index}>{serializeLexical({ nodes: node.children })}</li>
+
+          case 'quote':
+            return <blockquote key={index}>{serializeLexical({ nodes: node.children })}</blockquote>
+
+          case 'link':
+            const linkProps =
+              node.fields?.linkType === 'internal'
+                ? {
+                    href: node.fields?.doc?.value?.slug ? `/${node.fields.doc.value.slug}` : '/',
+                  }
+                : {
+                    href: node.fields?.url || '/',
+                    target: node.fields?.newTab ? '_blank' : undefined,
+                    rel: node.fields?.newTab ? 'noopener noreferrer' : undefined,
+                  }
+
+            return (
+              <Link key={index} {...linkProps}>
+                {serializeLexical({ nodes: node.children })}
+              </Link>
+            )
+
+          case 'linebreak':
+            return <br key={index} />
+
+          case 'horizontalrule':
+            return <hr key={index} />
+
+          case 'block':
+            // Handle custom blocks (Banner, Code, MediaBlock)
+            const blockType = node.fields?.blockType
+
+            if (blockType === 'code') {
+              return (
+                <pre
+                  key={index}
+                  className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto"
+                >
+                  <code>{node.fields?.code || ''}</code>
+                </pre>
+              )
+            }
+
+            if (blockType === 'mediaBlock' && node.fields?.media) {
+              const media = node.fields.media
+              if (typeof media === 'object' && media.url) {
+                return (
+                  <figure key={index} className="my-8">
+                    <Image
+                      src={media.url}
+                      alt={media.alt || ''}
+                      width={media.width || 800}
+                      height={media.height || 600}
+                      className="rounded-lg w-full h-auto"
+                    />
+                    {media.caption && (
+                      <figcaption className="text-sm text-gray-600 mt-2 text-center">
+                        {media.caption}
+                      </figcaption>
+                    )}
+                  </figure>
+                )
+              }
+            }
+
+            if (blockType === 'banner') {
+              return (
+                <div
+                  key={index}
+                  className={`p-6 rounded-lg my-6 ${
+                    node.fields?.style === 'info'
+                      ? 'bg-blue-50 border border-blue-200'
+                      : node.fields?.style === 'warning'
+                        ? 'bg-yellow-50 border border-yellow-200'
+                        : node.fields?.style === 'error'
+                          ? 'bg-red-50 border border-red-200'
+                          : 'bg-green-50 border border-green-200'
+                  }`}
+                >
+                  {serializeLexical({ nodes: node.fields?.content?.root?.children || [] })}
+                </div>
+              )
+            }
+
+            return null
+
+          default:
+            return null
+        }
+      })}
+    </Fragment>
   )
 }

@@ -1,25 +1,12 @@
-import React from 'react'
+// components/RenderHero.tsx
 
-import type { Page } from '@/payload-types'
+import { PostListHero } from '@/components/PostListHero'
 
-import { HighImpactHero } from '@/heros/HighImpact'
-import { LowImpactHero } from '@/heros/LowImpact'
-import { MediumImpactHero } from '@/heros/MediumImpact'
-
-const heroes = {
-  highImpact: HighImpactHero,
-  lowImpact: LowImpactHero,
-  mediumImpact: MediumImpactHero,
-}
-
-export const RenderHero: React.FC<Page['hero']> = (props) => {
-  const { type } = props || {}
-
-  if (!type || type === 'none') return null
-
-  const HeroToRender = heroes[type]
-
-  if (!HeroToRender) return null
-
-  return <HeroToRender {...props} />
+export function RenderHero({ type, ...props }: any) {
+  switch (type) {
+    case 'postList':
+      return <PostListHero {...props.postListConfig} />
+    default:
+      return null
+  }
 }
