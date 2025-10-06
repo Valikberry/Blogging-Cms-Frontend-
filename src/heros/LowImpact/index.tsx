@@ -11,14 +11,14 @@ type LowImpactHeroType =
     }
   | (Omit<Page['hero'], 'richText'> & {
       children?: never
-      richText?: Page['hero']['richText']
+      richText?: Page['hero']
     })
 
 export const LowImpactHero: React.FC<LowImpactHeroType> = ({ children, richText }) => {
   return (
     <div className="container mt-16">
       <div className="max-w-[48rem]">
-        {children || (richText && <RichText data={richText} enableGutter={false} />)}
+        {children || (richText && <RichText content={richText}  />)}
       </div>
     </div>
   )

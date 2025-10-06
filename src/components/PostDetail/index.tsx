@@ -4,7 +4,7 @@
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { RichText } from '@/components/RichText'
+import RichText  from '@/components/RichText'
 import type { Post } from '@/payload-types'
 import { Facebook, Twitter, Mail } from 'lucide-react'
 
