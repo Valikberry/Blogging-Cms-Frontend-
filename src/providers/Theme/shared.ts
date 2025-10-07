@@ -2,16 +2,14 @@ import type { Theme } from './types'
 
 export const themeLocalStorageKey = 'payload-theme'
 
-export const defaultTheme = 'light'
+// Force light theme only
+export const defaultTheme: Theme = 'light'
 
-export const getImplicitPreference = (): Theme | null => {
-  const mediaQuery = '(prefers-color-scheme: dark)'
-  const mql = window.matchMedia(mediaQuery)
-  const hasImplicitPreference = typeof mql.matches === 'boolean'
+export const getTheme = (): Theme => {
+  // You could still check localStorage if you want persistence
+  const stored = window.localStorage.getItem(themeLocalStorageKey)
+  if (stored === 'light') return 'light'
 
-  if (hasImplicitPreference) {
-    return mql.matches ? 'dark' : 'light'
-  }
-
-  return null
+  // Ignore OS preference
+  return defaultTheme
 }
