@@ -50,16 +50,14 @@ export function PostDetail({ post }: PostDetailProps) {
             Home
           </Link>
           <span>/</span>
-          <Link href="/posts" className="hover:text-gray-900 transition-colors">
+          <Link href="#" className="hover:text-gray-900 transition-colors">
             Posts
           </Link>
           {post.categories && post.categories.length > 0 && (
             <>
               <span>/</span>
               <Link
-                href={`/category/${
-                  typeof post.categories[0] === 'object' ? post.categories[0].slug : ''
-                }`}
+                href="#"
                 className="text-orange-500 hover:text-orange-600 transition-colors"
               >
                 {typeof post.categories[0] === 'object' ? post.categories[0].title : ''}

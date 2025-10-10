@@ -93,9 +93,7 @@ export default async function PostPage({ params }: PostPageProps) {
     notFound()
   }
 
-  // Note: View count increment should be done via API route or client-side
-  // to avoid issues with static generation and caching
-  // Consider creating an API endpoint: /api/posts/[id]/increment-view
+  
 
   return <PostDetail post={post} />
 }

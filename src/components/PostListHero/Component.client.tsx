@@ -4,6 +4,7 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { Flame, Book, Bell, Sparkles, Star, FileText } from 'lucide-react'
+import { Button } from '../ui/button'
 
 interface Post {
   id: string
@@ -44,7 +45,7 @@ const iconMap: Record<string, React.ElementType> = {
 // Group posts by date
 function groupPostsByDate(posts: Post[]) {
   const grouped: { [key: string]: Post[] } = {}
-  
+
   posts.forEach((post) => {
     const dateKey = post.publishedAt
     if (!grouped[dateKey]) {
@@ -52,7 +53,7 @@ function groupPostsByDate(posts: Post[]) {
     }
     grouped[dateKey].push(post)
   })
-  
+
   return grouped
 }
 
@@ -67,46 +68,57 @@ export function PostListClient({
   const activeCategory = categories[activeTab] || categories[0]
 
   // Group posts by date if enabled
-  const groupedPosts = groupByDate && activeCategory
-    ? groupPostsByDate(activeCategory.posts)
-    : null
+  const groupedPosts = groupByDate && activeCategory ? groupPostsByDate(activeCategory.posts) : null
+  console.log(categories)
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
+    <div className="">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-3">{title}</h1>
-        {description && (
-          <p className="text-gray-600 text-sm leading-relaxed">{description}</p>
-        )}
+      <div className="flex flex-col items-center  px-5 bg-white py-2 -mt-12">
+        <h1 className="text-black-700 text-[17.5px] font-bold text-center">{title}</h1>
+        <h2 className="text-black-700 text-sm font-medium text-center">{description}</h2>
       </div>
 
       {/* Category Tabs */}
       {categories.length > 0 && (
-        <div className="bg-gray-100 rounded-sm p-1 mb-4 inline-flex gap-1">
-          {categories.map((category, index) => {
-            const Icon = iconMap[category.icon as keyof typeof iconMap] || FileText
-            return (
-              <button
+        <div className="border border-gray-300 rounded-lg overflow-hidden mt-5 w-full bg-white">
+          <div className="flex overflow-x-auto w-full">
+            {categories.map((category, index) => (
+              <Button
                 key={index}
-                onClick={() => setActiveTab(index)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-sm font-medium transition-all ${
+                variant={activeTab === index ? 'default' : 'outline'}
+                className={`px-4 py-2 text-sm border-none flex-shrink-0 ${
                   activeTab === index
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    ? 'bg-green-50 hover:bg-green-700 text-green-700 hover:text-white'
+                    : 'bg-white hover:bg-green-700 text-gray-700 hover:text-white'
                 }`}
+                // onClick={() => handleClick(category.id)}
               >
-                <Icon className="w-3.5 h-3.5" />
-                <span>{category.label}</span>
-              </button>
-            )
-          })}
+                <h3>{category.label}</h3>
+              </Button>
+            ))}
+          </div>
         </div>
       )}
 
+      <nav className="flex items-center gap-6  px-4 py-3">
+        {categories.map((category, index) => {
+          const Icon = iconMap[category.icon as keyof typeof iconMap] || FileText
+          return (
+            <a
+              key={index}
+              href="#"
+              className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium"
+            >
+              <Icon className="w-3.5 h-3.5" />
+              <span className="underline">{category.label}</span>
+            </a>
+          )
+        })}
+      </nav>
       {/* Posts List */}
       {activeCategory && (
-        <div className="bg-gray-100 rounded-sm p-4">
+        <div className="rounded-sm p-4">
           {groupByDate && groupedPosts ? (
             // Grouped by date view
             <div className="space-y-0">
@@ -142,7 +154,7 @@ export function PostListClient({
           ) : (
             // Simple list view
             <div className="space-y-0">
-              {activeCategory.posts.map((post) => (
+              {activeCategory.posts.map((post: any) => (
                 <div key={post.id}>
                   <Link
                     href={`/posts/${post.slug}`}

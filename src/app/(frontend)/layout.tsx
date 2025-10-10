@@ -21,7 +21,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html className={cn(GeistSans.variable, GeistMono.variable)} lang="en" suppressHydrationWarning>
       <head>
-   
         <link href="/favicon.ico" rel="icon" sizes="32x32" />
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
       </head>
@@ -32,10 +31,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               preview: isEnabled,
             }}
           />
-
           <Header />
-          {children}
-          {/* <Footer /> */}
+          <div className="container mx-auto max-w-xl bg-[#ccc] px-4">
+            {children}
+            {/* <Footer /> */}
+          </div>
         </Providers>
       </body>
     </html>

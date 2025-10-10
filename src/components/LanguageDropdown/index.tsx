@@ -27,7 +27,7 @@ interface LanguageDropdownProps {
 export const LanguageDropdown: React.FC<LanguageDropdownProps> = ({
   currentLanguage = 'en',
   onLanguageChange,
-  buttonLabel = 'Language',
+  buttonLabel = '',
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -59,9 +59,9 @@ export const LanguageDropdown: React.FC<LanguageDropdownProps> = ({
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="bg-orange-500 text-white text-sm font-medium px-4 py-1.5 rounded hover:bg-orange-600 transition-colors flex items-center gap-2"
+        className="bg-orange-500 text-white text-sm font-medium px-2 py-1 hover:bg-orange-600 transition-colors flex items-center gap-2"
       >
-        <span>{buttonLabel}</span>
+
         <span className="text-xs opacity-80">{currentLanguage.toUpperCase()}</span>
         <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
