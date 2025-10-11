@@ -39,6 +39,7 @@ export const Posts: CollectionConfig<'posts'> = {
     title: true,
     slug: true,
     categories: true,
+    country: true,
     publishedAt: true,
     excerpt: true,
     heroImage: true,
@@ -49,7 +50,7 @@ export const Posts: CollectionConfig<'posts'> = {
     },
   },
   admin: {
-    defaultColumns: ['title', 'categories', 'publishedAt', 'updatedAt'],
+    defaultColumns: ['title', 'country', 'categories', 'publishedAt', 'updatedAt'],
     livePreview: {
       url: ({ data, req }) => {
         const path = generatePreviewPath({
@@ -86,20 +87,19 @@ export const Posts: CollectionConfig<'posts'> = {
       maxLength: 200,
     },
     {
+      name: 'heroImage',
+      type: 'upload',
+      relationTo: 'media',
+      admin: {
+        description: 'Featured image shown in post lists and detail page',
+      },
+    },
+    {
       type: 'tabs',
       tabs: [
         {
           label: 'Content',
           fields: [
-            {
-              name: 'heroImage',
-              type: 'upload',
-              relationTo: 'media',
-              required: false,
-              admin: {
-                description: 'Main image displayed at the top of the post',
-              },
-            },
             {
               name: 'videoEmbed',
               type: 'group',
@@ -118,7 +118,8 @@ export const Posts: CollectionConfig<'posts'> = {
                   type: 'text',
                   admin: {
                     condition: (_, siblingData) => siblingData?.enabled,
-                    description: 'YouTube URL (e.g., https://www.youtube.com/watch?v=VIDEO_ID or https://youtu.be/VIDEO_ID) or Vimeo URL (e.g., https://vimeo.com/VIDEO_ID). Regular URLs will be auto-converted to embed format.',
+                    description:
+                      'YouTube URL (e.g., https://www.youtube.com/watch?v=VIDEO_ID or https://youtu.be/VIDEO_ID) or Vimeo URL (e.g., https://vimeo.com/VIDEO_ID). Regular URLs will be auto-converted to embed format.',
                   },
                 },
                 {
@@ -157,13 +158,21 @@ export const Posts: CollectionConfig<'posts'> = {
           ],
         },
         {
-          label: 'Metadata',
+          label: 'Location & Categories',
           fields: [
+            {
+              name: 'country',
+              type: 'relationship',
+              relationTo: 'countries',
+              required: true,
+              admin: {
+                description: 'Select the country this post is about',
+              },
+            },
             {
               name: 'categories',
               type: 'relationship',
               admin: {
-                position: 'sidebar',
                 description: 'Categorize this post for filtering',
               },
               hasMany: true,
@@ -173,9 +182,6 @@ export const Posts: CollectionConfig<'posts'> = {
             {
               name: 'tags',
               type: 'array',
-              admin: {
-                position: 'sidebar',
-              },
               fields: [
                 {
                   name: 'tag',
@@ -184,11 +190,16 @@ export const Posts: CollectionConfig<'posts'> = {
               ],
               label: 'Tags',
             },
+          ],
+        },
+        {
+          label: 'Related Content',
+          fields: [
             {
               name: 'relatedPosts',
               type: 'relationship',
               admin: {
-                position: 'sidebar',
+                description: 'Manually select related posts',
               },
               filterOptions: ({ id }) => {
                 return {

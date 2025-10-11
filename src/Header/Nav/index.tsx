@@ -1,44 +1,100 @@
 'use client'
 
-import React from 'react'
-import type { Header as HeaderType } from '@/payload-types'
-import { CMSLink } from '@/components/Link'
+import React, { useState } from 'react'
 import Link from 'next/link'
-import { Search } from 'lucide-react'
+import type { Header, Country } from '@/payload-types'
 
-export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
-  const navItems = data?.navItems || []
+interface HeaderNavProps {
+  data: Header
+  countries?: Country[] // Pass countries from server
+}
+
+export const HeaderNav: React.FC<HeaderNavProps> = ({ data, countries = [] }) => {
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
 
   return (
-    <nav className="hidden lg:flex items-center space-x-8">
-      {navItems.map((navItem, i) => {
-        // The link is nested inside the navItem
-        const link = navItem.link
-        
-        if (!link) {
-          console.warn('NavItem missing link:', navItem)
-          return null
+    <>
+      {data.navItems?.map((item: any, index: number) => {
+        // Simple Link (Home)
+        if (item.type === 'simple') {
+          return (
+            <Link
+              key={index}
+              href={item.url || '/'}
+              className="px-4 py-2 text-white hover:bg-white/10 rounded transition-colors text-sm font-medium"
+            >
+              {item.label}
+            </Link>
+          )
         }
 
-        return (
-          <CMSLink 
-            key={i} 
-            type={link.type}
-            label={link.label}
-            url={link.url}
-            reference={link.reference}
-            newTab={link.newTab}
-            appearance="link"
-          />
-        )
+        // Continent Dropdown
+        if (item.type === 'continent' && item.continent) {
+          const continent = typeof item.continent === 'string' ? null : item.continent
+          
+          // Filter countries for this continent
+          const continentCountries = countries.filter(
+            (country: Country) => {
+              const countryContinent = typeof country.continent === 'string'
+                ? country.continent
+                : country.continent?.id
+              const currentContinentId = typeof continent?.id === 'string'
+                ? continent.id
+                : continent?.id
+              return countryContinent === currentContinentId
+            }
+          )
+
+          return (
+            <div
+              key={index}
+              className="relative group"
+              onMouseEnter={() => setOpenDropdown(item.label)}
+              onMouseLeave={() => setOpenDropdown(null)}
+            >
+              <button className="px-4 py-2 text-white hover:bg-white/10 rounded transition-colors text-sm font-medium flex items-center gap-1">
+                {item.label}
+                <svg
+                  className="w-4 h-4 transition-transform group-hover:rotate-180"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+
+              {/* Dropdown Menu */}
+              {openDropdown === item.label && (
+                <div className="absolute top-full left-0 mt-1 bg-white rounded-md shadow-xl min-w-[220px] py-2 z-50 border border-gray-200">
+                  {continentCountries.length > 0 ? (
+                    continentCountries.map((country: Country) => (
+                      <Link
+                        key={country.id}
+                        href={`/${continent?.slug}/${country.slug}`}
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                      >
+                        {country.name}
+                      </Link>
+                    ))
+                  ) : (
+                    <div className="px-4 py-2 text-sm text-gray-500">
+                      No countries available
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )
+        }
+
+        return null
       })}
-      
-      {data.showSearch && (
-        <Link href="/search" className="text-gray-300 hover:text-white transition-colors">
-          <span className="sr-only">Search</span>
-          <Search className="w-5 h-5" />
-        </Link>
-      )}
-    </nav>
+    </>
   )
 }

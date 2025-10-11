@@ -1,6 +1,4 @@
 import type { GlobalConfig } from 'payload'
-
-import { link } from '@/fields/link'
 import { revalidateHeader } from './hooks/revalidateHeader'
 
 export const Header: GlobalConfig = {
@@ -10,69 +8,75 @@ export const Header: GlobalConfig = {
   },
   fields: [
     {
+      name: 'logo',
       type: 'group',
-      name: 'topBar',
-      label: 'Top Bar',
+      label: 'Logo',
       fields: [
         {
-          name: 'socialLinks',
-          type: 'array',
-          label: 'Social Links',
-          fields: [
-            {
-              name: 'icon',
-              type: 'select',
-              options: [
-                { label: 'Facebook', value: 'facebook' },
-                { label: 'Twitter', value: 'twitter' },
-                { label: 'YouTube', value: 'youtube' },
-                { label: 'Instagram', value: 'instagram' },
-              ],
-              required: true,
-            },
-            { name: 'url', type: 'text', required: true },
-          ],
+          name: 'image',
+          type: 'upload',
+          relationTo: 'media',
+          label: 'Logo Image',
         },
         {
-          name: 'languageButton',
-          type: 'group',
-          label: 'Language Switcher Button',
-          fields: [
-            {
-              name: 'label',
-              type: 'text',
-              required: true,
-              defaultValue: 'Language',
-              admin: {
-                description: 'Button text to open language switcher',
-              },
-            },
-            {
-              name: 'enabled',
-              type: 'checkbox',
-              defaultValue: true,
-              label: 'Show Language Switcher',
-            },
-          ],
+          name: 'text',
+          type: 'text',
+          label: 'Logo Text',
+          admin: {
+            description: 'Alternative text logo (if no image)',
+          },
+        },
+        {
+          name: 'url',
+          type: 'text',
+          label: 'Logo Link URL',
+          defaultValue: '/',
         },
       ],
     },
     {
       name: 'navItems',
       type: 'array',
-      label: 'Main Navigation Items',
+      label: 'Navigation Items',
       fields: [
-        link({
-          appearances: false,
-          disableLabel: false,
-        }),
+        {
+          name: 'label',
+          type: 'text',
+          required: true,
+          label: 'Menu Label',
+        },
+        {
+          name: 'type',
+          type: 'select',
+          required: true,
+          options: [
+            { label: 'Simple Link', value: 'simple' },
+            { label: 'Continent Dropdown', value: 'continent' },
+          ],
+          defaultValue: 'simple',
+        },
+        {
+          name: 'url',
+          type: 'text',
+          label: 'URL',
+          admin: {
+            condition: (data, siblingData) => siblingData?.type === 'simple',
+            description: 'For simple links (e.g., Home)',
+          },
+        },
+        {
+          name: 'continent',
+          type: 'relationship',
+          relationTo: 'continents',
+          label: 'Select Continent',
+          admin: {
+            condition: (data, siblingData) => siblingData?.type === 'continent',
+          },
+        },
       ],
-      maxRows: 6,
+      maxRows: 8,
       admin: {
         initCollapsed: true,
-        components: {
-          RowLabel: '@/Header/RowLabel#RowLabel',
-        },
       },
     },
     {

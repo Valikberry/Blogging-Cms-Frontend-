@@ -1,16 +1,28 @@
-// components/Header/index.tsx
+// app/_components/Header/index.tsx
 import { HeaderClient } from './Component.client'
-import { getCachedGlobal } from '@/utilities/getGlobals'
-import React from 'react'
-import type { Header } from '@/payload-types'
+import { getPayloadHMR } from '@payloadcms/next/utilities'
+import configPromise from '@payload-config'
 
-interface HeaderProps {
-  locale?: 'en' | 'fr'
-}
+export async function Header() {
+  const payload = await getPayloadHMR({ config: configPromise })
+  
+  const [headerData, countriesData] = await Promise.all([
+    payload.findGlobal({
+      slug: 'header',
+      depth: 2,
+    }),
+    payload.find({
+      collection: 'countries',
+      depth: 1,
+      limit: 1000,
+    })
+  ])
 
-export async function Header({ locale = 'en' }: HeaderProps) {
-
-  const headerData = (await getCachedGlobal('header', 3, locale)()) as Header
-
-  return <HeaderClient data={headerData} locale={locale} />
+  return (
+    <HeaderClient 
+      data={headerData} 
+      countries={countriesData.docs} 
+      locale="en" 
+    />
+  )
 }

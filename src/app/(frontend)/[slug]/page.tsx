@@ -12,9 +12,13 @@ import { RenderHero } from '@/heros/RenderHero'
 import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
+import { HomeTemplate } from '@/components/HomeContent'
+
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
+  
+  // Get regular pages
   const pages = await payload.find({
     collection: 'pages',
     draft: false,
@@ -26,13 +30,23 @@ export async function generateStaticParams() {
     },
   })
 
-  const params = pages.docs
-    ?.filter((doc) => {
-      return doc.slug !== 'home'
-    })
-    .map(({ slug }) => {
-      return { slug }
-    })
+  // Get continents
+  const continents = await payload.find({
+    collection: 'continents',
+    limit: 1000,
+    select: {
+      slug: true,
+    },
+  })
+
+  const params = [
+    // Regular pages (excluding home)
+    ...pages.docs
+      .filter((doc) => doc.slug !== 'home')
+      .map(({ slug }) => ({ slug })),
+    // Continents
+    ...continents.docs.map(({ slug }) => ({ slug })),
+  ]
 
   return params
 }
@@ -48,6 +62,33 @@ export default async function Page({ params: paramsPromise }: Args) {
   const { slug = 'home' } = await paramsPromise
   const url = '/' + slug
 
+  const payload = await getPayload({ config: configPromise })
+
+  // First, check if it's a continent
+  const continentResult = await payload.find({
+    collection: 'continents',
+    where: {
+      slug: {
+        equals: slug,
+      },
+    },
+    limit: 1,
+  })
+
+  const continent = continentResult.docs[0]
+
+  // If it's a continent, fetch the home page and pass continent filter
+  if (continent) {
+    const page = await queryPageBySlug({ slug: 'home' })
+
+    if (!page) {
+      return <PayloadRedirects url={url} />
+    }
+
+    return <HomeTemplate page={page} url={url} draft={draft} continentSlug={slug} />
+  }
+
+  // Otherwise, treat it as a regular page
   let page: RequiredDataFromCollectionSlug<'pages'> | null
 
   page = await queryPageBySlug({
@@ -63,12 +104,17 @@ export default async function Page({ params: paramsPromise }: Args) {
     return <PayloadRedirects url={url} />
   }
 
+  // Check if this is the home page
+  if (slug === 'home') {
+    return <HomeTemplate page={page} url={url} draft={draft} />
+  }
+
+  // Regular page with article wrapper
   const { hero, layout } = page
 
   return (
     <article className="pt-16 pb-24">
       <PageClient />
-      {/* Allows redirects for valid pages too */}
       <PayloadRedirects disableNotFound url={url} />
 
       {draft && <LivePreviewListener />}
@@ -81,6 +127,29 @@ export default async function Page({ params: paramsPromise }: Args) {
 
 export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
   const { slug = 'home' } = await paramsPromise
+  const payload = await getPayload({ config: configPromise })
+
+  // Check if it's a continent first
+  const continentResult = await payload.find({
+    collection: 'continents',
+    where: {
+      slug: {
+        equals: slug,
+      },
+    },
+    limit: 1,
+  })
+
+  const continent = continentResult.docs[0]
+
+  if (continent) {
+    return {
+      title: continent.name,
+      description: `Content from ${continent.name}`,
+    }
+  }
+
+  // Otherwise, get page metadata
   const page = await queryPageBySlug({
     slug,
   })

@@ -72,6 +72,8 @@ export interface Config {
     media: Media;
     categories: Category;
     users: User;
+    continents: Continent;
+    countries: Country;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -88,6 +90,8 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    continents: ContinentsSelect<false> | ContinentsSelect<true>;
+    countries: CountriesSelect<false> | CountriesSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -307,7 +311,7 @@ export interface Post {
    */
   excerpt?: string | null;
   /**
-   * Main image displayed at the top of the post
+   * Featured image shown in post lists and detail page
    */
   heroImage?: (string | null) | Media;
   /**
@@ -337,6 +341,10 @@ export interface Post {
     [k: string]: unknown;
   };
   /**
+   * Select the country this post is about
+   */
+  country: string | Country;
+  /**
    * Categorize this post for filtering
    */
   categories: (string | Category)[];
@@ -346,6 +354,9 @@ export interface Post {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Manually select related posts
+   */
   relatedPosts?: (string | Post)[] | null;
   meta?: {
     title?: string | null;
@@ -478,6 +489,35 @@ export interface Media {
       filename?: string | null;
     };
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "countries".
+ */
+export interface Country {
+  id: string;
+  name: string;
+  /**
+   * e.g., brazil, argentina, usa
+   */
+  slug: string;
+  continent: string | Continent;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "continents".
+ */
+export interface Continent {
+  id: string;
+  name: string;
+  /**
+   * e.g., south-america, north-america, asia
+   */
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -992,6 +1032,14 @@ export interface PayloadLockedDocument {
         value: string | User;
       } | null)
     | ({
+        relationTo: 'continents';
+        value: string | Continent;
+      } | null)
+    | ({
+        relationTo: 'countries';
+        value: string | Country;
+      } | null)
+    | ({
         relationTo: 'redirects';
         value: string | Redirect;
       } | null)
@@ -1209,6 +1257,7 @@ export interface PostsSelect<T extends boolean = true> {
         aspectRatio?: T;
       };
   content?: T;
+  country?: T;
   categories?: T;
   tags?:
     | T
@@ -1376,6 +1425,27 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "continents_select".
+ */
+export interface ContinentsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "countries_select".
+ */
+export interface CountriesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  continent?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1638,39 +1708,23 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface Header {
   id: string;
-  topBar: {
-    socialLinks?:
-      | {
-          icon: 'facebook' | 'twitter' | 'youtube' | 'instagram';
-          url: string;
-          id?: string | null;
-        }[]
-      | null;
-    languageButton: {
-      /**
-       * Button text to open language switcher
-       */
-      label: string;
-      enabled?: boolean | null;
-    };
+  logo?: {
+    image?: (string | null) | Media;
+    /**
+     * Alternative text logo (if no image)
+     */
+    text?: string | null;
+    url?: string | null;
   };
   navItems?:
     | {
-        link: {
-          type?: ('reference' | 'custom') | null;
-          newTab?: boolean | null;
-          reference?:
-            | ({
-                relationTo: 'pages';
-                value: string | Page;
-              } | null)
-            | ({
-                relationTo: 'posts';
-                value: string | Post;
-              } | null);
-          url?: string | null;
-          label: string;
-        };
+        label: string;
+        type: 'simple' | 'continent';
+        /**
+         * For simple links (e.g., Home)
+         */
+        url?: string | null;
+        continent?: (string | null) | Continent;
         id?: string | null;
       }[]
     | null;
@@ -1712,35 +1766,20 @@ export interface Footer {
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
-  topBar?:
+  logo?:
     | T
     | {
-        socialLinks?:
-          | T
-          | {
-              icon?: T;
-              url?: T;
-              id?: T;
-            };
-        languageButton?:
-          | T
-          | {
-              label?: T;
-              enabled?: T;
-            };
+        image?: T;
+        text?: T;
+        url?: T;
       };
   navItems?:
     | T
     | {
-        link?:
-          | T
-          | {
-              type?: T;
-              newTab?: T;
-              reference?: T;
-              url?: T;
-              label?: T;
-            };
+        label?: T;
+        type?: T;
+        url?: T;
+        continent?: T;
         id?: T;
       };
   showSearch?: T;
