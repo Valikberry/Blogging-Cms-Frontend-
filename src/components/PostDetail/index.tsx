@@ -4,12 +4,51 @@
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import RichText  from '@/components/RichText'
+import RichText from '@/components/RichText'
 import type { Post } from '@/payload-types'
-import { Facebook, Twitter, Mail } from 'lucide-react'
+import {
+  Facebook,
+  Twitter,
+  Mail,
+  Lightbulb,
+  Zap,
+  Flame,
+  Star,
+  Diamond,
+  Target,
+  Bell,
+  Pin,
+} from 'lucide-react'
 
 interface PostDetailProps {
   post: Post
+}
+
+const iconMap: Record<string, React.ElementType> = {
+  lightbulb: Lightbulb,
+  lightning: Zap,
+  fire: Flame,
+  star: Star,
+  diamond: Diamond,
+  target: Target,
+  bell: Bell,
+  pin: Pin,
+}
+
+const backgroundColors = {
+  purple: 'bg-indigo-50 border-indigo-200',
+  green: 'bg-green-50 border-green-200',
+  yellow: 'bg-yellow-50 border-yellow-200',
+  red: 'bg-red-50 border-red-200',
+  gray: 'bg-gray-50 border-gray-200',
+}
+
+const iconColors = {
+  purple: 'text-indigo-600',
+  green: 'text-green-600',
+  yellow: 'text-yellow-600',
+  red: 'text-red-600',
+  gray: 'text-gray-600',
 }
 
 export function PostDetail({ post }: PostDetailProps) {
@@ -27,6 +66,7 @@ export function PostDetail({ post }: PostDetailProps) {
 
     incrementViewCount()
   }, [post.id])
+
   const authorName =
     post.submittedBy ||
     (post.populatedAuthors && post.populatedAuthors.length > 0
@@ -43,58 +83,10 @@ export function PostDetail({ post }: PostDetailProps) {
 
   return (
     <article className="min-h-screen bg-white">
-      {/* Breadcrumb Navigation */}
-      <nav className="max-w-4xl mx-auto px-4 py-4 text-sm">
-        <div className="flex items-center gap-2 text-gray-600">
-          <Link href="/" className="hover:text-gray-900 transition-colors">
-            Home
-          </Link>
-          <span>/</span>
-          <Link href="#" className="hover:text-gray-900 transition-colors">
-            Posts
-          </Link>
-          {post.categories && post.categories.length > 0 && (
-            <>
-              <span>/</span>
-              <Link
-                href="#"
-                className="text-orange-500 hover:text-orange-600 transition-colors"
-              >
-                {typeof post.categories[0] === 'object' ? post.categories[0].title : ''}
-              </Link>
-            </>
-          )}
-        </div>
-      </nav>
-
       <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Post Title */}
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-          {post.title}
-        </h1>
-
-        {/* Post Metadata */}
-        {post.excerpt && (
-          <p className="text-lg text-gray-600 mb-6 leading-relaxed">{post.excerpt}</p>
-        )}
-
-        <div className="flex items-center gap-4 mb-8 text-sm text-gray-500">
-          {authorName && (
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                <span className="text-xs font-medium text-gray-600">
-                  {authorName.charAt(0).toUpperCase()}
-                </span>
-              </div>
-              <span className="font-medium text-gray-700">By {authorName}</span>
-            </div>
-          )}
-          {publishedDate && <span>{publishedDate}</span>}
-        </div>
-
         {/* Hero Image */}
         {post.heroImage && typeof post.heroImage === 'object' && (
-          <div className="mb-8 rounded-lg overflow-hidden">
+          <div className="mb-6 rounded-xl overflow-hidden">
             <Image
               src={post.heroImage.url || ''}
               alt={post.heroImage.alt || post.title}
@@ -104,6 +96,16 @@ export function PostDetail({ post }: PostDetailProps) {
               priority
             />
           </div>
+        )}
+
+        {/* Post Title */}
+        <h1 className="text-4xl md:text-2xl font-bold text-gray-900 mb-4 leading-tight">
+          {post.title}
+        </h1>
+
+        {/* Excerpt */}
+        {post.excerpt && (
+          <p className="text-md text-gray-500 mb-6 leading-relaxed">{post.excerpt}</p>
         )}
 
         {/* Video Embed */}
@@ -129,13 +131,75 @@ export function PostDetail({ post }: PostDetailProps) {
           </div>
         )}
 
-        {/* Share Buttons */}
+        {/* Author Info and Share Buttons */}
+        <div className="flex items-center justify-between  border-b border-gray-200">
+          <div className="flex items-center gap-3">
+            {authorName && (
+              <>
+                <div className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                  <span className="text-sm font-semibold text-gray-600">
+                    {authorName.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900">{authorName}</p>
+                  {publishedDate && <p className="text-sm text-gray-500">{publishedDate}</p>}
+                </div>
+              </>
+            )}
+          </div>
 
-        <ShareButtons post={post} />
+          <ShareButtons post={post} />
+        </div>
         {/* Post Content */}
-        <div className="prose prose-lg max-w-none mb-12">
+        <div className="prose prose-lg max-w-none">
           <RichText content={post.content} />
         </div>
+
+        {/* Callout Sections */}
+        {post.calloutSections && post.calloutSections.length > 0 && (
+          <div className="space-y-6 mb-12">
+            {post.calloutSections.map((section: any, index: number) => {
+              const Icon = section.icon && section.icon !== 'none' ? iconMap[section.icon] : null
+              const bgClass =
+                backgroundColors[section.backgroundColor as keyof typeof backgroundColors] ||
+                backgroundColors.purple
+              const iconColor =
+                iconColors[section.backgroundColor as keyof typeof iconColors] || iconColors.purple
+
+              return (
+                <div key={index} className={`rounded-xl border p-6 ${bgClass}`}>
+                  {/* Badge with Icon */}
+                  {(section.badge || Icon) && (
+                    <div className="flex items-center gap-2 mb-3">
+                      {Icon && <Icon className={`w-5 h-5 ${iconColor}`} />}
+                      {section.badge && (
+                        <span className={`text-sm font-medium ${iconColor}`}>{section.badge}</span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Title */}
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">{section.title}</h3>
+
+                  {/* Numbered List */}
+                  {section.items && section.items.length > 0 && (
+                    <ol className="space-y-2">
+                      {section.items.map((item: any, itemIndex: number) => (
+                        <li key={item.id || itemIndex} className="flex gap-3">
+                          <span className="text-gray-900 font-medium flex-shrink-0">
+                            {itemIndex + 1}.
+                          </span>
+                          <span className="text-gray-700">{item.text}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
 
         {/* Tags */}
         {post.tags && post.tags.length > 0 && (
@@ -143,7 +207,7 @@ export function PostDetail({ post }: PostDetailProps) {
             {post.tags.map((tagItem: any, index: number) => (
               <span
                 key={index}
-                className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full"
+                className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full hover:bg-gray-200 transition-colors"
               >
                 #{tagItem.tag}
               </span>
@@ -153,7 +217,7 @@ export function PostDetail({ post }: PostDetailProps) {
 
         {/* Related Posts */}
         {post.relatedPosts && post.relatedPosts.length > 0 && (
-          <div className="border-t border-gray-200 pt-8">
+          <div className="border-t border-gray-200 pt-8 mt-12">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Related Posts</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {post.relatedPosts.map((relatedPost: any) => (
@@ -173,7 +237,7 @@ export function PostDetail({ post }: PostDetailProps) {
                       />
                     </div>
                   )}
-                  <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                  <h3 className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
                     {relatedPost.title}
                   </h3>
                   {relatedPost.excerpt && (
@@ -202,33 +266,33 @@ function ShareButtons({ post }: { post: any }) {
   const encodedTitle = encodeURIComponent(post.title)
 
   return (
-    <div className="flex items-center gap-3 mb-8 pb-8 border-b border-gray-200">
+    <div className="flex items-center gap-2">
       <a
         href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="p-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+        className="p-2.5 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
         aria-label="Share on Facebook"
       >
-        <Facebook className="w-4 h-4" />
+        <Facebook className="w-5 h-5" />
       </a>
 
       <a
         href={`https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="p-2 rounded-full bg-sky-500 text-white hover:bg-sky-600 transition-colors"
+        className="p-2.5 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
         aria-label="Share on Twitter"
       >
-        <Twitter className="w-4 h-4" />
+        <Twitter className="w-5 h-5" />
       </a>
 
       <a
         href={`mailto:?subject=${encodedTitle}&body=${encodedUrl}`}
-        className="p-2 rounded-full bg-gray-600 text-white hover:bg-gray-700 transition-colors"
+        className="p-2.5 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
         aria-label="Share via Email"
       >
-        <Mail className="w-4 h-4" />
+        <Mail className="w-5 h-5" />
       </a>
     </div>
   )

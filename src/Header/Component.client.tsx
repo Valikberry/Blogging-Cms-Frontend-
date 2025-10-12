@@ -57,7 +57,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, countries = []
   return (
     <header className="w-full relative z-40">
       <div className="w-full bg-[#6366f1]">
-        <div className="container mx-auto max-w-7xl px-4">
+        <div className="container mx-auto max-w-3xl">
           <div className="flex items-center justify-between h-12">
             {/* Logo */}
             <Link

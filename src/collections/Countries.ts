@@ -6,6 +6,11 @@ export const Countries: CollectionConfig = {
     useAsTitle: 'name',
     defaultColumns: ['name', 'continent', 'slug'],
   },
+  defaultSort: 'createdAt', // ← Add this for oldest first
+  // OR
+  // defaultSort: '-createdAt', // ← For newest first
+  // OR
+  // defaultSort: 'name', // ← For alphabetical
   access: {
     read: () => true,
   },

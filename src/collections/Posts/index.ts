@@ -138,6 +138,78 @@ export const Posts: CollectionConfig<'posts'> = {
               ],
             },
             {
+              name: 'calloutSections',
+              type: 'array',
+              label: 'Callout Sections',
+              admin: {
+                description: 'Add highlighted sections with colored backgrounds',
+              },
+              fields: [
+                {
+                  name: 'icon',
+                  type: 'select',
+                  label: 'Icon',
+                  options: [
+                    { label: '💡 Light Bulb', value: 'lightbulb' },
+                    { label: '⚡ Lightning', value: 'lightning' },
+                    { label: '🔥 Fire', value: 'fire' },
+                    { label: '⭐ Star', value: 'star' },
+                    { label: '💎 Diamond', value: 'diamond' },
+                    { label: '🎯 Target', value: 'target' },
+                    { label: '🔔 Bell', value: 'bell' },
+                    { label: '📌 Pin', value: 'pin' },
+                    { label: 'None', value: 'none' },
+                  ],
+                  defaultValue: 'lightbulb',
+                },
+                {
+                  name: 'badge',
+                  type: 'text',
+                  label: 'Badge Text',
+                  admin: {
+                    description: 'Small text next to icon (e.g., "Links to reliable shops")',
+                  },
+                },
+                {
+                  name: 'title',
+                  type: 'text',
+                  label: 'Title',
+                  required: true,
+                  admin: {
+                    description: 'Main heading of the callout section',
+                  },
+                },
+                {
+                  name: 'backgroundColor',
+                  type: 'select',
+                  label: 'Background Color',
+                  options: [
+                    { label: 'Purple/Blue', value: 'purple' },
+                    { label: 'Green', value: 'green' },
+                    { label: 'Yellow', value: 'yellow' },
+                    { label: 'Red', value: 'red' },
+                    { label: 'Gray', value: 'gray' },
+                  ],
+                  defaultValue: 'purple',
+                },
+                {
+                  name: 'items',
+                  type: 'array',
+                  label: 'List Items',
+                  fields: [
+                    {
+                      name: 'text',
+                      type: 'textarea',
+                      required: true,
+                    },
+                  ],
+                  admin: {
+                    description: 'Add items to the numbered list',
+                  },
+                },
+              ],
+            },
+            {
               name: 'content',
               type: 'richText',
               editor: lexicalEditor({

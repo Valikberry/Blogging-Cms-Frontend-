@@ -325,6 +325,33 @@ export interface Post {
     embedUrl?: string | null;
     aspectRatio?: ('16-9' | '4-3' | '1-1') | null;
   };
+  /**
+   * Add highlighted sections with colored backgrounds
+   */
+  calloutSections?:
+    | {
+        icon?: ('lightbulb' | 'lightning' | 'fire' | 'star' | 'diamond' | 'target' | 'bell' | 'pin' | 'none') | null;
+        /**
+         * Small text next to icon (e.g., "Links to reliable shops")
+         */
+        badge?: string | null;
+        /**
+         * Main heading of the callout section
+         */
+        title: string;
+        backgroundColor?: ('purple' | 'green' | 'yellow' | 'red' | 'gray') | null;
+        /**
+         * Add items to the numbered list
+         */
+        items?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
   content: {
     root: {
       type: string;
@@ -1256,6 +1283,21 @@ export interface PostsSelect<T extends boolean = true> {
         embedUrl?: T;
         aspectRatio?: T;
       };
+  calloutSections?:
+    | T
+    | {
+        icon?: T;
+        badge?: T;
+        title?: T;
+        backgroundColor?: T;
+        items?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        id?: T;
+      };
   content?: T;
   country?: T;
   categories?: T;
@@ -1758,6 +1800,14 @@ export interface Footer {
         id?: string | null;
       }[]
     | null;
+  socialMedia?:
+    | {
+        platform: 'facebook' | 'twitter' | 'instagram' | 'youtube' | 'linkedin' | 'tiktok';
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  copyrightText?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1806,6 +1856,14 @@ export interface FooterSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  socialMedia?:
+    | T
+    | {
+        platform?: T;
+        url?: T;
+        id?: T;
+      };
+  copyrightText?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

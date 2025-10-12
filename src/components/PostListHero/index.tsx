@@ -1,4 +1,3 @@
-// components/PostListHero/index.tsx
 import React from 'react'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
@@ -13,7 +12,7 @@ interface PostListHeroProps {
   showSubmitter?: boolean
   dateFormat?: 'short' | 'long' | 'full'
   continentSlug?: string
-  countrySlug?: string
+  countryIds?: string[]
 }
 
 export async function PostListHero(props: PostListHeroProps) {
@@ -26,150 +25,161 @@ export async function PostListHero(props: PostListHeroProps) {
     showSubmitter = true,
     dateFormat = 'short',
     continentSlug,
-    countrySlug,
+    countryIds = [],
   } = props
 
   const payload = await getPayload({ config: configPromise })
 
-  // Fetch continent/country if provided
-  let continent = null
-  let country = null
-  let countryIds: string[] = []
-
-  if (countrySlug) {
-    const countryResult = await payload.find({
+  // Fetch countries
+  let countries: any[] = []
+  let selectedContinentId: string | null = null
+  
+  if (countryIds.length > 0) {
+    // Fetch specific countries by IDs
+    const countriesResult = await payload.find({
       collection: 'countries',
-      where: { slug: { equals: countrySlug } },
-      depth: 1,
-      limit: 1,
+      where: {
+        id: { in: countryIds }
+      },
+      limit: 1000,
     })
-    country = countryResult.docs[0]
-    if (country) {
-      countryIds = [country.id]
-    }
+    countries = countriesResult.docs
   } else if (continentSlug) {
+    // Fetch continent by slug and then all its countries
     const continentResult = await payload.find({
       collection: 'continents',
       where: { slug: { equals: continentSlug } },
       limit: 1,
     })
-    continent = continentResult.docs[0]
+    const continent = continentResult.docs[0]
 
     if (continent) {
-      // Get all countries in this continent
+      selectedContinentId = continent.id
       const countriesResult = await payload.find({
         collection: 'countries',
         where: { continent: { equals: continent.id } },
         limit: 1000,
       })
-      countryIds = countriesResult.docs.map((c: any) => c.id)
+      countries = countriesResult.docs
+    }
+  } else {
+    // HOME PAGE: No continent or country specified, fetch the first continent by default
+    const continentsResult = await payload.find({
+      collection: 'continents',
+      limit: 1,
+      sort: 'name', // or any other sort field you prefer
+    })
+    
+    const firstContinent = continentsResult.docs[0]
+    
+    if (firstContinent) {
+      selectedContinentId = firstContinent.id
+      const countriesResult = await payload.find({
+        collection: 'countries',
+        where: { continent: { equals: firstContinent.id } },
+        limit: 1000,
+      })
+      countries = countriesResult.docs
     }
   }
 
-  // Fetch posts grouped by categories with location filter
-  const categoriesWithPosts = await Promise.all(
-    categories.map(async (cat) => {
-      let posts = []
-      
-      // Build query based on filter type
-      const whereQuery: any = {
-        _status: {
-          equals: 'published',
-        },
-      }
-
-      // Add location filter if we have country IDs
-      if (countryIds.length > 0) {
-        whereQuery.country = {
-          in: countryIds,
-        }
-      }
-
-      if (cat.filterType === 'featured') {
-        whereQuery.featured = { equals: true }
-      } else if (cat.filterType === 'category' && cat.filterCategories?.length > 0) {
-        if (cat.filterCategories.length === 1) {
-          whereQuery.categories = {
-            contains: cat.filterCategories[0],
+  // For each country, fetch posts for each category
+  const countriesWithCategoriesAndPosts = await Promise.all(
+    countries.map(async (country) => {
+      const categoriesWithPosts = await Promise.all(
+        categories.map(async (cat) => {
+          // Build query
+          const whereQuery: any = {
+            _status: { equals: 'published' },
+            country: { equals: country.id },
           }
-        } else {
-          whereQuery.categories = {
-            in: cat.filterCategories,
+
+          // Add category filters
+          if (cat.filterType === 'featured') {
+            whereQuery.featured = { equals: true }
+          } else if (cat.filterType === 'category' && cat.filterCategories?.length > 0) {
+            if (cat.filterCategories.length === 1) {
+              whereQuery.categories = {
+                contains: cat.filterCategories[0],
+              }
+            } else {
+              whereQuery.categories = {
+                in: cat.filterCategories,
+              }
+            }
           }
-        }
-      }
 
-      // Determine sort order
-      let sortField = '-publishedAt'
-      if (cat.sortBy === 'publishedAt_asc') {
-        sortField = 'publishedAt'
-      } else if (cat.sortBy === 'title') {
-        sortField = 'title'
-      } else if (cat.sortBy === 'viewCount') {
-        sortField = '-viewCount'
-      }
-
-      const result = await payload.find({
-        collection: 'posts',
-        where: whereQuery,
-        limit: postsPerPage,
-        sort: sortField,
-        depth: 1,
-      })
-      posts = result.docs
-
-      return {
-        label: cat.label,
-        icon: cat.icon,
-        posts: posts.map((post: any) => {
-          // Format date based on dateFormat prop
-          let formattedDate = ''
-          const date = new Date(post.publishedAt)
-          
-          if (dateFormat === 'short') {
-            formattedDate = date.toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-            })
-          } else if (dateFormat === 'long') {
-            formattedDate = date.toLocaleDateString('en-US', {
-              month: 'long',
-              day: 'numeric',
-            })
-          } else if (dateFormat === 'full') {
-            formattedDate = date.toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
-            })
+          // Determine sort order
+          let sortField = '-publishedAt'
+          if (cat.sortBy === 'publishedAt_asc') {
+            sortField = 'publishedAt'
+          } else if (cat.sortBy === 'title') {
+            sortField = 'title'
+          } else if (cat.sortBy === 'viewCount') {
+            sortField = '-viewCount'
           }
+
+          const result = await payload.find({
+            collection: 'posts',
+            where: whereQuery,
+            limit: postsPerPage,
+            sort: sortField,
+            depth: 1,
+          })
 
           return {
-            id: post.id,
-            title: post.title,
-            slug: post.slug,
-            publishedAt: formattedDate,
-            rawDate: post.publishedAt,
-            submittedBy: post.submittedBy || post.populatedAuthors?.[0]?.name || null,
+            label: cat.label,
+            icon: cat.icon,
+            posts: result.docs.map((post: any) => {
+              // Format date based on dateFormat prop
+              let formattedDate = ''
+              const date = new Date(post.publishedAt)
+              
+              if (dateFormat === 'short') {
+                formattedDate = date.toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                })
+              } else if (dateFormat === 'long') {
+                formattedDate = date.toLocaleDateString('en-US', {
+                  month: 'long',
+                  day: 'numeric',
+                })
+              } else if (dateFormat === 'full') {
+                formattedDate = date.toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                })
+              }
+
+              return {
+                id: post.id,
+                title: post.title,
+                slug: post.slug,
+                publishedAt: formattedDate,
+                rawDate: post.publishedAt,
+                submittedBy: post.submittedBy || post.populatedAuthors?.[0]?.name || null,
+              }
+            }),
           }
-        }),
+        })
+      )
+
+      return {
+        id: country.id,
+        name: country.name,
+        slug: country.slug,
+        categories: categoriesWithPosts,
       }
     })
   )
 
-  // Update title based on location
-  let displayTitle = title
-  if (country) {
-    displayTitle = `${title} - ${country.name}`
-  } else if (continent) {
-    displayTitle = `${title} - ${continent.name}`
-  }
-
   return (
     <PostListClient
-      title={displayTitle}
+      title={title}
       description={description}
-      categories={categoriesWithPosts}
+      countries={countriesWithCategoriesAndPosts}
       groupByDate={groupByDate}
       showSubmitter={showSubmitter}
     />
