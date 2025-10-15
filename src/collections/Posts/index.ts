@@ -38,19 +38,21 @@ export const Posts: CollectionConfig<'posts'> = {
   defaultPopulate: {
     title: true,
     slug: true,
-    categories: true,
     country: true,
     publishedAt: true,
     excerpt: true,
     heroImage: true,
     submittedBy: true,
+    source: true,
+    isHot: true,
+    isStories: true,
     meta: {
       image: true,
       description: true,
     },
   },
   admin: {
-    defaultColumns: ['title', 'country', 'categories', 'publishedAt', 'updatedAt'],
+    defaultColumns: ['title', 'country', 'source', 'publishedAt', 'updatedAt'],
     livePreview: {
       url: ({ data, req }) => {
         const path = generatePreviewPath({
@@ -230,7 +232,7 @@ export const Posts: CollectionConfig<'posts'> = {
           ],
         },
         {
-          label: 'Location & Categories',
+          label: 'Location',
           fields: [
             {
               name: 'country',
@@ -240,16 +242,6 @@ export const Posts: CollectionConfig<'posts'> = {
               admin: {
                 description: 'Select the country this post is about',
               },
-            },
-            {
-              name: 'categories',
-              type: 'relationship',
-              admin: {
-                description: 'Categorize this post for filtering',
-              },
-              hasMany: true,
-              relationTo: 'categories',
-              required: true,
             },
             {
               name: 'tags',
@@ -350,6 +342,14 @@ export const Posts: CollectionConfig<'posts'> = {
         description: 'Name of person who submitted this (e.g., "Zara Swanson")',
       },
     },
+    {
+      name: 'source',
+      type: 'text',
+      admin: {
+        position: 'sidebar',
+        description: 'Source of the post (e.g., "John Doe")',
+      },
+    },
     // This field is only used to populate the user data via the `populateAuthors` hook
     {
       name: 'populatedAuthors',
@@ -379,6 +379,24 @@ export const Posts: CollectionConfig<'posts'> = {
       admin: {
         position: 'sidebar',
         description: 'Feature this post (appears first in lists)',
+      },
+    },
+    {
+      name: 'isHot',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        position: 'sidebar',
+        description: 'Mark this post as Hot (trending)',
+      },
+    },
+    {
+      name: 'isStories',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        position: 'sidebar',
+        description: 'Mark this post as a Story',
       },
     },
     {

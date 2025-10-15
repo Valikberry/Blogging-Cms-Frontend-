@@ -160,31 +160,9 @@ export interface Page {
        */
       title: string;
       /**
-       * Introductory text shown above category tabs
+       * Introductory text shown above filter tabs
        */
       description: string;
-      /**
-       * Tab navigation for filtering posts by category
-       */
-      categories?:
-        | {
-            /**
-             * Display label for the tab (e.g., "New", "Hot")
-             */
-            label: string;
-            /**
-             * Icon to display next to the label
-             */
-            icon: 'new' | 'hot' | 'stories' | 'subscribe' | 'featured' | 'all';
-            filterType: 'category' | 'featured' | 'all';
-            /**
-             * Select categories to filter posts
-             */
-            filterCategories?: (string | Category)[] | null;
-            sortBy?: ('publishedAt' | 'publishedAt_asc' | 'title' | 'viewCount') | null;
-            id?: string | null;
-          }[]
-        | null;
       /**
        * Number of posts to display per page
        */
@@ -194,9 +172,9 @@ export interface Page {
        */
       groupByDate?: boolean | null;
       /**
-       * Show "Submitted by" text below posts
+       * Show "From" text with source below posts
        */
-      showSubmitter?: boolean | null;
+      showSource?: boolean | null;
       /**
        * Format for displaying dates
        */
@@ -226,27 +204,6 @@ export interface Page {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
- */
-export interface Category {
-  id: string;
-  title: string;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  parent?: (string | null) | Category;
-  breadcrumbs?:
-    | {
-        doc?: (string | null) | Category;
-        url?: string | null;
-        label?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -371,10 +328,6 @@ export interface Post {
    * Select the country this post is about
    */
   country: string | Country;
-  /**
-   * Categorize this post for filtering
-   */
-  categories: (string | Category)[];
   tags?:
     | {
         tag?: string | null;
@@ -405,6 +358,10 @@ export interface Post {
    * Name of person who submitted this (e.g., "Zara Swanson")
    */
   submittedBy?: string | null;
+  /**
+   * Source of the post (e.g., "John Doe")
+   */
+  source?: string | null;
   populatedAuthors?:
     | {
         id?: string | null;
@@ -415,6 +372,14 @@ export interface Post {
    * Feature this post (appears first in lists)
    */
   featured?: boolean | null;
+  /**
+   * Mark this post as Hot (trending)
+   */
+  isHot?: boolean | null;
+  /**
+   * Mark this post as a Story
+   */
+  isStories?: boolean | null;
   /**
    * Number of times this post has been viewed
    */
@@ -664,6 +629,27 @@ export interface ArchiveBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'archive';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: string;
+  title: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  parent?: (string | null) | Category;
+  breadcrumbs?:
+    | {
+        doc?: (string | null) | Category;
+        url?: string | null;
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1143,19 +1129,9 @@ export interface PagesSelect<T extends boolean = true> {
           | {
               title?: T;
               description?: T;
-              categories?:
-                | T
-                | {
-                    label?: T;
-                    icon?: T;
-                    filterType?: T;
-                    filterCategories?: T;
-                    sortBy?: T;
-                    id?: T;
-                  };
               postsPerPage?: T;
               groupByDate?: T;
-              showSubmitter?: T;
+              showSource?: T;
               dateFormat?: T;
               enablePagination?: T;
               backgroundColor?: T;
@@ -1300,7 +1276,6 @@ export interface PostsSelect<T extends boolean = true> {
       };
   content?: T;
   country?: T;
-  categories?: T;
   tags?:
     | T
     | {
@@ -1318,6 +1293,7 @@ export interface PostsSelect<T extends boolean = true> {
   publishedAt?: T;
   authors?: T;
   submittedBy?: T;
+  source?: T;
   populatedAuthors?:
     | T
     | {
@@ -1325,6 +1301,8 @@ export interface PostsSelect<T extends boolean = true> {
         name?: T;
       };
   featured?: T;
+  isHot?: T;
+  isStories?: T;
   viewCount?: T;
   slug?: T;
   slugLock?: T;

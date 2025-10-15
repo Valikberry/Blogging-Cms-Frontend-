@@ -100,3 +100,91 @@ html {
 html[data-theme='dark'] {
   opacity: initial;
 }
+
+/* RichText content styling */
+.rich-text {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.rich-text p {
+  font-size: 14px;
+  margin-bottom: 1em;
+}
+
+.rich-text h1 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-top: 1.5em;
+  margin-bottom: 0.75em;
+}
+
+.rich-text h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-top: 1.5em;
+  margin-bottom: 0.75em;
+}
+
+.rich-text h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 1.5em;
+  margin-bottom: 0.75em;
+}
+
+.rich-text h4 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 1.5em;
+  margin-bottom: 0.75em;
+}
+
+.rich-text ul,
+.rich-text ol {
+  font-size: 14px;
+  margin-bottom: 1em;
+  padding-left: 1.5em;
+}
+
+.rich-text li {
+  margin-bottom: 0.5em;
+}
+
+.rich-text a {
+  color: #6366f1;
+  text-decoration: underline;
+}
+
+.rich-text a:hover {
+  color: #4f46e5;
+}
+
+.rich-text strong {
+  font-weight: 600;
+}
+
+.rich-text code {
+  font-size: 13px;
+  background-color: #f3f4f6;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+}
+
+.rich-text pre {
+  font-size: 13px;
+  background-color: #f3f4f6;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin-bottom: 1em;
+}
+
+.rich-text blockquote {
+  font-size: 14px;
+  border-left: 3px solid #e5e7eb;
+  padding-left: 1rem;
+  margin-left: 0;
+  margin-bottom: 1em;
+  color: #6b7280;
+}

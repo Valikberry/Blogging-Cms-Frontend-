@@ -24,76 +24,8 @@ export const PostListHero: Block = {
       required: true,
       defaultValue: "To get started with our documentation, please navigate through the sections using the sidebar on the left. Here's a quick overview of the available sections:",
       admin: {
-        description: 'Introductory text shown above category tabs',
+        description: 'Introductory text shown above filter tabs',
       },
-    },
-    {
-      name: 'categories',
-      type: 'array',
-      label: 'Category Tabs',
-      minRows: 1,
-      maxRows: 6,
-      admin: {
-        description: 'Tab navigation for filtering posts by category',
-      },
-      fields: [
-        {
-          name: 'label',
-          type: 'text',
-          required: true,
-          admin: {
-            description: 'Display label for the tab (e.g., "New", "Hot")',
-          },
-        },
-        {
-          name: 'icon',
-          type: 'select',
-          required: true,
-          options: [
-            { label: '🔥 New', value: 'new' },
-            { label: '🔥 Hot', value: 'hot' },
-            { label: '📖 Stories', value: 'stories' },
-            { label: '✉️ Subscribe', value: 'subscribe' },
-            { label: '⭐ Featured', value: 'featured' },
-            { label: '📝 All', value: 'all' },
-          ],
-          admin: {
-            description: 'Icon to display next to the label',
-          },
-        },
-        {
-          name: 'filterType',
-          type: 'select',
-          required: true,
-          defaultValue: 'category',
-          options: [
-            { label: 'Filter by Category', value: 'category' },
-            { label: 'Show Featured Only', value: 'featured' },
-            { label: 'Show All Posts', value: 'all' },
-          ],
-        },
-        {
-          name: 'filterCategories',
-          type: 'relationship',
-          relationTo: 'categories',
-          hasMany: true,
-          admin: {
-            condition: (_, siblingData) => siblingData?.filterType === 'category',
-            description: 'Select categories to filter posts',
-          },
-        },
-        {
-          name: 'sortBy',
-          type: 'select',
-          defaultValue: 'publishedAt',
-          options: [
-            { label: 'Published Date (Newest First)', value: 'publishedAt' },
-            { label: 'Published Date (Oldest First)', value: 'publishedAt_asc' },
-            { label: 'Title (A-Z)', value: 'title' },
-            { label: 'Most Viewed', value: 'viewCount' },
-          ],
-        },
-      ],
     },
     {
       name: 'postsPerPage',
@@ -114,11 +46,11 @@ export const PostListHero: Block = {
       },
     },
     {
-      name: 'showSubmitter',
+      name: 'showSource',
       type: 'checkbox',
       defaultValue: true,
       admin: {
-        description: 'Show "Submitted by" text below posts',
+        description: 'Show "From" text with source below posts',
       },
     },
     {

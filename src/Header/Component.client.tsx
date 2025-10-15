@@ -58,7 +58,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, countries = []
     <header className="w-full relative z-40">
       <div className="w-full bg-[#6366f1]">
         <div className="container mx-auto max-w-3xl">
-          <div className="flex items-center justify-between h-12">
+          <div className="flex items-center justify-between h-12 relative">
             {/* Logo */}
             <Link
               href="/"
@@ -75,6 +75,26 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, countries = []
               )}
               {data.logo?.text && <span className="font-bold text-xl">{data.logo.text}</span>}
             </Link>
+
+            {/* Search Bar Overlay - Appears over navigation when open */}
+            {searchOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setSearchOpen(false)} />
+                <div className="absolute right-14 top-1/2 -translate-y-1/2 z-20">
+                  <input
+                    type="text"
+                    placeholder="Search..."
+                    className="w-80 bg-white/95 border border-white/30 px-4 py-2 rounded-md text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-lg transition-colors"
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') {
+                        setSearchOpen(false)
+                      }
+                    }}
+                  />
+                </div>
+              </>
+            )}
 
             {/* Navigation */}
             <nav className="flex items-center gap-1">
@@ -168,32 +188,18 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, countries = []
 
                 return null
               })}
-            </nav>
-
-            {/* Search Icon */}
-            {data.showSearch && (
-              <div className="relative">
+              {data.showSearch && (
                 <button
-                  className="text-white hover:bg-white/10 transition-colors p-2 rounded-full"
+                  className="text-white hover:bg-white/10 transition-colors p-2 rounded-full relative z-20"
                   aria-label="Search"
                   onClick={() => setSearchOpen(!searchOpen)}
                 >
                   <Search className="w-5 h-5" />
                 </button>
+              )}
+            </nav>
 
-                {searchOpen && (
-                  <div className="absolute top-full right-0 mt-2 z-50">
-                    <input
-                      type="text"
-                      placeholder="Search..."
-                      className="bg-white border border-gray-300 px-4 py-2 rounded-md w-64 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-lg"
-                      autoFocus
-                      onBlur={() => setTimeout(() => setSearchOpen(false), 200)}
-                    />
-                  </div>
-                )}
-              </div>
-            )}
+     
           </div>
         </div>
       </div>

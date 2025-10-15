@@ -18,6 +18,7 @@ import {
   Target,
   Bell,
   Pin,
+  Globe,
 } from 'lucide-react'
 
 interface PostDetailProps {
@@ -83,7 +84,25 @@ export function PostDetail({ post }: PostDetailProps) {
 
   return (
     <article className="min-h-screen bg-white">
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 mb-6xx">
+        {/* Post Title */}
+        <h1 className="text-[24px] font-bold text-gray-900 mb-2 leading-tight">
+          {post.title}
+        </h1>
+
+        {/* Excerpt */}
+        {post.excerpt && (
+          <p className="text-[14px] text-gray-600  leading-relaxed mb-3">{post.excerpt}</p>
+        )}
+
+        {/* Source */}
+        {post.source && (
+          <div className="flex items-center gap-2  text-sm text-gray-600 mb-1">
+            <Globe className="w-4 h-4" />
+            <span className='text-[12px]'>Source: {post.source}</span>
+          </div>
+        )}
+
         {/* Hero Image */}
         {post.heroImage && typeof post.heroImage === 'object' && (
           <div className="mb-6 rounded-xl overflow-hidden">
@@ -98,21 +117,11 @@ export function PostDetail({ post }: PostDetailProps) {
           </div>
         )}
 
-        {/* Post Title */}
-        <h1 className="text-4xl md:text-2xl font-bold text-gray-900 mb-4 leading-tight">
-          {post.title}
-        </h1>
-
-        {/* Excerpt */}
-        {post.excerpt && (
-          <p className="text-md text-gray-500 mb-6 leading-relaxed">{post.excerpt}</p>
-        )}
-
         {/* Video Embed */}
         {post.videoEmbed?.enabled && post.videoEmbed.embedUrl && (
-          <div className="mb-8">
+          <div className="mb-6">
             <div
-              className={`relative w-full overflow-hidden rounded-lg ${
+              className={`relative w-full overflow-hidden rounded-lg bg-gray-800 ${
                 post.videoEmbed.aspectRatio === '16-9'
                   ? 'aspect-video'
                   : post.videoEmbed.aspectRatio === '4-3'
@@ -132,18 +141,18 @@ export function PostDetail({ post }: PostDetailProps) {
         )}
 
         {/* Author Info and Share Buttons */}
-        <div className="flex items-center justify-between  border-b border-gray-200">
+        <div className="flex items-center justify-between py-1 border-b border-gray-200 mb-2">
           <div className="flex items-center gap-3">
             {authorName && (
               <>
-                <div className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                  <span className="text-sm font-semibold text-gray-600">
+                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                  <span className="text-base font-semibold text-gray-600">
                     {authorName.charAt(0).toUpperCase()}
                   </span>
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-900">{authorName}</p>
-                  {publishedDate && <p className="text-sm text-gray-500">{publishedDate}</p>}
+                  <p className="font-semibold text-gray-900 text-sm">{authorName}</p>
+                  {publishedDate && <p className="text-xs text-gray-500">{publishedDate}</p>}
                 </div>
               </>
             )}
@@ -152,7 +161,7 @@ export function PostDetail({ post }: PostDetailProps) {
           <ShareButtons post={post} />
         </div>
         {/* Post Content */}
-        <div className="prose prose-lg max-w-none">
+        <div className="prose prose-base max-w-none mb-4 text-gray-700">
           <RichText content={post.content} />
         </div>
 
@@ -168,29 +177,29 @@ export function PostDetail({ post }: PostDetailProps) {
                 iconColors[section.backgroundColor as keyof typeof iconColors] || iconColors.purple
 
               return (
-                <div key={index} className={`rounded-xl border p-6 ${bgClass}`}>
+                <div key={index} className={`rounded-2xl border-2 p-6 ${bgClass}`}>
                   {/* Badge with Icon */}
                   {(section.badge || Icon) && (
-                    <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center gap-2 mb-4">
                       {Icon && <Icon className={`w-5 h-5 ${iconColor}`} />}
                       {section.badge && (
-                        <span className={`text-sm font-medium ${iconColor}`}>{section.badge}</span>
+                        <span className={`text-sm font-semibold ${iconColor}`}>{section.badge}</span>
                       )}
                     </div>
                   )}
 
                   {/* Title */}
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">{section.title}</h3>
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">{section.title}</h3>
 
                   {/* Numbered List */}
                   {section.items && section.items.length > 0 && (
-                    <ol className="space-y-2">
+                    <ol className="space-y-3">
                       {section.items.map((item: any, itemIndex: number) => (
-                        <li key={item.id || itemIndex} className="flex gap-3">
-                          <span className="text-gray-900 font-medium flex-shrink-0">
+                        <li key={item.id || itemIndex} className="flex gap-3 text-sm">
+                          <span className="text-gray-900 font-bold flex-shrink-0">
                             {itemIndex + 1}.
                           </span>
-                          <span className="text-gray-700">{item.text}</span>
+                          <span className="text-gray-700 leading-relaxed">{item.text}</span>
                         </li>
                       ))}
                     </ol>
@@ -271,7 +280,7 @@ function ShareButtons({ post }: { post: any }) {
         href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="p-2.5 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+        className="p-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
         aria-label="Share on Facebook"
       >
         <Facebook className="w-5 h-5" />
@@ -281,7 +290,7 @@ function ShareButtons({ post }: { post: any }) {
         href={`https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="p-2.5 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+        className="p-2 rounded-md bg-gray-700 text-white hover:bg-gray-800 transition-colors"
         aria-label="Share on Twitter"
       >
         <Twitter className="w-5 h-5" />
@@ -289,7 +298,7 @@ function ShareButtons({ post }: { post: any }) {
 
       <a
         href={`mailto:?subject=${encodedTitle}&body=${encodedUrl}`}
-        className="p-2.5 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+        className="p-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
         aria-label="Share via Email"
       >
         <Mail className="w-5 h-5" />
