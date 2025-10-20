@@ -19,6 +19,7 @@ import {
   Bell,
   Pin,
   Globe,
+  LinkIcon,
 } from 'lucide-react'
 
 interface PostDetailProps {
@@ -84,24 +85,24 @@ export function PostDetail({ post }: PostDetailProps) {
 
   return (
     <article className="min-h-screen bg-white">
-      <div className="max-w-4xl mx-auto px-4 mb-6xx">
+      <div className="max-w-4xl mx-auto mb-6xx">
         {/* Post Title */}
-        <h1 className="text-[24px] font-bold text-gray-900 mb-2 leading-tight">
+        <h1 className="text-xl sm:text-2xl md:text-[24px] font-bold text-gray-900 mb-2 leading-tight">
           {post.title}
         </h1>
 
         {/* Excerpt */}
         {post.excerpt && (
-          <p className="text-[14px] text-gray-600  leading-relaxed mb-3">{post.excerpt}</p>
+          <p className="text-sm sm:text-[14px] text-gray-600 leading-relaxed mb-3">{post.excerpt}</p>
         )}
 
         {/* Source */}
-        {post.source && (
+        {/* {post.source && (
           <div className="flex items-center gap-2  text-sm text-gray-600 mb-1">
             <Globe className="w-4 h-4" />
             <span className='text-[12px]'>Source: {post.source}</span>
           </div>
-        )}
+        )} */}
 
         {/* Hero Image */}
         {post.heroImage && typeof post.heroImage === 'object' && (
@@ -141,7 +142,7 @@ export function PostDetail({ post }: PostDetailProps) {
         )}
 
         {/* Author Info and Share Buttons */}
-        <div className="flex items-center justify-between py-1 border-b border-gray-200 mb-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-1 border-b border-gray-200 mb-2 gap-3">
           <div className="flex items-center gap-3">
             {authorName && (
               <>
@@ -227,8 +228,8 @@ export function PostDetail({ post }: PostDetailProps) {
         {/* Related Posts */}
         {post.relatedPosts && post.relatedPosts.length > 0 && (
           <div className="border-t border-gray-200 pt-8 mt-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Related Posts</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Related Posts</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               {post.relatedPosts.map((relatedPost: any) => (
                 <Link
                   key={relatedPost.id}
@@ -262,47 +263,70 @@ export function PostDetail({ post }: PostDetailProps) {
   )
 }
 
-function ShareButtons({ post }: { post: any }) {
-  const [shareUrl, setShareUrl] = useState('')
+export default function ShareButtons({ post }: { post: any }) {
+  const [shareUrl, setShareUrl] = useState("")
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setShareUrl(window.location.href)
+    if (typeof window !== "undefined") {
+      // Use full URL for the specific post
+      const fullUrl = `${window.location.origin}/posts/${post.slug || post.id}`
+      setShareUrl(fullUrl)
     }
-  }, [])
+  }, [post])
 
   const encodedUrl = encodeURIComponent(shareUrl)
-  const encodedTitle = encodeURIComponent(post.title)
+  const encodedTitle = encodeURIComponent(post.title || "Check this out!")
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl)
+      alert("Link copied to clipboard!")
+    } catch (err) {
+      console.error("Failed to copy link:", err)
+    }
+  }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1.5 sm:gap-2">
+      {/* Facebook */}
       <a
         href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="p-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+        className="p-1.5 sm:p-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
         aria-label="Share on Facebook"
       >
-        <Facebook className="w-5 h-5" />
+        <Facebook className="w-4 h-4 sm:w-5 sm:h-5" />
       </a>
 
+      {/* Twitter / X */}
       <a
         href={`https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="p-2 rounded-md bg-gray-700 text-white hover:bg-gray-800 transition-colors"
+        className="p-1.5 sm:p-2 rounded-md bg-gray-700 text-white hover:bg-gray-800 transition-colors"
         aria-label="Share on Twitter"
       >
-        <Twitter className="w-5 h-5" />
+        <Twitter className="w-4 h-4 sm:w-5 sm:h-5" />
       </a>
 
+      {/* Email */}
       <a
         href={`mailto:?subject=${encodedTitle}&body=${encodedUrl}`}
-        className="p-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+        className="p-1.5 sm:p-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
         aria-label="Share via Email"
       >
-        <Mail className="w-5 h-5" />
+        <Mail className="w-4 h-4 sm:w-5 sm:h-5" />
       </a>
+
+      {/* Copy Link */}
+      <button
+        onClick={handleCopyLink}
+        className="p-1.5 sm:p-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+        aria-label="Copy link"
+      >
+        <LinkIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+      </button>
     </div>
   )
 }

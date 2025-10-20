@@ -83,21 +83,21 @@ export function PostListClient({
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <div className="max-w-4xl mx-auto px-4 -mt-5">
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-gray-900 text-[24px] font-medium mb-2">{title}</h1>
-          <p className="text-gray-500 text-[14px]">{description}</p>
+          <h1 className="text-gray-900 text-xl sm:text-2xl md:text-[24px] font-medium mb-2">{title}</h1>
+          <p className="text-gray-500 text-sm sm:text-[14px]">{description}</p>
         </div>
 
         {/* Country Buttons */}
         {countries.length > 0 && (
-          <div className="flex gap-3 overflow-x-auto mb-4 pb-2">
+          <div className="flex gap-2 sm:gap-3 overflow-x-auto mb-4 pb-2 scrollbar-hide">
             {countries.map((country, index) => (
               <button
                 key={country.id}
                 onClick={() => setActiveCountryIndex(index)}
-                className={`px-4 py-1 rounded-lg text-sm font-medium whitespace-nowrap transition-colors border ${
+                className={`px-3 sm:px-4 py-1 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-colors border ${
                   activeCountryIndex === index
                     ? 'bg-[#6366f1]/10 text-[#6366f1] border-[#6366f1]'
                     : 'bg-gray-200 text-gray-700 border-gray-300 hover:bg-gray-300'
@@ -110,8 +110,8 @@ export function PostListClient({
         )}
 
         {/* Filter Tabs (New, Hot, Stories, Subscribe) */}
-        <div className="border-b border-gray-300 mb-3">
-          <nav className="flex gap-8 px-1">
+        <div className="border-b border-gray-300 mb-3 overflow-x-auto scrollbar-hide">
+          <nav className="flex gap-4 sm:gap-8 px-1 min-w-max">
             <button
               onClick={() => setActiveFilter('new')}
               className={`flex items-center gap-2 pb-3 text-sm font-medium transition-colors relative ${
@@ -167,11 +167,11 @@ export function PostListClient({
 
         {/* Subscribe Form */}
         {activeFilter === 'subscribe' && (
-          <div className="bg-white rounded-lg border border-gray-200 p-8">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-8">
             <div className="max-w-md mx-auto text-center">
-              <Mail className="w-12 h-12 text-indigo-600 mx-auto mb-4" />
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Subscribe to Updates</h3>
-              <p className="text-gray-600 mb-6">
+              <Mail className="w-10 h-10 sm:w-12 sm:h-12 text-indigo-600 mx-auto mb-4" />
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Subscribe to Updates</h3>
+              <p className="text-sm sm:text-base text-gray-600 mb-6">
                 Get the latest posts delivered straight to your inbox.
               </p>
               <form onSubmit={handleSubscribe} className="space-y-4">
@@ -216,14 +216,14 @@ export function PostListClient({
                           href={`/posts/${post.slug}`}
                           className="block hover:bg-gray-50 transition-colors"
                         >
-                          <div className="px-6 py-4">
-                            <div className="flex items-center justify-between gap-4">
-                              <div className="flex gap-4 items-start flex-1 min-w-0">
-                                <span className="text-indigo-600 font-medium text-sm shrink-0 pt-0.5">
+                          <div className="px-3 sm:px-6 py-3 sm:py-4">
+                            <div className="flex items-center justify-between gap-2 sm:gap-4">
+                              <div className="flex gap-2 sm:gap-4 items-start flex-1 min-w-0">
+                                <span className="text-indigo-600 font-medium text-xs sm:text-sm shrink-0 pt-0.5">
                                   {post.publishedAt}
                                 </span>
                                 <div className="flex-1 min-w-0">
-                                  <h3 className="text-gray-900 font-medium text-[14px] leading-snug">
+                                  <h3 className="text-gray-900 font-medium text-xs sm:text-[14px] leading-snug">
                                     {post.title}
                                   </h3>
 
@@ -232,7 +232,7 @@ export function PostListClient({
                                   )}
                                 </div>
                               </div>
-                              <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
+                              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 shrink-0" />
                             </div>
                           </div>
                         </Link>
@@ -250,14 +250,14 @@ export function PostListClient({
                       href={`/posts/${post.slug}`}
                       className="block hover:bg-gray-50 transition-colors"
                     >
-                      <div className="px-6 py-1">
-                        <div className="flex items-center justify-between gap-4">
-                          <div className="flex gap-4 items-start flex-1 min-w-0">
-                            <span className="text-indigo-600 font-medium text-sm shrink-0 pt-0.5">
+                      <div className="px-3 sm:px-6 py-1">
+                        <div className="flex items-center justify-between gap-2 sm:gap-4">
+                          <div className="flex gap-2 sm:gap-4 items-start flex-1 min-w-0">
+                            <span className="text-indigo-600 font-medium text-xs sm:text-sm shrink-0 pt-0.5">
                               {post.publishedAt}
                             </span>
                             <div className="flex-1 min-w-0">
-                              <h3 className="text-gray-900 font-medium text-base leading-snug">
+                              <h3 className="text-gray-900 font-medium text-sm sm:text-base leading-snug">
                                 {post.title}
                               </h3>
                               {showSource && post.source && (
@@ -265,7 +265,7 @@ export function PostListClient({
                               )}
                             </div>
                           </div>
-                          <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
+                          <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 shrink-0" />
                         </div>
                       </div>
                     </Link>

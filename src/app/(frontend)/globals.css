@@ -101,10 +101,33 @@ html[data-theme='dark'] {
   opacity: initial;
 }
 
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
 /* RichText content styling */
 .rich-text {
   font-size: 14px;
   line-height: 1.6;
+}
+
+@media (min-width: 640px) {
+  .rich-text {
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 768px) {
+  .rich-text {
+    font-size: 16px;
+  }
 }
 
 .rich-text p {
@@ -112,25 +135,49 @@ html[data-theme='dark'] {
   margin-bottom: 1em;
 }
 
-.rich-text h1 {
-  font-size: 20px;
-  font-weight: 700;
-  margin-top: 1.5em;
-  margin-bottom: 0.75em;
+@media (min-width: 640px) {
+  .rich-text p {
+    font-size: 15px;
+  }
 }
 
-.rich-text h2 {
+.rich-text h1 {
   font-size: 18px;
   font-weight: 700;
   margin-top: 1.5em;
   margin-bottom: 0.75em;
 }
 
-.rich-text h3 {
+@media (min-width: 640px) {
+  .rich-text h1 {
+    font-size: 20px;
+  }
+}
+
+.rich-text h2 {
   font-size: 16px;
+  font-weight: 700;
+  margin-top: 1.5em;
+  margin-bottom: 0.75em;
+}
+
+@media (min-width: 640px) {
+  .rich-text h2 {
+    font-size: 18px;
+  }
+}
+
+.rich-text h3 {
+  font-size: 15px;
   font-weight: 600;
   margin-top: 1.5em;
   margin-bottom: 0.75em;
+}
+
+@media (min-width: 640px) {
+  .rich-text h3 {
+    font-size: 16px;
+  }
 }
 
 .rich-text h4 {
@@ -142,9 +189,16 @@ html[data-theme='dark'] {
 
 .rich-text ul,
 .rich-text ol {
-  font-size: 14px;
+  font-size: 13px;
   margin-bottom: 1em;
   padding-left: 1.5em;
+}
+
+@media (min-width: 640px) {
+  .rich-text ul,
+  .rich-text ol {
+    font-size: 14px;
+  }
 }
 
 .rich-text li {
@@ -165,26 +219,45 @@ html[data-theme='dark'] {
 }
 
 .rich-text code {
-  font-size: 13px;
+  font-size: 12px;
   background-color: #f3f4f6;
   padding: 0.125rem 0.25rem;
   border-radius: 0.25rem;
 }
 
+@media (min-width: 640px) {
+  .rich-text code {
+    font-size: 13px;
+  }
+}
+
 .rich-text pre {
-  font-size: 13px;
+  font-size: 12px;
   background-color: #f3f4f6;
-  padding: 1rem;
+  padding: 0.75rem;
   border-radius: 0.5rem;
   overflow-x: auto;
   margin-bottom: 1em;
 }
 
+@media (min-width: 640px) {
+  .rich-text pre {
+    font-size: 13px;
+    padding: 1rem;
+  }
+}
+
 .rich-text blockquote {
-  font-size: 14px;
+  font-size: 13px;
   border-left: 3px solid #e5e7eb;
   padding-left: 1rem;
   margin-left: 0;
   margin-bottom: 1em;
   color: #6b7280;
+}
+
+@media (min-width: 640px) {
+  .rich-text blockquote {
+    font-size: 14px;
+  }
 }

@@ -17,19 +17,18 @@ const socialIcons: Record<string, React.ElementType> = {
 }
 
 export async function Footer() {
-  const footerData = await getCachedGlobal('footer', 1)() as FooterType
+  const footerData = (await getCachedGlobal('footer', 1)()) as FooterType
 
   const navItems = footerData?.navItems || []
   const socialMedia = footerData?.socialMedia || []
-  const copyrightText = footerData?.copyrightText || 'Copyright © 2025 Company Name LLC. All rights reserved.'
+  const copyrightText =
+    footerData?.copyrightText || 'Copyright © 2025 Company Name LLC. All rights reserved.'
 
   return (
-<footer className="fixed bottom-0 left-0 w-full border-t border-gray-200 bg-gray-50">
-
-      <div className="container mx-auto">
-
+    <footer className="w-full border-t border-gray-200 bg-gray-50">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Navigation Links */}
-        <nav className="flex justify-center items-center gap-8 py-2">
+        <nav className="flex flex-wrap justify-center items-center gap-4 sm:gap-8 py-2">
           {navItems.map(({ link }, i) => {
             return (
               <CMSLink
@@ -43,26 +42,26 @@ export async function Footer() {
 
         {/* Copyright */}
         <div className="text-center py-2 border-t border-gray-200">
-            {/* Social Media Links */}
-        {socialMedia.length > 0 && (
-          <div className="flex justify-center items-center gap-6">
-            {socialMedia.map((social: any, index: number) => {
-              const Icon = socialIcons[social.platform] || Instagram
-              return (
-                <Link
-                  key={index}
-                  href={social.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  <Icon className="w-4 h-4" />
-                  <span className="text-sm capitalize">{social.platform}</span>
-                </Link>
-              )
-            })}
-          </div>
-        )}
+          {/* Social Media Links */}
+          {socialMedia.length > 0 && (
+            <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6">
+              {socialMedia.map((social: any, index: number) => {
+                const Icon = socialIcons[social.platform] || Instagram
+                return (
+                  <Link
+                    key={index}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span className="text-sm capitalize">{social.platform}</span>
+                  </Link>
+                )
+              })}
+            </div>
+          )}
           {/* <p className="text-gray-500 text-xs">{copyrightText}</p> */}
         </div>
       </div>
