@@ -20,6 +20,7 @@ import {
   Pin,
   Globe,
   LinkIcon,
+  X,
 } from 'lucide-react'
 
 interface PostDetailProps {
@@ -93,34 +94,28 @@ export function PostDetail({ post }: PostDetailProps) {
 
         {/* Excerpt */}
         {post.excerpt && (
-          <p className="text-sm sm:text-[14px] text-gray-600 leading-relaxed mb-3">{post.excerpt}</p>
+          <p className="text-sm sm:text-[14px] text-gray-600 leading-relaxed mb-3">
+            {post.excerpt}
+          </p>
         )}
-
-        {/* Source */}
-        {/* {post.source && (
-          <div className="flex items-center gap-2  text-sm text-gray-600 mb-1">
-            <Globe className="w-4 h-4" />
-            <span className='text-[12px]'>Source: {post.source}</span>
-          </div>
-        )} */}
 
         {/* Hero Image */}
-        {post.heroImage && typeof post.heroImage === 'object' && (
-          <div className="mb-6 rounded-xl overflow-hidden">
-            <Image
-              src={post.heroImage.url || ''}
-              alt={post.heroImage.alt || post.title}
-              width={post.heroImage.width || 1200}
-              height={post.heroImage.height || 600}
-              className="w-full h-auto"
-              priority
-            />
-          </div>
-        )}
+       {post.heroImage && typeof post.heroImage === 'object' && (
+  <div
+   className="relative w-full aspect-[16/9] rounded-xl overflow-hidden bg-no-repeat"
+    style={{
+      backgroundImage: `url(${post.heroImage.url || ''})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center center',
+    }}
+    aria-label={post.heroImage.alt || post.title}
+  ></div>
+)}
+
 
         {/* Video Embed */}
         {post.videoEmbed?.enabled && post.videoEmbed.embedUrl && (
-          <div className="mb-6">
+          <div className="mb-2">
             <div
               className={`relative w-full overflow-hidden rounded-lg bg-gray-800 ${
                 post.videoEmbed.aspectRatio === '16-9'
@@ -142,24 +137,16 @@ export function PostDetail({ post }: PostDetailProps) {
         )}
 
         {/* Author Info and Share Buttons */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-1 border-b border-gray-200 mb-2 gap-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between  border-b border-gray-200 mb-2 gap-3">
           <div className="flex items-center gap-3">
-            {authorName && (
-              <>
-                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                  <span className="text-base font-semibold text-gray-600">
-                    {authorName.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-                <div>
-                  <p className="font-semibold text-gray-900 text-sm">{authorName}</p>
-                  {publishedDate && <p className="text-xs text-gray-500">{publishedDate}</p>}
-                </div>
-              </>
+            {post.source && (
+              <div className="flex items-center gap-2  text-sm text-gray-600 ">
+                <Globe className="w-4 h-4" />
+                <span className="text-[12px]">{post.source}</span>
+              </div>
             )}
+            <ShareButtons post={post} />
           </div>
-
-          <ShareButtons post={post} />
         </div>
         {/* Post Content */}
         <div className="prose prose-base max-w-none mb-4 text-gray-700">
@@ -184,7 +171,9 @@ export function PostDetail({ post }: PostDetailProps) {
                     <div className="flex items-center gap-2 mb-4">
                       {Icon && <Icon className={`w-5 h-5 ${iconColor}`} />}
                       {section.badge && (
-                        <span className={`text-sm font-semibold ${iconColor}`}>{section.badge}</span>
+                        <span className={`text-sm font-semibold ${iconColor}`}>
+                          {section.badge}
+                        </span>
                       )}
                     </div>
                   )}
@@ -264,10 +253,10 @@ export function PostDetail({ post }: PostDetailProps) {
 }
 
 export default function ShareButtons({ post }: { post: any }) {
-  const [shareUrl, setShareUrl] = useState("")
+  const [shareUrl, setShareUrl] = useState('')
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       // Use full URL for the specific post
       const fullUrl = `${window.location.origin}/posts/${post.slug || post.id}`
       setShareUrl(fullUrl)
@@ -275,14 +264,14 @@ export default function ShareButtons({ post }: { post: any }) {
   }, [post])
 
   const encodedUrl = encodeURIComponent(shareUrl)
-  const encodedTitle = encodeURIComponent(post.title || "Check this out!")
+  const encodedTitle = encodeURIComponent(post.title || 'Check this out!')
 
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl)
-      alert("Link copied to clipboard!")
+      // alert('Link copied to clipboard!')
     } catch (err) {
-      console.error("Failed to copy link:", err)
+      console.error('Failed to copy link:', err)
     }
   }
 
@@ -293,7 +282,7 @@ export default function ShareButtons({ post }: { post: any }) {
         href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="p-1.5 sm:p-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+        className="p-1.5 sm:p-2 text-gray-700 hover:bg-gray-200 transition-colors"
         aria-label="Share on Facebook"
       >
         <Facebook className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -304,10 +293,10 @@ export default function ShareButtons({ post }: { post: any }) {
         href={`https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="p-1.5 sm:p-2 rounded-md bg-gray-700 text-white hover:bg-gray-800 transition-colors"
+        className="p-1.5 sm:p-2  hover:text-black hover:bg-gray-200 transition-colors"
         aria-label="Share on Twitter"
       >
-        <Twitter className="w-4 h-4 sm:w-5 sm:h-5" />
+        <X className="w-4 h-4 sm:w-5 sm:h-5" />
       </a>
 
       {/* Email */}

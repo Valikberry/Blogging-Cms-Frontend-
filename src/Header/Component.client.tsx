@@ -54,7 +54,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, countries = []
   }
 
   const isActivePath = (path: string) => pathname === path
-console.log(data.logo);
+  console.log(data.logo)
 
   return (
     <header className="w-full relative z-40">
@@ -212,13 +212,15 @@ console.log(data.logo);
                   <Search className="w-5 h-5" />
                 </button>
               )}
-              <button
-                className="text-white hover:bg-white/10 transition-colors p-2 rounded-full"
-                aria-label="Toggle menu"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              >
-                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-              </button>
+              {data.navItems?.length ? (
+                <button
+                  className="text-white hover:bg-white/10 transition-colors p-2 rounded-full"
+                  aria-label="Toggle menu"
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                >
+                  {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                </button>
+              ):''}
             </div>
           </div>
         </div>

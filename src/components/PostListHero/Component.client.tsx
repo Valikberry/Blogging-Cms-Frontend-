@@ -97,7 +97,7 @@ export function PostListClient({
               <button
                 key={country.id}
                 onClick={() => setActiveCountryIndex(index)}
-                className={`px-3 sm:px-4 py-1 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-colors border ${
+                className={`px-3 sm:px-4 py-1 rounded-lg text-sm sm:text-sm font-medium whitespace-nowrap transition-colors border ${
                   activeCountryIndex === index
                     ? 'bg-[#6366f1]/10 text-[#6366f1] border-[#6366f1]'
                     : 'bg-gray-200 text-gray-700 border-gray-300 hover:bg-gray-300'
