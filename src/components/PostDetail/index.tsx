@@ -100,17 +100,17 @@ export function PostDetail({ post }: PostDetailProps) {
         )}
 
         {/* Hero Image */}
-       {post.heroImage && typeof post.heroImage === 'object' && (
-  <div
-   className="relative w-full aspect-[16/9] rounded-xl overflow-hidden bg-no-repeat"
-    style={{
-      backgroundImage: `url(${post.heroImage.url || ''})`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center center',
-    }}
-    aria-label={post.heroImage.alt || post.title}
-  ></div>
-)}
+        {post.heroImage && typeof post.heroImage === 'object' && (
+          <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden mb-2">
+            <Image
+              src={post.heroImage.url || ''}
+              alt={post.heroImage.alt || post.title}
+              fill
+              className="object-cover"
+              priority
+            />
+          </div>
+        )}
 
 
         {/* Video Embed */}
