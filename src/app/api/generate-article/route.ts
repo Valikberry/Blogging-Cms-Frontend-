@@ -33,8 +33,13 @@ Trump ordered troops to protect ICE buildings…
 Locals say the city is calm and troops are provocative…`
 
 export async function POST(request: NextRequest) {
+  let id: string | undefined
+  let url: string | undefined
+
   try {
-    const { id, url } = await request.json()
+    const body = await request.json()
+    id = body.id
+    url = body.url
 
     if (!id || !url) {
       return NextResponse.json({ error: 'Missing id or url' }, { status: 400 })
@@ -53,11 +58,18 @@ export async function POST(request: NextRequest) {
 
     // Fetch article content using Jina Reader API
     const jinaUrl = `https://r.jina.ai/${url}`
+    const jinaHeaders: Record<string, string> = {
+      'Accept': 'application/json',
+      'X-With-Generated-Alt': 'true',
+    }
+
+    // Add Jina API key if available
+    if (process.env.JINA_API_KEY) {
+      jinaHeaders['Authorization'] = `Bearer ${process.env.JINA_API_KEY}`
+    }
+
     const articleResponse = await fetch(jinaUrl, {
-      headers: {
-        'Accept': 'application/json',
-        'X-With-Generated-Alt': 'true',
-      },
+      headers: jinaHeaders,
     })
 
     if (!articleResponse.ok) {
@@ -96,7 +108,56 @@ export async function POST(request: NextRequest) {
 
     const generatedContent = completion.choices[0]?.message?.content || 'No content generated'
 
-    // Update the document with the generated content
+    // Generate image using GPT with image generation tool
+    let featuredImageId: string | undefined
+
+    try {
+      console.log('Starting image generation with GPT image tool...')
+      const imagePrompt = `Create a professional, editorial-style featured image for a news article with the headline: "${headline}". The image should be photorealistic, high-quality, and suitable for a news website. Avoid text in the image.`
+
+      const imageResponse = await openai.responses.create({
+        model: 'gpt-4.1-mini',
+        input: imagePrompt,
+        tools: [{ type: 'image_generation' }],
+      })
+
+      // Extract image data from the response
+      const imageData = imageResponse.output
+        .filter((output: any) => output.type === 'image_generation_call')
+        .map((output: any) => output.result)
+
+      console.log('Image generation result:', imageData.length > 0 ? 'Yes' : 'No')
+
+      if (imageData.length > 0) {
+        const imageBase64 = imageData[0]
+        const buffer = Buffer.from(imageBase64, 'base64')
+        console.log('Image generated, size:', buffer.length, 'bytes')
+
+        // Upload to Payload media collection
+        console.log('Uploading image to Payload media collection...')
+        const mediaDoc = await payload.create({
+          collection: 'media',
+          data: {
+            alt: `Featured image for: ${headline}`,
+          },
+          file: {
+            data: buffer,
+            mimetype: 'image/png',
+            name: `article-${Date.now()}.png`,
+            size: buffer.length,
+          },
+        })
+
+        featuredImageId = mediaDoc.id
+        console.log('Image uploaded successfully! Media ID:', featuredImageId)
+      }
+    } catch (imageError) {
+      console.error('❌ Error generating/uploading image:', imageError)
+      console.error('Image error details:', imageError instanceof Error ? imageError.message : imageError)
+      // Continue without image if it fails
+    }
+
+    // Update the document with the generated content and image
     await payload.update({
       collection: 'article-generator',
       id,
@@ -104,6 +165,7 @@ export async function POST(request: NextRequest) {
         status: 'completed',
         generatedContent,
         originalHeadline: headline,
+        ...(featuredImageId && { featuredImage: featuredImageId }),
       },
     })
 
@@ -113,8 +175,6 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('Error generating article:', error)
-
-    const { id } = await request.json()
 
     if (id) {
       try {

@@ -864,7 +864,11 @@ export interface ArticleGenerator {
   sourceUrl: string;
   status?: ('pending' | 'processing' | 'completed' | 'failed') | null;
   /**
-   * The AI-generated content will appear here
+   * AI-generated featured image for the article
+   */
+  featuredImage?: (string | null) | Media;
+  /**
+   * The AI-generated content - you can edit this after generation
    */
   generatedContent?: string | null;
   originalHeadline?: string | null;
@@ -1498,6 +1502,7 @@ export interface CountriesSelect<T extends boolean = true> {
 export interface ArticleGeneratorSelect<T extends boolean = true> {
   sourceUrl?: T;
   status?: T;
+  featuredImage?: T;
   generatedContent?: T;
   originalHeadline?: T;
   error?: T;

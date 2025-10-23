@@ -7,6 +7,14 @@ export const ArticleGenerator: CollectionConfig = {
     useAsTitle: 'sourceUrl',
     defaultColumns: ['sourceUrl', 'status', 'createdAt'],
     group: 'Tools',
+    components: {
+      edit: {
+        PreviewButton: false,
+        SaveButton: false,
+        SaveDraftButton: false,
+        PublishButton: false,
+      },
+    },
   },
   access: {
     create: authenticated,
@@ -15,6 +23,15 @@ export const ArticleGenerator: CollectionConfig = {
     update: authenticated,
   },
   fields: [
+    {
+      name: 'generateButton',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/components/ArticleGenerateButton',
+        },
+      },
+    },
     {
       name: 'sourceUrl',
       type: 'text',
@@ -40,13 +57,21 @@ export const ArticleGenerator: CollectionConfig = {
       },
     },
     {
+      name: 'featuredImage',
+      type: 'upload',
+      relationTo: 'media',
+      label: 'Featured Image',
+      admin: {
+        description: 'AI-generated featured image for the article',
+      },
+    },
+    {
       name: 'generatedContent',
       type: 'textarea',
       label: 'Generated Content',
       admin: {
-        readOnly: true,
         rows: 15,
-        description: 'The AI-generated content will appear here',
+        description: 'The AI-generated content - you can edit this after generation',
       },
     },
     {
@@ -67,33 +92,4 @@ export const ArticleGenerator: CollectionConfig = {
       },
     },
   ],
-  hooks: {
-    afterChange: [
-      async ({ doc, req, operation }) => {
-        // Only trigger on create and if status is pending
-        if (operation === 'create' && doc.status === 'pending') {
-          // Trigger the generation in the background
-          // We'll call the API endpoint
-          try {
-            const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'
-            fetch(`${baseUrl}/api/generate-article`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                id: doc.id,
-                url: doc.sourceUrl,
-              }),
-            }).catch((err) => {
-              console.error('Failed to trigger article generation:', err)
-            })
-          } catch (error) {
-            console.error('Error triggering generation:', error)
-          }
-        }
-        return doc
-      },
-    ],
-  },
 }
