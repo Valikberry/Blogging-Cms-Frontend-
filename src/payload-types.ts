@@ -74,6 +74,7 @@ export interface Config {
     users: User;
     continents: Continent;
     countries: Country;
+    'article-generator': ArticleGenerator;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -92,6 +93,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     continents: ContinentsSelect<false> | ContinentsSelect<true>;
     countries: CountriesSelect<false> | CountriesSelect<true>;
+    'article-generator': ArticleGeneratorSelect<false> | ArticleGeneratorSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -852,6 +854,26 @@ export interface Category {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "article-generator".
+ */
+export interface ArticleGenerator {
+  id: string;
+  /**
+   * Paste the URL of the article you want to generate content from
+   */
+  sourceUrl: string;
+  status?: ('pending' | 'processing' | 'completed' | 'failed') | null;
+  /**
+   * The AI-generated content will appear here
+   */
+  generatedContent?: string | null;
+  originalHeadline?: string | null;
+  error?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -1050,6 +1072,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'countries';
         value: string | Country;
+      } | null)
+    | ({
+        relationTo: 'article-generator';
+        value: string | ArticleGenerator;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -1462,6 +1488,19 @@ export interface CountriesSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
   continent?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "article-generator_select".
+ */
+export interface ArticleGeneratorSelect<T extends boolean = true> {
+  sourceUrl?: T;
+  status?: T;
+  generatedContent?: T;
+  originalHeadline?: T;
+  error?: T;
   updatedAt?: T;
   createdAt?: T;
 }
