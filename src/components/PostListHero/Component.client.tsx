@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { Flame, Book, Bell, Sparkles, Star, FileText, ChevronRight, Edit, Mail } from 'lucide-react'
+import { Flame, Book, ChevronRight, Edit, Mail } from 'lucide-react'
 
 interface Post {
   id: string

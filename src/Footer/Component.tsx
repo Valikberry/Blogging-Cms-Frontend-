@@ -43,7 +43,7 @@ export async function Footer() {
         {/* Copyright */}
         <div className="text-center py-2 border-t border-gray-200">
           {/* Social Media Links */}
-          {socialMedia.length > 0 && (
+          {/* {socialMedia.length > 0 && (
             <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6">
               {socialMedia.map((social: any, index: number) => {
                 const Icon = socialIcons[social.platform] || Instagram
@@ -61,7 +61,7 @@ export async function Footer() {
                 )
               })}
             </div>
-          )}
+          )} */}
           {/* <p className="text-gray-500 text-xs">{copyrightText}</p> */}
         </div>
       </div>
