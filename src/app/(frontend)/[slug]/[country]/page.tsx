@@ -46,19 +46,24 @@ export default async function CountryPage({ params: paramsPromise }: Args) {
   return <HomeTemplate page={page} url={url} draft={draft} continentSlug={continent} countrySlug={country} />
 }
 
-export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
-  const { country } = await paramsPromise
+// Cache country query to prevent duplicate fetches
+const queryCountryBySlug = cache(async (slug: string) => {
   const payload = await getPayload({ config: configPromise })
-  
-  const countryResult = await payload.find({
+
+  const result = await payload.find({
     collection: 'countries',
-    where: { slug: { equals: country } },
+    where: { slug: { equals: slug } },
     depth: 1,
     limit: 1,
   })
 
-  const countryDoc = countryResult.docs[0]
-  
+  return result.docs[0] || null
+})
+
+export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
+  const { country } = await paramsPromise
+  const countryDoc = await queryCountryBySlug(country)
+
   return {
     title: countryDoc?.name || country,
     description: `Content from ${countryDoc?.name || country}`,

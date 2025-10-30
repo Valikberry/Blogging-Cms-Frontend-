@@ -58,8 +58,11 @@ export function PostListClient({
   const [activeFilter, setActiveFilter] = useState<FilterTab>('new')
   const [email, setEmail] = useState('')
   const [subscribeMessage, setSubscribeMessage] = useState('')
+  const [isSubscribing, setIsSubscribing] = useState(false)
+  const [messageType, setMessageType] = useState<'success' | 'error'>('success')
 
   const activeCountry = countries[activeCountryIndex] || countries[0]
+
 
   // Filter posts based on active filter tab
   const filteredPosts =
@@ -75,10 +78,40 @@ export function PostListClient({
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Implement email subscription logic
-    setSubscribeMessage('Thank you for subscribing!')
-    setEmail('')
-    setTimeout(() => setSubscribeMessage(''), 3000)
+    setIsSubscribing(true)
+    setSubscribeMessage('')
+
+    try {
+      const response = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          source: 'blog-list',
+          countryId: activeCountry?.id || null,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        setMessageType('success')
+        setSubscribeMessage(data.message || 'Thank you for subscribing!')
+        setEmail('')
+      } else {
+        setMessageType('error')
+        setSubscribeMessage(data.error || 'Failed to subscribe. Please try again.')
+      }
+    } catch (error) {
+      console.error('Subscription error:', error)
+      setMessageType('error')
+      setSubscribeMessage('Network error. Please check your connection and try again.')
+    } finally {
+      setIsSubscribing(false)
+      setTimeout(() => setSubscribeMessage(''), 5000)
+    }
   }
 
   return (
@@ -185,13 +218,23 @@ export function PostListClient({
                 />
                 <button
                   type="submit"
-                  className="w-full bg-indigo-600 text-white px-6 py-3 rounded-md font-medium hover:bg-indigo-700 transition-colors"
+                  disabled={isSubscribing}
+                  className="w-full bg-indigo-600 text-white px-6 py-3 rounded-md font-medium hover:bg-indigo-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  Subscribe
+                  {isSubscribing ? (
+                    <>
+                      <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      Subscribing...
+                    </>
+                  ) : (
+                    'Subscribe'
+                  )}
                 </button>
               </form>
               {subscribeMessage && (
-                <p className="mt-4 text-green-600 font-medium">{subscribeMessage}</p>
+                <p className={`mt-4 font-medium ${messageType === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                  {subscribeMessage}
+                </p>
               )}
             </div>
           </div>

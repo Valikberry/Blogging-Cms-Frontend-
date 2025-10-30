@@ -57,15 +57,11 @@ type Args = {
   }>
 }
 
-export default async function Page({ params: paramsPromise }: Args) {
-  const { isEnabled: draft } = await draftMode()
-  const { slug = 'home' } = await paramsPromise
-  const url = '/' + slug
-
+// Cache continent query to prevent duplicate fetches
+const queryContinentBySlug = cache(async (slug: string) => {
   const payload = await getPayload({ config: configPromise })
 
-  // First, check if it's a continent
-  const continentResult = await payload.find({
+  const result = await payload.find({
     collection: 'continents',
     where: {
       slug: {
@@ -75,7 +71,16 @@ export default async function Page({ params: paramsPromise }: Args) {
     limit: 1,
   })
 
-  const continent = continentResult.docs[0]
+  return result.docs[0] || null
+})
+
+export default async function Page({ params: paramsPromise }: Args) {
+  const { isEnabled: draft } = await draftMode()
+  const { slug = 'home' } = await paramsPromise
+  const url = '/' + slug
+
+  // First, check if it's a continent
+  const continent = await queryContinentBySlug(slug)
 
   // If it's a continent, fetch the home page and pass continent filter
   if (continent) {
@@ -127,20 +132,9 @@ export default async function Page({ params: paramsPromise }: Args) {
 
 export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
   const { slug = 'home' } = await paramsPromise
-  const payload = await getPayload({ config: configPromise })
 
-  // Check if it's a continent first
-  const continentResult = await payload.find({
-    collection: 'continents',
-    where: {
-      slug: {
-        equals: slug,
-      },
-    },
-    limit: 1,
-  })
-
-  const continent = continentResult.docs[0]
+  // Check if it's a continent first (using cached query)
+  const continent = await queryContinentBySlug(slug)
 
   if (continent) {
     return {
@@ -149,7 +143,7 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
     }
   }
 
-  // Otherwise, get page metadata
+  // Otherwise, get page metadata (using cached query)
   const page = await queryPageBySlug({
     slug,
   })

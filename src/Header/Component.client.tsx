@@ -54,7 +54,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, countries = []
   }
 
   const isActivePath = (path: string) => pathname === path
-  console.log(data.logo)
+
 
   return (
     <header className="w-full relative z-40">
@@ -72,7 +72,8 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, countries = []
                   alt={data.logo.image.alt || 'Logo'}
                   width={40}
                   height={40}
-                  className="object-contain"
+                  className="object-contain rounded-full"
+                  priority
                 />
               )}
               {data.logo?.text && <span className="font-bold text-xl">{data.logo.text}</span>}

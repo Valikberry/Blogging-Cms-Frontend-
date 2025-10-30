@@ -1,5 +1,5 @@
 // app/(frontend)/posts/[slug]/page.tsx
-import React from 'react'
+import React, { cache } from 'react'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { notFound } from 'next/navigation'
@@ -11,6 +11,27 @@ interface PostPageProps {
     slug: string
   }>
 }
+
+// Cache the post query to prevent duplicate fetches
+const queryPostBySlug = cache(async (slug: string) => {
+  const payload = await getPayload({ config: configPromise })
+
+  const result = await payload.find({
+    collection: 'posts',
+    where: {
+      slug: {
+        equals: slug,
+      },
+      _status: {
+        equals: 'published',
+      },
+    },
+    limit: 1,
+    depth: 2,
+  })
+
+  return result.docs[0] as Post | undefined
+})
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
@@ -30,20 +51,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: PostPageProps) {
-  const payload = await getPayload({ config: configPromise })
   const { slug } = await params
-
-  const result = await payload.find({
-    collection: 'posts',
-    where: {
-      slug: {
-        equals: slug,
-      },
-    },
-    limit: 1,
-  })
-
-  const post = result.docs[0]
+  const post = await queryPostBySlug(slug)
 
   if (!post) {
     return {}
@@ -70,30 +79,12 @@ export async function generateMetadata({ params }: PostPageProps) {
 }
 
 export default async function PostPage({ params }: PostPageProps) {
-  const payload = await getPayload({ config: configPromise })
   const { slug } = await params
-
-  const result = await payload.find({
-    collection: 'posts',
-    where: {
-      slug: {
-        equals: slug,
-      },
-      _status: {
-        equals: 'published',
-      },
-    },
-    limit: 1,
-    depth: 2,
-  })
-
-  const post = result.docs[0] as Post
+  const post = await queryPostBySlug(slug)
 
   if (!post) {
     notFound()
   }
-
-  
 
   return <PostDetail post={post} />
 }

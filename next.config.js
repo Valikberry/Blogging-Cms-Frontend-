@@ -19,6 +19,8 @@ const nextConfig = {
         }
       }),
     ],
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60,
   },
   webpack: (webpackConfig) => {
     webpackConfig.resolve.extensionAlias = {
@@ -31,6 +33,9 @@ const nextConfig = {
   },
   reactStrictMode: true,
   redirects,
+  experimental: {
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-select'],
+  },
 }
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })

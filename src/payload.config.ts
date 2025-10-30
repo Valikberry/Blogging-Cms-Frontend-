@@ -14,6 +14,7 @@ import { Posts } from './collections/Posts'
 import { Countries } from './collections/Countries'
 import { Users } from './collections/Users'
 import { ArticleGenerator } from './collections/ArticleGenerator'
+import { Subscribers } from './collections/Subscribers'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
 import { plugins } from './plugins'
@@ -66,7 +67,7 @@ export default buildConfig({
   db: mongooseAdapter({
     url: process.env.DATABASE_URI || '',
   }),
-  collections: [Pages, Posts, Media, Categories, Users, Continents, Countries, ArticleGenerator],
+  collections: [Pages, Posts, Media, Categories, Users, Continents, Countries, ArticleGenerator, Subscribers],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins: [

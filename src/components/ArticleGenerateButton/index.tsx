@@ -136,7 +136,7 @@ const ArticleGenerateButton: React.FC = () => {
           )}
         </button>
 
-        {hasContent && (
+        {hasContent ? (
           <button
             type="button"
             onClick={handleCopy}
@@ -155,7 +155,7 @@ const ArticleGenerateButton: React.FC = () => {
           >
             {copied ? '✓ Copied!' : '📋 Copy Content'}
           </button>
-        )}
+        ) : null}
 
         {currentStatus === 'completed' && (
           <div style={{

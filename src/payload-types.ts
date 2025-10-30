@@ -75,6 +75,7 @@ export interface Config {
     continents: Continent;
     countries: Country;
     'article-generator': ArticleGenerator;
+    subscribers: Subscriber;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -94,6 +95,7 @@ export interface Config {
     continents: ContinentsSelect<false> | ContinentsSelect<true>;
     countries: CountriesSelect<false> | CountriesSelect<true>;
     'article-generator': ArticleGeneratorSelect<false> | ArticleGeneratorSelect<true>;
+    subscribers: SubscribersSelect<false> | SubscribersSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -878,6 +880,39 @@ export interface ArticleGenerator {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subscribers".
+ */
+export interface Subscriber {
+  id: string;
+  /**
+   * Subscriber email address
+   */
+  email: string;
+  /**
+   * Whether the subscription is active
+   */
+  isActive?: boolean | null;
+  /**
+   * Date when the user subscribed
+   */
+  subscribedAt?: string | null;
+  /**
+   * Where the subscription came from (e.g., homepage, blog post)
+   */
+  source?: string | null;
+  /**
+   * Country where the user subscribed from
+   */
+  country?: (string | null) | Country;
+  /**
+   * Date when the user unsubscribed
+   */
+  unsubscribedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -1080,6 +1115,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'article-generator';
         value: string | ArticleGenerator;
+      } | null)
+    | ({
+        relationTo: 'subscribers';
+        value: string | Subscriber;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -1506,6 +1545,20 @@ export interface ArticleGeneratorSelect<T extends boolean = true> {
   generatedContent?: T;
   originalHeadline?: T;
   error?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subscribers_select".
+ */
+export interface SubscribersSelect<T extends boolean = true> {
+  email?: T;
+  isActive?: T;
+  subscribedAt?: T;
+  source?: T;
+  country?: T;
+  unsubscribedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }
