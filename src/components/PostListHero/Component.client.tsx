@@ -28,6 +28,7 @@ interface PostListClientProps {
   countries: Country[]
   groupByDate?: boolean
   showSource?: boolean
+  initialCountryId?: string | null
 }
 
 // Group posts by date
@@ -53,8 +54,15 @@ export function PostListClient({
   countries,
   groupByDate = true,
   showSource = true,
+  initialCountryId,
 }: PostListClientProps) {
-  const [activeCountryIndex, setActiveCountryIndex] = useState(0)
+  // Find the index of the initial country if provided
+  const initialIndex = initialCountryId
+    ? countries.findIndex((c) => c.id === initialCountryId)
+    : 0
+  const validInitialIndex = initialIndex >= 0 ? initialIndex : 0
+
+  const [activeCountryIndex, setActiveCountryIndex] = useState(validInitialIndex)
   const [activeFilter, setActiveFilter] = useState<FilterTab>('new')
   const [email, setEmail] = useState('')
   const [subscribeMessage, setSubscribeMessage] = useState('')
@@ -113,13 +121,14 @@ export function PostListClient({
       setTimeout(() => setSubscribeMessage(''), 5000)
     }
   }
+console.log(countries);
 
   return (
     <div className="bg-gray-50 min-h-screen">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-gray-900 text-xl sm:text-2xl md:text-[24px] font-medium mb-2">{title}</h1>
+          <h1 className="text-gray-900 text-[17.5px] font-medium mb-2">{title}</h1>
           <p className="text-gray-500 text-sm sm:text-[14px]">{description}</p>
         </div>
 

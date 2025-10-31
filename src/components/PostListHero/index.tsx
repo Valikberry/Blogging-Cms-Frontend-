@@ -12,6 +12,7 @@ interface PostListHeroProps {
   dateFormat?: 'short' | 'long' | 'full'
   continentSlug?: string
   countryIds?: string[]
+  countrySlug?: string
 }
 
 export async function PostListHero(props: PostListHeroProps) {
@@ -24,15 +25,62 @@ export async function PostListHero(props: PostListHeroProps) {
     dateFormat = 'short',
     continentSlug,
     countryIds = [],
+    countrySlug,
   } = props
+
+  console.log('PostListHero props:', { continentSlug, countrySlug, countryIds })
 
   const payload = await getPayload({ config: configPromise })
 
   // Fetch countries
   let countries: any[] = []
   let selectedContinentId: string | null = null
-  
-  if (countryIds.length > 0) {
+  let selectedCountryId: string | null = null
+
+  if (countrySlug) {
+    console.log('Fetching country by slug:', countrySlug)
+    // Fetch specific country by slug to find its continent
+    const countryResult = await payload.find({
+      collection: 'countries',
+      where: {
+        slug: { equals: countrySlug }
+      },
+      limit: 1,
+      depth: 1,
+    })
+
+    const selectedCountry = countryResult.docs[0]
+    console.log('Found country:', selectedCountry)
+
+    if (selectedCountry) {
+      selectedCountryId = selectedCountry.id
+
+      // Get the continent ID
+      const continentId = typeof selectedCountry.continent === 'object'
+        ? selectedCountry.continent.id
+        : selectedCountry.continent
+
+      console.log('Continent ID:', continentId)
+
+      if (continentId) {
+        selectedContinentId = continentId
+        // Fetch all countries from the same continent
+        const countriesResult = await payload.find({
+          collection: 'countries',
+          where: { continent: { equals: continentId } },
+          limit: 1000,
+        })
+        countries = countriesResult.docs
+        console.log('Fetched countries from continent:', countries.length)
+      } else {
+        // If no continent, just show this country
+        countries = [selectedCountry]
+        console.log('No continent, showing single country')
+      }
+    } else {
+      console.log('No country found with slug:', countrySlug)
+    }
+  } else if (countryIds.length > 0) {
     // Fetch specific countries by IDs
     const countriesResult = await payload.find({
       collection: 'countries',
@@ -61,25 +109,18 @@ export async function PostListHero(props: PostListHeroProps) {
       countries = countriesResult.docs
     }
   } else {
-    // HOME PAGE: No continent or country specified, fetch the first continent by default
-    const continentsResult = await payload.find({
-      collection: 'continents',
-      limit: 1,
-      sort: 'name', // or any other sort field you prefer
+    // HOME PAGE: No continent or country specified, fetch all countries
+    console.log('HOME PAGE: Fetching all countries')
+    const countriesResult = await payload.find({
+      collection: 'countries',
+      limit: 1000,
+      sort: 'name',
     })
-    
-    const firstContinent = continentsResult.docs[0]
-    
-    if (firstContinent) {
-      selectedContinentId = firstContinent.id
-      const countriesResult = await payload.find({
-        collection: 'countries',
-        where: { continent: { equals: firstContinent.id } },
-        limit: 1000,
-      })
-      countries = countriesResult.docs
-    }
+    console.log('Found countries:', countriesResult.docs.length)
+    countries = countriesResult.docs
   }
+
+  console.log('Total countries to process:', countries.length)
 
   // For each country, fetch all posts
   const countriesWithPosts = await Promise.all(
@@ -142,6 +183,9 @@ export async function PostListHero(props: PostListHeroProps) {
     })
   )
 
+  console.log('countriesWithPosts:', countriesWithPosts.length, 'countries')
+  console.log('selectedCountryId:', selectedCountryId)
+
   return (
     <PostListClient
       title={title}
@@ -149,6 +193,7 @@ export async function PostListHero(props: PostListHeroProps) {
       countries={countriesWithPosts}
       groupByDate={groupByDate}
       showSource={showSource}
+      initialCountryId={selectedCountryId}
     />
   )
 }

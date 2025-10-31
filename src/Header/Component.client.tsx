@@ -70,8 +70,8 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, countries = []
                 <Image
                   src={data.logo.image.url || ''}
                   alt={data.logo.image.alt || 'Logo'}
-                  width={40}
-                  height={40}
+                  width={30}
+                  height={30}
                   className="object-contain rounded-full"
                   priority
                 />

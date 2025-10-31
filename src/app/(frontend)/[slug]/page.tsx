@@ -17,7 +17,7 @@ import { HomeTemplate } from '@/components/HomeContent'
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
-  
+
   // Get regular pages
   const pages = await payload.find({
     collection: 'pages',
@@ -39,6 +39,15 @@ export async function generateStaticParams() {
     },
   })
 
+  // Get countries
+  const countries = await payload.find({
+    collection: 'countries',
+    limit: 1000,
+    select: {
+      slug: true,
+    },
+  })
+
   const params = [
     // Regular pages (excluding home)
     ...pages.docs
@@ -46,6 +55,8 @@ export async function generateStaticParams() {
       .map(({ slug }) => ({ slug })),
     // Continents
     ...continents.docs.map(({ slug }) => ({ slug })),
+    // Countries
+    ...countries.docs.map(({ slug }) => ({ slug })),
   ]
 
   return params
@@ -74,6 +85,23 @@ const queryContinentBySlug = cache(async (slug: string) => {
   return result.docs[0] || null
 })
 
+// Cache country query to prevent duplicate fetches
+const queryCountryBySlug = cache(async (slug: string) => {
+  const payload = await getPayload({ config: configPromise })
+
+  const result = await payload.find({
+    collection: 'countries',
+    where: {
+      slug: {
+        equals: slug,
+      },
+    },
+    limit: 1,
+  })
+
+  return result.docs[0] || null
+})
+
 export default async function Page({ params: paramsPromise }: Args) {
   const { isEnabled: draft } = await draftMode()
   const { slug = 'home' } = await paramsPromise
@@ -91,6 +119,20 @@ export default async function Page({ params: paramsPromise }: Args) {
     }
 
     return <HomeTemplate page={page} url={url} draft={draft} continentSlug={slug} />
+  }
+
+  // Check if it's a country
+  const country = await queryCountryBySlug(slug)
+
+  // If it's a country, fetch the home page and pass country filter
+  if (country) {
+    const page = await queryPageBySlug({ slug: 'home' })
+
+    if (!page) {
+      return <PayloadRedirects url={url} />
+    }
+
+    return <HomeTemplate page={page} url={url} draft={draft} countrySlug={slug} />
   }
 
   // Otherwise, treat it as a regular page
@@ -140,6 +182,16 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
     return {
       title: continent.name,
       description: `Content from ${continent.name}`,
+    }
+  }
+
+  // Check if it's a country (using cached query)
+  const country = await queryCountryBySlug(slug)
+
+  if (country) {
+    return {
+      title: country.name,
+      description: `Content from ${country.name}`,
     }
   }
 
