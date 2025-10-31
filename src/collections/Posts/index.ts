@@ -303,6 +303,25 @@ export const Posts: CollectionConfig<'posts'> = {
       ],
     },
     {
+      name: 'sourceUrl',
+      type: 'text',
+      admin: {
+        position: 'sidebar',
+        description: 'Paste article URL and click "Generate Post" below to auto-generate content',
+      },
+      label: 'Source Article URL',
+    },
+    {
+      name: 'generateButton',
+      type: 'ui',
+      admin: {
+        position: 'sidebar',
+        components: {
+          Field: '/collections/Posts/GenerateButton',
+        },
+      },
+    },
+    {
       name: 'publishedAt',
       type: 'date',
       admin: {

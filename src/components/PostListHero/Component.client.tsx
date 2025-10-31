@@ -121,7 +121,6 @@ export function PostListClient({
       setTimeout(() => setSubscribeMessage(''), 5000)
     }
   }
-console.log(countries);
 
   return (
     <div className="bg-gray-50 min-h-screen">

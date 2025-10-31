@@ -28,8 +28,6 @@ export async function PostListHero(props: PostListHeroProps) {
     countrySlug,
   } = props
 
-  console.log('PostListHero props:', { continentSlug, countrySlug, countryIds })
-
   const payload = await getPayload({ config: configPromise })
 
   // Fetch countries
@@ -38,7 +36,6 @@ export async function PostListHero(props: PostListHeroProps) {
   let selectedCountryId: string | null = null
 
   if (countrySlug) {
-    console.log('Fetching country by slug:', countrySlug)
     // Fetch specific country by slug to find its continent
     const countryResult = await payload.find({
       collection: 'countries',
@@ -50,7 +47,6 @@ export async function PostListHero(props: PostListHeroProps) {
     })
 
     const selectedCountry = countryResult.docs[0]
-    console.log('Found country:', selectedCountry)
 
     if (selectedCountry) {
       selectedCountryId = selectedCountry.id
@@ -59,8 +55,6 @@ export async function PostListHero(props: PostListHeroProps) {
       const continentId = typeof selectedCountry.continent === 'object'
         ? selectedCountry.continent.id
         : selectedCountry.continent
-
-      console.log('Continent ID:', continentId)
 
       if (continentId) {
         selectedContinentId = continentId
@@ -71,14 +65,10 @@ export async function PostListHero(props: PostListHeroProps) {
           limit: 1000,
         })
         countries = countriesResult.docs
-        console.log('Fetched countries from continent:', countries.length)
       } else {
         // If no continent, just show this country
         countries = [selectedCountry]
-        console.log('No continent, showing single country')
       }
-    } else {
-      console.log('No country found with slug:', countrySlug)
     }
   } else if (countryIds.length > 0) {
     // Fetch specific countries by IDs
@@ -110,17 +100,13 @@ export async function PostListHero(props: PostListHeroProps) {
     }
   } else {
     // HOME PAGE: No continent or country specified, fetch all countries
-    console.log('HOME PAGE: Fetching all countries')
     const countriesResult = await payload.find({
       collection: 'countries',
       limit: 1000,
       sort: 'name',
     })
-    console.log('Found countries:', countriesResult.docs.length)
     countries = countriesResult.docs
   }
-
-  console.log('Total countries to process:', countries.length)
 
   // For each country, fetch all posts
   const countriesWithPosts = await Promise.all(
@@ -182,9 +168,6 @@ export async function PostListHero(props: PostListHeroProps) {
       }
     })
   )
-
-  console.log('countriesWithPosts:', countriesWithPosts.length, 'countries')
-  console.log('selectedCountryId:', selectedCountryId)
 
   return (
     <PostListClient

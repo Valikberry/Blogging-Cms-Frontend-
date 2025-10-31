@@ -351,6 +351,10 @@ export interface Post {
     description?: string | null;
   };
   /**
+   * Paste article URL and click "Generate Post" below to auto-generate content
+   */
+  sourceUrl?: string | null;
+  /**
    * Date shown in post lists (defaults to publish date)
    */
   publishedAt: string;
@@ -1357,6 +1361,7 @@ export interface PostsSelect<T extends boolean = true> {
         image?: T;
         description?: T;
       };
+  sourceUrl?: T;
   publishedAt?: T;
   authors?: T;
   submittedBy?: T;
