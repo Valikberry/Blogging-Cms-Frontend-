@@ -19,9 +19,13 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, countries = []
   const [searchOpen, setSearchOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<any[]>([])
+  const [isSearching, setIsSearching] = useState(false)
   const { headerTheme, setHeaderTheme } = useHeaderTheme()
   const pathname = usePathname()
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     setHeaderTheme(null)
@@ -36,8 +40,52 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, countries = []
       if (closeTimeoutRef.current) {
         clearTimeout(closeTimeoutRef.current)
       }
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current)
+      }
     }
   }, [])
+
+  // Debounced search effect
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current)
+    }
+
+    if (searchQuery.trim().length < 2) {
+      setSearchResults([])
+      setIsSearching(false)
+      return
+    }
+
+    setIsSearching(true)
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const response = await fetch(
+          `/api/posts?where[title][contains]=${encodeURIComponent(searchQuery)}&limit=5&depth=1`
+        )
+        const data = await response.json()
+        setSearchResults(data.docs || [])
+      } catch (error) {
+        console.error('Search error:', error)
+        setSearchResults([])
+      } finally {
+        setIsSearching(false)
+      }
+    }, 300)
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current)
+      }
+    }
+  }, [searchQuery])
+
+  const handleCloseSearch = () => {
+    setSearchOpen(false)
+    setSearchQuery('')
+    setSearchResults([])
+  }
 
   const handleMouseEnter = (label: string) => {
     if (closeTimeoutRef.current) {
@@ -82,19 +130,65 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, countries = []
             {/* Search Bar Overlay - Appears over navigation when open */}
             {searchOpen && (
               <>
-                <div className="fixed inset-0 z-10" onClick={() => setSearchOpen(false)} />
+                <div className="fixed inset-0 z-10" onClick={handleCloseSearch} />
                 <div className="absolute right-14 md:right-14 top-1/2 -translate-y-1/2 z-20 left-4 md:left-auto">
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    className="w-full md:w-80 bg-white/95 border border-white/30 px-4 py-2 rounded-md text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-lg transition-colors"
-                    autoFocus
-                    onKeyDown={(e) => {
-                      if (e.key === 'Escape') {
-                        setSearchOpen(false)
-                      }
-                    }}
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search posts..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full md:w-80 bg-white/95 border border-white/30 px-4 py-2 rounded-md text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-lg transition-colors"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === 'Escape') {
+                          handleCloseSearch()
+                        }
+                      }}
+                    />
+                    {/* Search Results Dropdown */}
+                    {searchQuery.trim().length >= 2 && (
+                      <div className="absolute top-full mt-2 w-full bg-white rounded-md shadow-xl border border-gray-200 max-h-96 overflow-y-auto">
+                        {isSearching ? (
+                          <div className="px-4 py-8 text-center text-gray-500 text-sm">
+                            Searching...
+                          </div>
+                        ) : searchResults.length > 0 ? (
+                          <div className="py-2">
+                            {searchResults.map((post) => {
+                              const country = typeof post.country === 'object' ? post.country : null
+                              const continent = country && typeof country.continent === 'object' ? country.continent : null
+                              const postUrl = country && continent
+                                ? `/${continent.slug}/${country.slug}/${post.slug}`
+                                : `/${post.slug}`
+
+                              return (
+                                <Link
+                                  key={post.id}
+                                  href={postUrl}
+                                  className="block px-4 py-3 hover:bg-indigo-50 transition-colors border-b border-gray-100 last:border-0"
+                                  onClick={handleCloseSearch}
+                                >
+                                  <div className="text-sm font-medium text-gray-900 line-clamp-2">
+                                    {post.title}
+                                  </div>
+                                  {post.excerpt && (
+                                    <div className="text-xs text-gray-500 mt-1 line-clamp-1">
+                                      {post.excerpt}
+                                    </div>
+                                  )}
+                                </Link>
+                              )
+                            })}
+                          </div>
+                        ) : (
+                          <div className="px-4 py-8 text-center text-gray-500 text-sm">
+                            No posts found matching &quot;{searchQuery}&quot;
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </>
             )}

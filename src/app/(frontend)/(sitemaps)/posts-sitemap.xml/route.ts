@@ -15,7 +15,7 @@ const getPostsSitemap = unstable_cache(
       collection: 'posts',
       overrideAccess: false,
       draft: false,
-      depth: 0,
+      depth: 1,
       limit: 1000,
       pagination: false,
       where: {
@@ -26,6 +26,7 @@ const getPostsSitemap = unstable_cache(
       select: {
         slug: true,
         updatedAt: true,
+        country: true,
       },
     })
 
@@ -34,10 +35,18 @@ const getPostsSitemap = unstable_cache(
     const sitemap = results.docs
       ? results.docs
           .filter((post) => Boolean(post?.slug))
-          .map((post) => ({
-            loc: `${SITE_URL}/posts/${post?.slug}`,
-            lastmod: post.updatedAt || dateFallback,
-          }))
+          .map((post) => {
+            const country = typeof post.country === 'object' ? post.country : null
+            const continent = country && typeof country.continent === 'object' ? country.continent : null
+            const postUrl = country && continent
+              ? `${SITE_URL}/${continent.slug}/${country.slug}/${post.slug}`
+              : `${SITE_URL}/${post.slug}`
+
+            return {
+              loc: postUrl,
+              lastmod: post.updatedAt || dateFallback,
+            }
+          })
       : []
 
     return sitemap

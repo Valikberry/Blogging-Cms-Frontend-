@@ -219,12 +219,19 @@ export function PostDetail({ post }: PostDetailProps) {
           <div className="border-t border-gray-200 pt-8 mt-12">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Related Posts</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-              {post.relatedPosts.map((relatedPost: any) => (
-                <Link
-                  key={relatedPost.id}
-                  href={`/posts/${relatedPost.slug}`}
-                  className="group block"
-                >
+              {post.relatedPosts.map((relatedPost: any) => {
+                const country = typeof relatedPost.country === 'object' ? relatedPost.country : null
+                const continent = country && typeof country.continent === 'object' ? country.continent : null
+                const postUrl = country && continent
+                  ? `/${continent.slug}/${country.slug}/${relatedPost.slug}`
+                  : `/${relatedPost.slug}`
+
+                return (
+                  <Link
+                    key={relatedPost.id}
+                    href={postUrl}
+                    className="group block"
+                  >
                   {relatedPost.heroImage && typeof relatedPost.heroImage === 'object' && (
                     <div className="mb-3 rounded-lg overflow-hidden">
                       <Image
@@ -243,7 +250,8 @@ export function PostDetail({ post }: PostDetailProps) {
                     <p className="text-sm text-gray-600 mt-1 line-clamp-2">{relatedPost.excerpt}</p>
                   )}
                 </Link>
-              ))}
+                )
+              })}
             </div>
           </div>
         )}

@@ -125,10 +125,10 @@ const config = {
           css: [
             {
               h1: {
-                fontSize: '2.5rem',
+                fontSize: '2.25rem', /* 2.5rem * 0.9 */
               },
               h2: {
-                fontSize: '1.25rem',
+                fontSize: '1.125rem', /* 1.25rem * 0.9 */
                 fontWeight: 600,
               },
             },
@@ -138,10 +138,10 @@ const config = {
           css: [
             {
               h1: {
-                fontSize: '3.5rem',
+                fontSize: '3.15rem', /* 3.5rem * 0.9 */
               },
               h2: {
-                fontSize: '1.5rem',
+                fontSize: '1.35rem', /* 1.5rem * 0.9 */
               },
             },
           ],

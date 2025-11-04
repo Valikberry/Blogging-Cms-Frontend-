@@ -11,7 +11,11 @@ export const revalidatePost: CollectionAfterChangeHook<Post> = ({
 }) => {
   if (!context.disableRevalidate) {
     if (doc._status === 'published') {
-      const path = `/posts/${doc.slug}`
+      const country = typeof doc.country === 'object' ? doc.country : null
+      const continent = country && typeof country.continent === 'object' ? country.continent : null
+      const path = country && continent
+        ? `/${continent.slug}/${country.slug}/${doc.slug}`
+        : `/${doc.slug}`
 
       payload.logger.info(`Revalidating post at path: ${path}`)
 
@@ -21,7 +25,11 @@ export const revalidatePost: CollectionAfterChangeHook<Post> = ({
 
     // If the post was previously published, we need to revalidate the old path
     if (previousDoc._status === 'published' && doc._status !== 'published') {
-      const oldPath = `/posts/${previousDoc.slug}`
+      const country = typeof previousDoc.country === 'object' ? previousDoc.country : null
+      const continent = country && typeof country.continent === 'object' ? country.continent : null
+      const oldPath = country && continent
+        ? `/${continent.slug}/${country.slug}/${previousDoc.slug}`
+        : `/${previousDoc.slug}`
 
       payload.logger.info(`Revalidating old post at path: ${oldPath}`)
 
@@ -34,7 +42,11 @@ export const revalidatePost: CollectionAfterChangeHook<Post> = ({
 
 export const revalidateDelete: CollectionAfterDeleteHook<Post> = ({ doc, req: { context } }) => {
   if (!context.disableRevalidate) {
-    const path = `/posts/${doc?.slug}`
+    const country = typeof doc.country === 'object' ? doc.country : null
+    const continent = country && typeof country.continent === 'object' ? country.continent : null
+    const path = country && continent
+      ? `/${continent.slug}/${country.slug}/${doc.slug}`
+      : `/${doc.slug}`
 
     revalidatePath(path)
     revalidateTag('posts-sitemap')

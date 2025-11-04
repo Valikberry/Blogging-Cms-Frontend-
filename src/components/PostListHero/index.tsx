@@ -160,10 +160,13 @@ export async function PostListHero(props: PostListHeroProps) {
         }
       })
 
+      const continent = typeof country.continent === 'object' ? country.continent : null
+
       return {
         id: country.id,
         name: country.name,
         slug: country.slug,
+        continentSlug: continent?.slug || '',
         posts: posts,
       }
     })

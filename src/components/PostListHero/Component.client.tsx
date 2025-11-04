@@ -19,6 +19,7 @@ interface Country {
   id: string
   name: string
   slug: string
+  continentSlug: string
   posts: Post[]
 }
 
@@ -264,7 +265,7 @@ export function PostListClient({
                         }
                       >
                         <Link
-                          href={`/posts/${post.slug}`}
+                          href={`/${activeCountry.continentSlug}/${activeCountry.slug}/${post.slug}`}
                           className="block hover:bg-gray-50 transition-colors"
                         >
                           <div className="px-3 sm:px-6 py-3 sm:py-4">
@@ -298,7 +299,7 @@ export function PostListClient({
                 {filteredPosts.map((post: any, index: number) => (
                   <div key={post.id} className={index > 0 ? 'border-t border-gray-100' : ''}>
                     <Link
-                      href={`/posts/${post.slug}`}
+                      href={`/${activeCountry.continentSlug}/${activeCountry.slug}/${post.slug}`}
                       className="block hover:bg-gray-50 transition-colors"
                     >
                       <div className="px-3 sm:px-6 py-1">
