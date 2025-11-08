@@ -94,22 +94,57 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
     return {}
   }
 
+  // Get the site URL
+  const siteUrl = process.env.NEXT_PUBLIC_SERVER_URL ||
+                  process.env.VERCEL_PROJECT_PRODUCTION_URL ||
+                  'https://askgeopolitics.com'
+
+  // Build canonical URL for this post
+  const canonicalUrl = `${siteUrl}/posts/${country}/${postSlug}`
+
+  // Get OG image with dimensions
+  const ogImage = post.meta?.image && typeof post.meta.image === 'object'
+    ? post.meta.image
+    : post.heroImage && typeof post.heroImage === 'object'
+    ? post.heroImage
+    : null
+
+  // Ensure image URL is absolute
+  let ogImageUrl = ogImage?.url || ''
+  if (ogImageUrl && !ogImageUrl.startsWith('http')) {
+    ogImageUrl = `${siteUrl}${ogImageUrl}`
+  }
+
+  const ogImageWidth = ogImage?.width || 1200
+  const ogImageHeight = ogImage?.height || 630
+
   return {
     title: post.meta?.title || post.title,
-    description: post.meta?.description || undefined,
+    description: post.meta?.description || post.excerpt || undefined,
     openGraph: {
       title: post.meta?.title || post.title,
-      description: post.meta?.description || undefined,
-      images: post.meta?.image
+      description: post.meta?.description || post.excerpt || undefined,
+      url: canonicalUrl,
+      siteName: 'Ask Geopolitics',
+      type: 'article',
+      images: ogImageUrl
         ? [
             {
-              url:
-                typeof post.meta.image === 'object'
-                  ? post.meta.image.url || ''
-                  : '',
+              url: ogImageUrl,
+              width: ogImageWidth,
+              height: ogImageHeight,
+              alt: post.title,
             },
           ]
         : [],
+      publishedTime: post.publishedAt || undefined,
+      authors: post.submittedBy || undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.meta?.title || post.title,
+      description: post.meta?.description || post.excerpt || undefined,
+      images: ogImageUrl ? [ogImageUrl] : [],
     },
   }
 }
