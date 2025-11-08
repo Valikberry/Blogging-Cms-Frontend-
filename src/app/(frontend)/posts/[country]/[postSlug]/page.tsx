@@ -102,12 +102,21 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
   // Build canonical URL for this post
   const canonicalUrl = `${siteUrl}/posts/${country}/${postSlug}`
 
-  // Get OG image with dimensions
-  const ogImage = post.meta?.image && typeof post.meta.image === 'object'
-    ? post.meta.image
-    : post.heroImage && typeof post.heroImage === 'object'
+  // Get OG image with dimensions - prioritize heroImage over meta image
+  const ogImage = post.heroImage && typeof post.heroImage === 'object'
     ? post.heroImage
+    : post.meta?.image && typeof post.meta.image === 'object'
+    ? post.meta.image
     : null
+
+  // Debug logging
+  console.log('=== Open Graph Debug ===')
+  console.log('Post title:', post.title)
+  console.log('Post excerpt:', post.excerpt)
+  console.log('Post heroImage:', post.heroImage)
+  console.log('Post meta image:', post.meta?.image)
+  console.log('Selected OG Image:', ogImage)
+  console.log('========================')
 
   // Ensure image URL is absolute
   let ogImageUrl = ogImage?.url || ''
@@ -118,7 +127,7 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
   const ogImageWidth = ogImage?.width || 1200
   const ogImageHeight = ogImage?.height || 630
 
-  return {
+  const metadata = {
     title: post.meta?.title || post.title,
     description: post.meta?.description || post.excerpt || undefined,
     openGraph: {
@@ -147,6 +156,9 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
       images: ogImageUrl ? [ogImageUrl] : [],
     },
   }
+
+  console.log('Final metadata:', JSON.stringify(metadata, null, 2))
+  return metadata
 }
 
 export default async function PostPage({ params }: PostPageProps) {
