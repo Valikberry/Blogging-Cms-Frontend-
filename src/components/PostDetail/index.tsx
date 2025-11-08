@@ -88,13 +88,13 @@ export function PostDetail({ post }: PostDetailProps) {
     <article className="min-h-screen bg-white">
       <div className="max-w-4xl mx-auto mb-6xx">
         {/* Post Title */}
-        <h1 className="text-xl sm:text-lg md:text-[20px] font-bold text-gray-900 mb-2 leading-tight">
+        <h1 className="text-2xl sm:text-2xl md:text-[24px] font-bold text-gray-900 mb-2 leading-tight">
           {post.title}
         </h1>
 
         {/* Excerpt */}
         {post.excerpt && (
-          <p className="text-sm sm:text-[14px] text-gray-600 leading-relaxed mb-3">
+          <p className="text-base sm:text-base text-gray-600 leading-relaxed mb-3">
             {post.excerpt}
           </p>
         )}
@@ -140,16 +140,16 @@ export function PostDetail({ post }: PostDetailProps) {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between  border-b border-gray-200 mb-2 gap-3">
           <div className="flex items-center gap-3">
             {post.source && (
-              <div className="flex items-center gap-2  text-sm text-gray-600 ">
-                <Globe className="w-4 h-4" />
-                <span className="text-[12px]">{post.source}</span>
+              <div className="flex items-center gap-2  text-base text-gray-600 ">
+                <Globe className="w-5 h-5" />
+                <span className="text-sm">{post.source}</span>
               </div>
             )}
             <ShareButtons post={post} />
           </div>
         </div>
         {/* Post Content */}
-        <div className="prose prose-base max-w-none mb-4 text-gray-700">
+        <div className="prose prose-lg max-w-none mb-4 text-gray-700">
           <RichText content={post.content} />
         </div>
 
@@ -169,9 +169,9 @@ export function PostDetail({ post }: PostDetailProps) {
                   {/* Badge with Icon */}
                   {(section.badge || Icon) && (
                     <div className="flex items-center gap-2 mb-4">
-                      {Icon && <Icon className={`w-5 h-5 ${iconColor}`} />}
+                      {Icon && <Icon className={`w-6 h-6 ${iconColor}`} />}
                       {section.badge && (
-                        <span className={`text-sm font-semibold ${iconColor}`}>
+                        <span className={`text-base font-semibold ${iconColor}`}>
                           {section.badge}
                         </span>
                       )}
@@ -179,13 +179,13 @@ export function PostDetail({ post }: PostDetailProps) {
                   )}
 
                   {/* Title */}
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">{section.title}</h3>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">{section.title}</h3>
 
                   {/* Numbered List */}
                   {section.items && section.items.length > 0 && (
                     <ol className="space-y-3">
                       {section.items.map((item: any, itemIndex: number) => (
-                        <li key={item.id || itemIndex} className="flex gap-3 text-sm">
+                        <li key={item.id || itemIndex} className="flex gap-3 text-base">
                           <span className="text-gray-900 font-bold flex-shrink-0">
                             {itemIndex + 1}.
                           </span>
@@ -206,7 +206,7 @@ export function PostDetail({ post }: PostDetailProps) {
             {post.tags.map((tagItem: any, index: number) => (
               <span
                 key={index}
-                className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full hover:bg-gray-200 transition-colors"
+                className="px-3 py-1 bg-gray-100 text-gray-700 text-base rounded-full hover:bg-gray-200 transition-colors"
               >
                 #{tagItem.tag}
               </span>
@@ -217,14 +217,14 @@ export function PostDetail({ post }: PostDetailProps) {
         {/* Related Posts */}
         {post.relatedPosts && post.relatedPosts.length > 0 && (
           <div className="border-t border-gray-200 pt-8 mt-12">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Related Posts</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">Related Posts</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               {post.relatedPosts.map((relatedPost: any) => {
                 const country = typeof relatedPost.country === 'object' ? relatedPost.country : null
-                const continent = country && typeof country.continent === 'object' ? country.continent : null
-                const postUrl = country && continent
-                  ? `/${continent.slug}/${country.slug}/${relatedPost.slug}`
-                  : `/${relatedPost.slug}`
+                const normalizedCountrySlug = country?.slug ? country.slug.replace(/[^a-zA-Z0-9]/g, "") : ""
+                const postUrl = normalizedCountrySlug
+                  ? `/posts/${normalizedCountrySlug}/${relatedPost.slug}`
+                  : `/posts/${relatedPost.slug}`
 
                 return (
                   <Link
@@ -243,11 +243,11 @@ export function PostDetail({ post }: PostDetailProps) {
                       />
                     </div>
                   )}
-                  <h3 className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
+                  <h3 className="font-semibold text-base text-gray-900 group-hover:text-indigo-600 transition-colors">
                     {relatedPost.title}
                   </h3>
                   {relatedPost.excerpt && (
-                    <p className="text-sm text-gray-600 mt-1 line-clamp-2">{relatedPost.excerpt}</p>
+                    <p className="text-base text-gray-600 mt-1 line-clamp-2">{relatedPost.excerpt}</p>
                   )}
                 </Link>
                 )
@@ -293,7 +293,7 @@ export default function ShareButtons({ post }: { post: any }) {
         className="p-1.5 sm:p-2 text-gray-700 hover:bg-gray-200 transition-colors"
         aria-label="Share on Facebook"
       >
-        <Facebook className="w-4 h-4 sm:w-5 sm:h-5" />
+        <Facebook className="w-5 h-5 sm:w-6 sm:h-6" />
       </a>
 
       {/* Twitter / X */}
@@ -304,7 +304,7 @@ export default function ShareButtons({ post }: { post: any }) {
         className="p-1.5 sm:p-2  hover:text-black hover:bg-gray-200 transition-colors"
         aria-label="Share on Twitter"
       >
-        <X className="w-4 h-4 sm:w-5 sm:h-5" />
+        <X className="w-5 h-5 sm:w-6 sm:h-6" />
       </a>
 
       {/* Email */}
@@ -313,7 +313,7 @@ export default function ShareButtons({ post }: { post: any }) {
         className="p-1.5 sm:p-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
         aria-label="Share via Email"
       >
-        <Mail className="w-4 h-4 sm:w-5 sm:h-5" />
+        <Mail className="w-5 h-5 sm:w-6 sm:h-6" />
       </a>
 
       {/* Copy Link */}
@@ -322,7 +322,7 @@ export default function ShareButtons({ post }: { post: any }) {
         className="p-1.5 sm:p-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
         aria-label="Copy link"
       >
-        <LinkIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+        <LinkIcon className="w-5 h-5 sm:w-6 sm:h-6" />
       </button>
     </div>
   )

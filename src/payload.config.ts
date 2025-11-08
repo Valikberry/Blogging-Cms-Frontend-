@@ -15,8 +15,10 @@ import { Countries } from './collections/Countries'
 import { Users } from './collections/Users'
 import { ArticleGenerator } from './collections/ArticleGenerator'
 import { Subscribers } from './collections/Subscribers'
+import { ContactMessages } from './collections/ContactMessages'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
+import { AboutUs } from './globals/AboutUs'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
@@ -67,9 +69,9 @@ export default buildConfig({
   db: mongooseAdapter({
     url: process.env.DATABASE_URI || '',
   }),
-  collections: [Pages, Posts, Media, Categories, Users, Continents, Countries, ArticleGenerator, Subscribers],
+  collections: [Pages, Posts, Media, Categories, Users, Continents, Countries, ArticleGenerator, Subscribers, ContactMessages],
   cors: [getServerSideURL()].filter(Boolean),
-  globals: [Header, Footer],
+  globals: [Header, Footer, AboutUs],
   plugins: [
     ...plugins,
     // storage-adapter-placeholder

@@ -3,26 +3,20 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import { unstable_cache } from 'next/cache'
 
-const getPagesSitemap = unstable_cache(
+const getCountriesSitemap = unstable_cache(
   async () => {
     const payload = await getPayload({ config })
     const SITE_URL =
       process.env.NEXT_PUBLIC_SERVER_URL ||
       process.env.VERCEL_PROJECT_PRODUCTION_URL ||
-      'https://example.com'
+      'https://askgeopolitics.com'
 
     const results = await payload.find({
-      collection: 'pages',
+      collection: 'countries',
       overrideAccess: false,
-      draft: false,
       depth: 0,
       limit: 1000,
       pagination: false,
-      where: {
-        _status: {
-          equals: 'published',
-        },
-      },
       select: {
         slug: true,
         updatedAt: true,
@@ -31,34 +25,28 @@ const getPagesSitemap = unstable_cache(
 
     const dateFallback = new Date().toISOString()
 
-    const defaultSitemap = [
-      {
-        loc: `${SITE_URL}/about`,
-        lastmod: dateFallback,
-      },
-    ]
-
     const sitemap = results.docs
       ? results.docs
-          .filter((page) => Boolean(page?.slug))
-          .map((page) => {
+          .filter((country) => Boolean(country?.slug))
+          .map((country) => {
+            const normalizedSlug = country.slug.replace(/[^a-zA-Z0-9]/g, "")
             return {
-              loc: page?.slug === 'home' ? `${SITE_URL}/` : `${SITE_URL}/${page?.slug}`,
-              lastmod: page.updatedAt || dateFallback,
+              loc: `${SITE_URL}/${normalizedSlug}`,
+              lastmod: country.updatedAt || dateFallback,
             }
           })
       : []
 
-    return [...defaultSitemap, ...sitemap]
+    return sitemap
   },
-  ['pages-sitemap'],
+  ['countries-sitemap'],
   {
-    tags: ['pages-sitemap'],
+    tags: ['countries-sitemap'],
   },
 )
 
 export async function GET() {
-  const sitemap = await getPagesSitemap()
+  const sitemap = await getCountriesSitemap()
 
   return getServerSideSitemap(sitemap)
 }

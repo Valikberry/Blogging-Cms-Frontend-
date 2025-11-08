@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Flame, Book, ChevronRight, Edit, Mail } from 'lucide-react'
 
 interface Post {
@@ -20,6 +21,7 @@ interface Country {
   name: string
   slug: string
   continentSlug: string
+  flagUrl?: string | null
   posts: Post[]
 }
 
@@ -128,8 +130,8 @@ export function PostListClient({
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-gray-900 text-[17.5px] font-medium mb-2">{title}</h1>
-          <p className="text-gray-500 text-sm sm:text-[14px]">{description}</p>
+          <h1 className="text-gray-900 text-[20px] font-medium mb-2">{title}</h1>
+          <p className="text-gray-500 text-base sm:text-base">{description}</p>
         </div>
 
         {/* Country Buttons */}
@@ -139,12 +141,21 @@ export function PostListClient({
               <button
                 key={country.id}
                 onClick={() => setActiveCountryIndex(index)}
-                className={`px-3 sm:px-4 py-1 rounded-lg text-sm sm:text-sm font-medium whitespace-nowrap transition-colors border ${
+                className={`px-3 sm:px-4 py-1 rounded-lg text-base sm:text-base font-medium whitespace-nowrap transition-colors border flex items-center gap-2 ${
                   activeCountryIndex === index
                     ? 'bg-[#6366f1]/10 text-[#6366f1] border-[#6366f1]'
                     : 'bg-gray-200 text-gray-700 border-gray-300 hover:bg-gray-300'
                 }`}
               >
+                {country.flagUrl && (
+                  <Image
+                    src={country.flagUrl}
+                    alt={`${country.name} flag`}
+                    width={20}
+                    height={15}
+                    className="object-cover rounded-sm"
+                  />
+                )}
                 {country.name}
               </button>
             ))}
@@ -156,50 +167,50 @@ export function PostListClient({
           <nav className="flex gap-4 sm:gap-8 px-1 min-w-max">
             <button
               onClick={() => setActiveFilter('new')}
-              className={`flex items-center gap-2 pb-3 text-sm font-medium transition-colors relative ${
+              className={`flex items-center gap-2 pb-3 text-base font-medium transition-colors relative ${
                 activeFilter === 'new' ? 'text-indigo-600' : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              <Edit className="w-3 h-3" />
-              <span className="text-sm">New</span>
+              <Edit className="w-4 h-4" />
+              <span className="text-base">New</span>
               {activeFilter === 'new' && (
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600" />
               )}
             </button>
             <button
               onClick={() => setActiveFilter('hot')}
-              className={`flex items-center gap-2 pb-3 text-sm font-medium transition-colors relative ${
+              className={`flex items-center gap-2 pb-3 text-base font-medium transition-colors relative ${
                 activeFilter === 'hot' ? 'text-indigo-600' : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              <Flame className="w-3 h-3" />
-              <span className="text-sm">Hot</span>
+              <Flame className="w-4 h-4" />
+              <span className="text-base">Hot</span>
               {activeFilter === 'hot' && (
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600" />
               )}
             </button>
             <button
               onClick={() => setActiveFilter('stories')}
-              className={`flex items-center gap-2 pb-3 text-sm font-medium transition-colors relative ${
+              className={`flex items-center gap-2 pb-3 text-base font-medium transition-colors relative ${
                 activeFilter === 'stories' ? 'text-indigo-600' : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              <Book className="w-3 h-3" />
-              <span className="text-sm">Stories</span>
+              <Book className="w-4 h-4" />
+              <span className="text-base">Stories</span>
               {activeFilter === 'stories' && (
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600" />
               )}
             </button>
             <button
               onClick={() => setActiveFilter('subscribe')}
-              className={`flex items-center gap-2 pb-3 text-sm font-medium transition-colors relative ${
+              className={`flex items-center gap-2 pb-3 text-base font-medium transition-colors relative ${
                 activeFilter === 'subscribe'
                   ? 'text-indigo-600'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              <Mail className="w-3 h-3" />
-              <span className="text-sm">Subscribe</span>
+              <Mail className="w-4 h-4" />
+              <span className="text-base">Subscribe</span>
               {activeFilter === 'subscribe' && (
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600" />
               )}
@@ -212,8 +223,8 @@ export function PostListClient({
           <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-8">
             <div className="max-w-md mx-auto text-center">
               <Mail className="w-10 h-10 sm:w-12 sm:h-12 text-indigo-600 mx-auto mb-4" />
-              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Subscribe to Updates</h3>
-              <p className="text-sm sm:text-base text-gray-600 mb-6">
+              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Subscribe to Updates</h3>
+              <p className="text-base sm:text-lg text-gray-600 mb-6">
                 Get the latest posts delivered straight to your inbox.
               </p>
               <form onSubmit={handleSubscribe} className="space-y-4">
@@ -265,26 +276,26 @@ export function PostListClient({
                         }
                       >
                         <Link
-                          href={`/${activeCountry.continentSlug}/${activeCountry.slug}/${post.slug}`}
+                          href={`/posts/${activeCountry.slug.replace(/[^a-zA-Z0-9]/g, "")}/${post.slug}`}
                           className="block hover:bg-gray-50 transition-colors"
                         >
                           <div className="px-3 sm:px-6 py-3 sm:py-4">
                             <div className="flex items-center justify-between gap-2 sm:gap-4">
                               <div className="flex gap-2 sm:gap-4 items-start flex-1 min-w-0">
-                                <span className="text-indigo-600 font-medium text-xs sm:text-sm shrink-0 pt-0.5">
+                                <span className="text-indigo-600 font-medium text-sm sm:text-base shrink-0 pt-0.5">
                                   {post.publishedAt}
                                 </span>
                                 <div className="flex-1 min-w-0">
-                                  <h3 className="text-gray-900 font-medium text-xs sm:text-[14px] leading-snug">
+                                  <h3 className="text-gray-900 font-medium text-sm sm:text-base leading-snug">
                                     {post.title}
                                   </h3>
 
                                   {showSource && post.source && (
-                                    <p className="text-xs text-gray-500 mt-1">From {post.source}</p>
+                                    <p className="text-sm text-gray-500 mt-1">From {post.source}</p>
                                   )}
                                 </div>
                               </div>
-                              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 shrink-0" />
+                              <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 shrink-0" />
                             </div>
                           </div>
                         </Link>
@@ -299,25 +310,25 @@ export function PostListClient({
                 {filteredPosts.map((post: any, index: number) => (
                   <div key={post.id} className={index > 0 ? 'border-t border-gray-100' : ''}>
                     <Link
-                      href={`/${activeCountry.continentSlug}/${activeCountry.slug}/${post.slug}`}
+                      href={`/posts/${activeCountry.slug.replace(/[^a-zA-Z0-9]/g, "")}/${post.slug}`}
                       className="block hover:bg-gray-50 transition-colors"
                     >
                       <div className="px-3 sm:px-6 py-1">
                         <div className="flex items-center justify-between gap-2 sm:gap-4">
                           <div className="flex gap-2 sm:gap-4 items-start flex-1 min-w-0">
-                            <span className="text-indigo-600 font-medium text-xs sm:text-sm shrink-0 pt-0.5">
+                            <span className="text-indigo-600 font-medium text-sm sm:text-base shrink-0 pt-0.5">
                               {post.publishedAt}
                             </span>
                             <div className="flex-1 min-w-0">
-                              <h3 className="text-gray-900 font-medium text-sm sm:text-base leading-snug">
+                              <h3 className="text-gray-900 font-medium text-base sm:text-lg leading-snug">
                                 {post.title}
                               </h3>
                               {showSource && post.source && (
-                                <p className="text-xs text-gray-500 mt-1">From {post.source}</p>
+                                <p className="text-sm text-gray-500 mt-1">From {post.source}</p>
                               )}
                             </div>
                           </div>
-                          <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 shrink-0" />
+                          <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 shrink-0" />
                         </div>
                       </div>
                     </Link>
@@ -328,7 +339,7 @@ export function PostListClient({
 
             {/* Empty state */}
             {filteredPosts.length === 0 && (
-              <div className="text-center py-12 text-gray-500 text-sm">
+              <div className="text-center py-12 text-gray-500 text-base">
                 No posts found for this filter.
               </div>
             )}

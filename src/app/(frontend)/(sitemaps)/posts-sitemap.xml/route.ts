@@ -37,10 +37,10 @@ const getPostsSitemap = unstable_cache(
           .filter((post) => Boolean(post?.slug))
           .map((post) => {
             const country = typeof post.country === 'object' ? post.country : null
-            const continent = country && typeof country.continent === 'object' ? country.continent : null
-            const postUrl = country && continent
-              ? `${SITE_URL}/${continent.slug}/${country.slug}/${post.slug}`
-              : `${SITE_URL}/${post.slug}`
+            const normalizedCountrySlug = country?.slug ? country.slug.replace(/[^a-zA-Z0-9]/g, "") : ""
+            const postUrl = normalizedCountrySlug
+              ? `${SITE_URL}/posts/${normalizedCountrySlug}/${post.slug}`
+              : `${SITE_URL}/posts/${post.slug}`
 
             return {
               loc: postUrl,

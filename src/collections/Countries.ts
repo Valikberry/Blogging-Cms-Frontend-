@@ -4,7 +4,7 @@ export const Countries: CollectionConfig = {
   slug: 'countries',
   admin: {
     useAsTitle: 'name',
-    defaultColumns: ['name', 'continent', 'slug'],
+    defaultColumns: ['name', 'flag', 'continent', 'slug'],
   },
   defaultSort: 'createdAt', // ← Add this for oldest first
   // OR
@@ -28,6 +28,15 @@ export const Countries: CollectionConfig = {
       label: 'URL Slug',
       admin: {
         description: 'e.g., brazil, argentina, usa',
+      },
+    },
+    {
+      name: 'flag',
+      type: 'upload',
+      relationTo: 'media',
+      label: 'Country Flag',
+      admin: {
+        description: 'Upload a flag image for this country',
       },
     },
     {

@@ -76,6 +76,7 @@ export interface Config {
     countries: Country;
     'article-generator': ArticleGenerator;
     subscribers: Subscriber;
+    'contact-messages': ContactMessage;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -96,6 +97,7 @@ export interface Config {
     countries: CountriesSelect<false> | CountriesSelect<true>;
     'article-generator': ArticleGeneratorSelect<false> | ArticleGeneratorSelect<true>;
     subscribers: SubscribersSelect<false> | SubscribersSelect<true>;
+    'contact-messages': ContactMessagesSelect<false> | ContactMessagesSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -111,10 +113,12 @@ export interface Config {
   globals: {
     header: Header;
     footer: Footer;
+    'about-us': AboutUs;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
+    'about-us': AboutUsSelect<false> | AboutUsSelect<true>;
   };
   locale: 'en' | 'fr' | 'rw';
   user: User & {
@@ -501,6 +505,10 @@ export interface Country {
    * e.g., brazil, argentina, usa
    */
   slug: string;
+  /**
+   * Upload a flag image for this country
+   */
+  flag?: (string | null) | Media;
   continent: string | Continent;
   updatedAt: string;
   createdAt: string;
@@ -917,6 +925,21 @@ export interface Subscriber {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-messages".
+ */
+export interface ContactMessage {
+  id: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  status?: ('new' | 'read' | 'responded' | 'archived') | null;
+  ipAddress?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -1123,6 +1146,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'subscribers';
         value: string | Subscriber;
+      } | null)
+    | ({
+        relationTo: 'contact-messages';
+        value: string | ContactMessage;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -1535,6 +1562,7 @@ export interface ContinentsSelect<T extends boolean = true> {
 export interface CountriesSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
+  flag?: T;
   continent?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1564,6 +1592,20 @@ export interface SubscribersSelect<T extends boolean = true> {
   source?: T;
   country?: T;
   unsubscribedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-messages_select".
+ */
+export interface ContactMessagesSelect<T extends boolean = true> {
+  name?: T;
+  email?: T;
+  subject?: T;
+  message?: T;
+  status?: T;
+  ipAddress?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1891,6 +1933,72 @@ export interface Footer {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "about-us".
+ */
+export interface AboutUs {
+  id: string;
+  pageTitle: string;
+  missionTitle?: string | null;
+  missionContent: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  aboutContent?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  teamTitle?: string | null;
+  teamMembers?:
+    | {
+        name: string;
+        title: string;
+        bio?: string | null;
+        photo?: (string | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  contactTitle?: string | null;
+  contactEmail: string;
+  contactPhone?: string | null;
+  location?: string | null;
+  locationDetails?: string | null;
+  showContactForm?: boolean | null;
+  socialTitle?: string | null;
+  socialDescription?: string | null;
+  socialLinks?:
+    | {
+        platform: 'twitter' | 'linkedin' | 'youtube' | 'facebook' | 'instagram' | 'tiktok';
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
@@ -1942,6 +2050,44 @@ export interface FooterSelect<T extends boolean = true> {
         id?: T;
       };
   copyrightText?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "about-us_select".
+ */
+export interface AboutUsSelect<T extends boolean = true> {
+  pageTitle?: T;
+  missionTitle?: T;
+  missionContent?: T;
+  aboutContent?: T;
+  teamTitle?: T;
+  teamMembers?:
+    | T
+    | {
+        name?: T;
+        title?: T;
+        bio?: T;
+        photo?: T;
+        id?: T;
+      };
+  contactTitle?: T;
+  contactEmail?: T;
+  contactPhone?: T;
+  location?: T;
+  locationDetails?: T;
+  showContactForm?: T;
+  socialTitle?: T;
+  socialDescription?: T;
+  socialLinks?:
+    | T
+    | {
+        platform?: T;
+        url?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
