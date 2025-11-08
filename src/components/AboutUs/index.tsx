@@ -8,11 +8,12 @@ import RichText from '@/components/RichText'
 interface TeamMember {
   name: string
   title: string
-  bio?: string
+  bio?: string | null
   photo?: {
-    url?: string
-    alt?: string
-  } | string
+    url?: string | null
+    alt?: string | null
+  } | string | null
+  id?: string | null
 }
 
 interface SocialLink {
@@ -21,21 +22,21 @@ interface SocialLink {
 }
 
 interface AboutUsData {
-  pageTitle?: string
-  missionTitle?: string
+  pageTitle?: string | null
+  missionTitle?: string | null
   missionContent?: any
   aboutContent?: any
-  teamTitle?: string
-  teamMembers?: TeamMember[]
-  contactTitle?: string
-  contactEmail?: string
-  contactPhone?: string
-  location?: string
-  locationDetails?: string
-  showContactForm?: boolean
-  socialTitle?: string
-  socialDescription?: string
-  socialLinks?: SocialLink[]
+  teamTitle?: string | null
+  teamMembers?: TeamMember[] | null
+  contactTitle?: string | null
+  contactEmail?: string | null
+  contactPhone?: string | null
+  location?: string | null
+  locationDetails?: string | null
+  showContactForm?: boolean | null
+  socialTitle?: string | null
+  socialDescription?: string | null
+  socialLinks?: SocialLink[] | null
 }
 
 const socialIcons = {

@@ -17,7 +17,7 @@ const collections: CollectionSlug[] = [
   'form-submissions',
   'search',
 ]
-const globals: GlobalSlug[] = ['header', 'footer']
+const globals: GlobalSlug[] = ['header', 'footer', 'about-us']
 
 // Next.js revalidation errors are normal when seeding the database without a server running
 // i.e. running `yarn seed` locally instead of using the admin UI within an active app
@@ -40,18 +40,23 @@ export const seed = async ({
 
   // clear the database
   await Promise.all(
-    globals.map((global) =>
-      payload.updateGlobal({
-        slug: global,
-        data: {
-          navItems: [],
-        },
-        depth: 0,
-        context: {
-          disableRevalidate: true,
-        },
-      }),
-    ),
+    globals.map((global) => {
+      // Only update navItems for header and footer globals
+      if (global === 'header' || global === 'footer') {
+        return payload.updateGlobal({
+          slug: global,
+          data: {
+            navItems: [],
+          } as any,
+          depth: 0,
+          context: {
+            disableRevalidate: true,
+          },
+        })
+      }
+      // For about-us global, just return a resolved promise
+      return Promise.resolve()
+    }),
   )
 
   await Promise.all(
