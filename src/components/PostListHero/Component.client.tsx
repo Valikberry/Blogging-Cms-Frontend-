@@ -14,6 +14,11 @@ interface Post {
   source?: string | null
   isHot?: boolean
   isStories?: boolean
+  heroImage?: {
+    url?: string | null
+    alt?: string | null
+  } | string | null
+  excerpt?: string | null
 }
 
 interface Country {
@@ -74,6 +79,12 @@ export function PostListClient({
 
   const activeCountry = countries[activeCountryIndex] || countries[0]
 
+  // Collect all hot posts from all countries
+  const allHotPosts = countries.flatMap((country) =>
+    country.posts
+      .filter((post) => post.isHot)
+      .map((post) => ({ ...post, country }))
+  )
 
   // Filter posts based on active filter tab
   const filteredPosts =
@@ -136,12 +147,12 @@ export function PostListClient({
 
         {/* Country Buttons */}
         {countries.length > 0 && (
-          <div className="flex gap-2 sm:gap-3 overflow-x-auto mb-4 pb-2 scrollbar-hide">
+          <div className="flex gap-1.5 sm:gap-3 overflow-x-auto mb-4 pb-2 scrollbar-hide -mx-1 px-1">
             {countries.map((country, index) => (
               <button
                 key={country.id}
                 onClick={() => setActiveCountryIndex(index)}
-                className={`px-3 sm:px-4 py-1 rounded-lg text-base sm:text-base font-medium whitespace-nowrap transition-colors border flex items-center gap-2 ${
+                className={`px-2 sm:px-4 py-1 sm:py-1.5 rounded-lg text-xs sm:text-base font-medium whitespace-nowrap transition-colors border flex items-center gap-1 sm:gap-1.5 flex-shrink-0 ${
                   activeCountryIndex === index
                     ? 'bg-[#6366f1]/10 text-[#6366f1] border-[#6366f1]'
                     : 'bg-gray-200 text-gray-700 border-gray-300 hover:bg-gray-300'
@@ -151,9 +162,9 @@ export function PostListClient({
                   <Image
                     src={country.flagUrl}
                     alt={`${country.name} flag`}
-                    width={20}
-                    height={15}
-                    className="object-cover rounded-sm"
+                    width={14}
+                    height={10}
+                    className="object-cover rounded-sm sm:w-5 sm:h-4"
                   />
                 )}
                 {country.name}
@@ -164,59 +175,117 @@ export function PostListClient({
 
         {/* Filter Tabs (New, Hot, Stories, Subscribe) */}
         <div className="border-b border-gray-300 mb-3 overflow-x-auto scrollbar-hide">
-          <nav className="flex gap-4 sm:gap-8 px-1 min-w-max">
+          <nav className="flex gap-3 sm:gap-8 px-1 min-w-max">
             <button
               onClick={() => setActiveFilter('new')}
-              className={`flex items-center gap-2 pb-3 text-base font-medium transition-colors relative ${
+              className={`flex items-center gap-1.5 pb-3 text-sm sm:text-base font-medium transition-colors relative whitespace-nowrap ${
                 activeFilter === 'new' ? 'text-indigo-600' : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              <Edit className="w-4 h-4" />
-              <span className="text-base">New</span>
+              <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span>New</span>
               {activeFilter === 'new' && (
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600" />
               )}
             </button>
             <button
               onClick={() => setActiveFilter('hot')}
-              className={`flex items-center gap-2 pb-3 text-base font-medium transition-colors relative ${
+              className={`flex items-center gap-1.5 pb-3 text-sm sm:text-base font-medium transition-colors relative whitespace-nowrap ${
                 activeFilter === 'hot' ? 'text-indigo-600' : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              <Flame className="w-4 h-4" />
-              <span className="text-base">Hot</span>
+              <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span>Hot</span>
               {activeFilter === 'hot' && (
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600" />
               )}
             </button>
             <button
               onClick={() => setActiveFilter('stories')}
-              className={`flex items-center gap-2 pb-3 text-base font-medium transition-colors relative ${
+              className={`flex items-center gap-1.5 pb-3 text-sm sm:text-base font-medium transition-colors relative whitespace-nowrap ${
                 activeFilter === 'stories' ? 'text-indigo-600' : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              <Book className="w-4 h-4" />
-              <span className="text-base">Stories</span>
+              <Book className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span>Stories</span>
               {activeFilter === 'stories' && (
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600" />
               )}
             </button>
             <button
               onClick={() => setActiveFilter('subscribe')}
-              className={`flex items-center gap-2 pb-3 text-base font-medium transition-colors relative ${
+              className={`flex items-center gap-1.5 pb-3 text-sm sm:text-base font-medium transition-colors relative whitespace-nowrap ${
                 activeFilter === 'subscribe'
                   ? 'text-indigo-600'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              <Mail className="w-4 h-4" />
-              <span className="text-base">Subscribe</span>
+              <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span>Subscribe</span>
               {activeFilter === 'subscribe' && (
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600" />
               )}
             </button>
           </nav>
         </div>
+
+        {/* Hot Posts Scrollable Section */}
+        {allHotPosts.length > 0 && (
+          <div className="mb-1">
+            {/* <div className="flex items-center gap-2 mb-3">
+              <Flame className="w-5 h-5 text-orange-500" />
+              <h2 className="text-gray-900 text-lg font-semibold">Hot Posts</h2>
+            </div> */}
+            <div className="overflow-x-auto scrollbar-hide -mx-1 px-1">
+              <div className="flex gap-3 pb-2">
+                {allHotPosts.map((post) => {
+                  const imageUrl = typeof post.heroImage === 'object' ? post.heroImage?.url : null
+                  const imageAlt = typeof post.heroImage === 'object' ? post.heroImage?.alt : post.title
+                  const normalizedCountrySlug = post.country.slug.replace(/[^a-zA-Z0-9]/g, "")
+
+                  return (
+                    <Link
+                      key={post.id}
+                      href={`/posts/${normalizedCountrySlug}/${post.slug}`}
+                      className="flex-shrink-0 w-64 sm:w-72 bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+                    >
+                      {/* Image */}
+                      <div className="relative w-full h-40 bg-gray-100">
+                        {imageUrl ? (
+                          <Image
+                            src={imageUrl}
+                            alt={imageAlt || post.title}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <div className="w-16 h-16 border-2 border-gray-300 rounded flex items-center justify-center">
+                              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      {/* Content */}
+                      <div className="p-4">
+                        <h3 className="text-gray-900 font-semibold text-base line-clamp-2 mb-2">
+                          {post.title}
+                        </h3>
+                        {post.excerpt && (
+                          <p className="text-gray-600 text-sm line-clamp-2">
+                            {post.excerpt}
+                          </p>
+                        )}
+                      </div>
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Subscribe Form */}
         {activeFilter === 'subscribe' && (

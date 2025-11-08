@@ -148,6 +148,8 @@ export async function PostListHero(props: PostListHeroProps) {
           })
         }
 
+        const heroImage = typeof post.heroImage === 'object' ? post.heroImage : null
+
         return {
           id: post.id,
           title: post.title,
@@ -157,6 +159,8 @@ export async function PostListHero(props: PostListHeroProps) {
           source: post.source || post.populatedAuthors?.[0]?.name || null,
           isHot: post.isHot || false,
           isStories: post.isStories || false,
+          heroImage: heroImage ? { url: heroImage.url || null, alt: heroImage.alt || null } : null,
+          excerpt: post.excerpt || null,
         }
       })
 
