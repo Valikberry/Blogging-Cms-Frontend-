@@ -109,15 +109,6 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
     ? post.meta.image
     : null
 
-  // Debug logging
-  console.log('=== Open Graph Debug ===')
-  console.log('Post title:', post.title)
-  console.log('Post excerpt:', post.excerpt)
-  console.log('Post heroImage:', post.heroImage)
-  console.log('Post meta image:', post.meta?.image)
-  console.log('Selected OG Image:', ogImage)
-  console.log('========================')
-
   // Ensure image URL is absolute
   let ogImageUrl = ogImage?.url || ''
   if (ogImageUrl && !ogImageUrl.startsWith('http')) {
@@ -127,33 +118,50 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
   const ogImageWidth = ogImage?.width || 1200
   const ogImageHeight = ogImage?.height || 630
 
-  const metadata = {
+  // Debug logging
+  console.log('=== Open Graph Debug ===')
+  console.log('Site URL:', siteUrl)
+  console.log('Canonical URL:', canonicalUrl)
+  console.log('Post title:', post.title)
+  console.log('Post excerpt:', post.excerpt)
+  console.log('OG Image URL:', ogImageUrl)
+  console.log('OG Image Width:', ogImageWidth)
+  console.log('OG Image Height:', ogImageHeight)
+  console.log('========================')
+
+  const metadata: Metadata = {
     title: post.meta?.title || post.title,
     description: post.meta?.description || post.excerpt || undefined,
+    metadataBase: new URL(siteUrl),
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
       title: post.meta?.title || post.title,
       description: post.meta?.description || post.excerpt || undefined,
       url: canonicalUrl,
       siteName: 'Ask Geopolitics',
       type: 'article',
+      locale: 'en_US',
       images: ogImageUrl
         ? [
             {
               url: ogImageUrl,
               width: ogImageWidth,
               height: ogImageHeight,
-              alt: post.title,
+              alt: post.title || 'Ask Geopolitics',
             },
           ]
         : [],
       publishedTime: post.publishedAt || undefined,
-      authors: post.submittedBy || undefined,
+      authors: post.submittedBy ? [post.submittedBy] : undefined,
     },
     twitter: {
       card: 'summary_large_image',
       title: post.meta?.title || post.title,
       description: post.meta?.description || post.excerpt || undefined,
       images: ogImageUrl ? [ogImageUrl] : [],
+      creator: '@askgeopolitics',
     },
   }
 
