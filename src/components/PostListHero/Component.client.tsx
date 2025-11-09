@@ -232,10 +232,6 @@ export function PostListClient({
         {/* Hot Posts Scrollable Section */}
         {allHotPosts.length > 0 && (
           <div className="mb-1">
-            {/* <div className="flex items-center gap-2 mb-3">
-              <Flame className="w-5 h-5 text-orange-500" />
-              <h2 className="text-gray-900 text-lg font-semibold">Hot Posts</h2>
-            </div> */}
             <div className="overflow-x-auto scrollbar-hide -mx-1 px-1">
               <div className="flex gap-3 pb-2">
                 {allHotPosts.map((post) => {
@@ -247,10 +243,10 @@ export function PostListClient({
                     <Link
                       key={post.id}
                       href={`/posts/${normalizedCountrySlug}/${post.slug}`}
-                      className="flex-shrink-0 w-64 sm:w-72 bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+                      className="flex-shrink-0 w-[153px] bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
                     >
                       {/* Image */}
-                      <div className="relative w-full h-40 bg-gray-100">
+                      <div className="relative w-full h-[139px] bg-gray-100">
                         {imageUrl ? (
                           <Image
                             src={imageUrl}
@@ -260,8 +256,8 @@ export function PostListClient({
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            <div className="w-16 h-16 border-2 border-gray-300 rounded flex items-center justify-center">
-                              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="w-12 h-12 border-2 border-gray-300 rounded flex items-center justify-center">
+                              <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                               </svg>
                             </div>
@@ -269,12 +265,12 @@ export function PostListClient({
                         )}
                       </div>
                       {/* Content */}
-                      <div className="p-4">
-                        <h3 className="text-gray-900 font-semibold text-base line-clamp-2 mb-2">
+                      <div className="p-2">
+                        <h3 className="text-gray-900 font-medium text-sm line-clamp-1 mb-1">
                           {post.title}
                         </h3>
                         {post.excerpt && (
-                          <p className="text-gray-600 text-sm line-clamp-2">
+                          <p className="text-gray-600 text-xs line-clamp-1">
                             {post.excerpt}
                           </p>
                         )}

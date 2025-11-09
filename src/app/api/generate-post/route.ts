@@ -143,52 +143,8 @@ export async function POST(request: NextRequest) {
 
     const suggestedTitle = structuredData.title || headline
     console.log('💡 Suggested title:', suggestedTitle)
-
     // Generate featured image using GPT
     let featuredImageId: string | undefined
-
-    try {
-      console.log('Starting image generation...')
-      const imagePrompt = `Create a professional, editorial-style featured image for a geopolitical news article with the headline: "${headline}". The image should be photorealistic, high-quality, modern, and suitable for social media sharing. Avoid text in the image. Focus on visual storytelling that represents the geopolitical theme.`
-
-      const imageResponse = await openai.responses.create({
-        model: 'gpt-4.1-mini',
-        input: imagePrompt,
-        tools: [{ type: 'image_generation' }],
-      })
-
-      // Extract image data from the response
-      const imageData = imageResponse.output
-        .filter((output: any) => output.type === 'image_generation_call')
-        .map((output: any) => output.result)
-
-      if (imageData.length > 0) {
-        const imageBase64 = imageData[0]
-        const buffer = Buffer.from(imageBase64, 'base64')
-        console.log('Image generated, size:', buffer.length, 'bytes')
-
-        // Upload to Payload media collection
-        const mediaDoc = await payload.create({
-          collection: 'media',
-          data: {
-            alt: `Featured image for: ${headline}`,
-          },
-          file: {
-            data: buffer,
-            mimetype: 'image/png',
-            name: `post-${Date.now()}.png`,
-            size: buffer.length,
-          },
-        })
-
-        featuredImageId = mediaDoc.id
-        console.log('Image uploaded successfully! Media ID:', featuredImageId)
-      }
-    } catch (imageError) {
-      console.error('❌ Error generating/uploading image:', imageError)
-      // Continue without image if it fails
-    }
-
     // Fetch the first country to use as default
     console.log('Fetching first country as default...')
     const countriesResult = await payload.find({
@@ -322,7 +278,6 @@ export async function POST(request: NextRequest) {
       title: suggestedTitle,
       questionCount: structuredData.socialQuestions?.length || 0,
       explainerSections: structuredData.explainerSections?.length || 0,
-      imageId: featuredImageId,
       message: `Generated ${structuredData.socialQuestions?.length || 0} discussion questions and ${structuredData.explainerSections?.length || 0} explainer sections`,
     })
   } catch (error) {
