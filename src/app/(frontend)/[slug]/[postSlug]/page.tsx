@@ -8,7 +8,7 @@ import type { Metadata } from 'next'
 
 interface PostPageProps {
   params: Promise<{
-    country: string // normalized country slug (no spaces/special chars)
+    slug: string // normalized country slug (no spaces/special chars)
     postSlug: string // post slug
   }>
 }
@@ -71,13 +71,13 @@ export async function generateStaticParams() {
     depth: 1,
   })
 
-  const params: Array<{ country: string; postSlug: string }> = []
+  const params: Array<{ slug: string; postSlug: string }> = []
 
   for (const post of posts.docs) {
     const country = typeof post.country === 'string' ? null : post.country
     if (country && country.slug) {
       params.push({
-        country: normalizeSlug(country.slug),
+        slug: normalizeSlug(country.slug),
         postSlug: post.slug || '',
       })
     }
@@ -87,8 +87,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: PostPageProps): Promise<Metadata> {
-  const { postSlug, country } = await params
-  const post = await queryPostBySlug(postSlug, country)
+  const { postSlug, slug } = await params
+  const post = await queryPostBySlug(postSlug, slug)
 
   if (!post) {
     return {}
@@ -100,7 +100,7 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
                   'https://askgeopolitics.com'
 
   // Build canonical URL for this post
-  const canonicalUrl = `${siteUrl}/posts/${country}/${postSlug}`
+  const canonicalUrl = `${siteUrl}/${slug}/${postSlug}`
 
   // Get OG image with dimensions - prioritize heroImage over meta image
   const ogImage = post.heroImage && typeof post.heroImage === 'object'
@@ -117,17 +117,6 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
 
   const ogImageWidth = ogImage?.width || 1200
   const ogImageHeight = ogImage?.height || 630
-
-  // Debug logging
-  console.log('=== Open Graph Debug ===')
-  console.log('Site URL:', siteUrl)
-  console.log('Canonical URL:', canonicalUrl)
-  console.log('Post title:', post.title)
-  console.log('Post excerpt:', post.excerpt)
-  console.log('OG Image URL:', ogImageUrl)
-  console.log('OG Image Width:', ogImageWidth)
-  console.log('OG Image Height:', ogImageHeight)
-  console.log('========================')
 
   const metadata: Metadata = {
     title: post.meta?.title || post.title,
@@ -165,13 +154,12 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
     },
   }
 
-  console.log('Final metadata:', JSON.stringify(metadata, null, 2))
   return metadata
 }
 
 export default async function PostPage({ params }: PostPageProps) {
-  const { postSlug, country } = await params
-  const post = await queryPostBySlug(postSlug, country)
+  const { postSlug, slug } = await params
+  const post = await queryPostBySlug(postSlug, slug)
 
   if (!post) {
     notFound()
@@ -183,7 +171,7 @@ export default async function PostPage({ params }: PostPageProps) {
                   'https://askgeopolitics.com'
 
   // Build canonical URL
-  const canonicalUrl = `${siteUrl}/posts/${country}/${postSlug}`
+  const canonicalUrl = `${siteUrl}/${slug}/${postSlug}`
 
   // Get image URL
   const heroImage = post.heroImage && typeof post.heroImage === 'object' ? post.heroImage : null

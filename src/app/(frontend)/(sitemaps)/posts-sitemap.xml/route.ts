@@ -39,8 +39,8 @@ const getPostsSitemap = unstable_cache(
             const country = typeof post.country === 'object' ? post.country : null
             const normalizedCountrySlug = country?.slug ? country.slug.replace(/[^a-zA-Z0-9]/g, "") : ""
             const postUrl = normalizedCountrySlug
-              ? `${SITE_URL}/posts/${normalizedCountrySlug}/${post.slug}`
-              : `${SITE_URL}/posts/${post.slug}`
+              ? `${SITE_URL}/${normalizedCountrySlug}/${post.slug}`
+              : `${SITE_URL}/${post.slug}`
 
             return {
               loc: postUrl,

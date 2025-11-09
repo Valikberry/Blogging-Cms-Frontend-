@@ -67,33 +67,39 @@ export function PostListClient({
   // Find the index of the initial country if provided
   const initialIndex = initialCountryId
     ? countries.findIndex((c) => c.id === initialCountryId)
-    : 0
-  const validInitialIndex = initialIndex >= 0 ? initialIndex : 0
+    : -1 // -1 means "All Countries"
 
-  const [activeCountryIndex, setActiveCountryIndex] = useState(validInitialIndex)
+  const [activeCountryIndex, setActiveCountryIndex] = useState(initialIndex)
   const [activeFilter, setActiveFilter] = useState<FilterTab>('new')
   const [email, setEmail] = useState('')
   const [subscribeMessage, setSubscribeMessage] = useState('')
   const [isSubscribing, setIsSubscribing] = useState(false)
   const [messageType, setMessageType] = useState<'success' | 'error'>('success')
 
-  const activeCountry = countries[activeCountryIndex] || countries[0]
+  const activeCountry = activeCountryIndex >= 0 ? countries[activeCountryIndex] : null
 
-  // Collect all hot posts from all countries
-  const allHotPosts = countries.flatMap((country) =>
-    country.posts
-      .filter((post) => post.isHot)
-      .map((post) => ({ ...post, country }))
+  // Collect all posts from all countries
+  const allPosts = countries.flatMap((country) =>
+    country.posts.map((post) => ({ ...post, country }))
   )
 
-  // Filter posts based on active filter tab
-  const filteredPosts =
-    activeCountry?.posts.filter((post) => {
-      if (activeFilter === 'hot') return post.isHot
-      if (activeFilter === 'stories') return post.isStories
-      if (activeFilter === 'new') return true // Show all posts for "new"
-      return true
-    }) || []
+  // Collect all hot posts from all countries
+  const allHotPosts = allPosts.filter((post) => post.isHot)
+
+  // Filter posts based on active filter tab and selected country
+  const filteredPosts = activeCountry
+    ? activeCountry.posts.filter((post) => {
+        if (activeFilter === 'hot') return post.isHot
+        if (activeFilter === 'stories') return post.isStories
+        if (activeFilter === 'new') return true
+        return true
+      })
+    : allPosts.filter((post) => {
+        if (activeFilter === 'hot') return post.isHot
+        if (activeFilter === 'stories') return post.isStories
+        if (activeFilter === 'new') return true
+        return true
+      })
 
   // Group posts by date if enabled
   const groupedPosts = groupByDate && filteredPosts ? groupPostsByDate(filteredPosts) : null
@@ -141,7 +147,7 @@ export function PostListClient({
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-gray-900 text-[20px] font-medium mb-2">{title}</h1>
+          <h1 className="text-gray-900 text-[20px] font-bold mb-2">{title}</h1>
           <p className="text-gray-500 text-base sm:text-base">{description}</p>
         </div>
 
@@ -152,7 +158,7 @@ export function PostListClient({
               <button
                 key={country.id}
                 onClick={() => setActiveCountryIndex(index)}
-                className={`px-2 sm:px-4 py-1 sm:py-1.5 rounded-lg text-xs sm:text-base font-medium whitespace-nowrap transition-colors border flex items-center gap-1 sm:gap-1.5 flex-shrink-0 ${
+                className={`px-2 sm:px-4 py-1 sm:py-1.5 rounded-lg text-sm sm:text-base font-medium whitespace-nowrap transition-colors border flex items-center gap-1 sm:gap-1.5 flex-shrink-0 ${
                   activeCountryIndex === index
                     ? 'bg-[#6366f1]/10 text-[#6366f1] border-[#6366f1]'
                     : 'bg-gray-200 text-gray-700 border-gray-300 hover:bg-gray-300'
@@ -242,11 +248,11 @@ export function PostListClient({
                   return (
                     <Link
                       key={post.id}
-                      href={`/posts/${normalizedCountrySlug}/${post.slug}`}
-                      className="flex-shrink-0 w-[153px] bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+                      href={`/${normalizedCountrySlug}/${post.slug}`}
+                      className="flex-shrink-0 w-[143px] bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
                     >
                       {/* Image */}
-                      <div className="relative w-full h-[139px] bg-gray-100">
+                      <div className="relative w-full h-[90px] bg-gray-100">
                         {imageUrl ? (
                           <Image
                             src={imageUrl}
@@ -265,12 +271,10 @@ export function PostListClient({
                         )}
                       </div>
                       {/* Content */}
-                      <div className="p-2">
-                        <h3 className="text-gray-900 font-medium text-sm line-clamp-1 mb-1">
-                          {post.title}
-                        </h3>
+                      <div className="p-1">
+                     
                         {post.excerpt && (
-                          <p className="text-gray-600 text-xs line-clamp-1">
+                          <p className="text-gray-600 text-xs line-clamp-2">
                             {post.excerpt}
                           </p>
                         )}
@@ -326,14 +330,18 @@ export function PostListClient({
         )}
 
         {/* Posts List */}
-        {activeCountry && activeFilter !== 'subscribe' && (
+        {activeFilter !== 'subscribe' && (
           <div className="bg-white rounded-lg border border-gray-200">
             {groupByDate && groupedPosts ? (
               // Grouped by date view
               <div>
                 {Object.entries(groupedPosts).map(([date, posts], groupIndex) => (
                   <div key={date}>
-                    {posts.map((post, postIndex) => (
+                    {posts.map((post: any, postIndex) => {
+                      const postCountry = post.country || activeCountry
+                      const normalizedCountrySlug = postCountry?.slug ? postCountry.slug.replace(/[^a-zA-Z0-9]/g, "") : ""
+
+                      return (
                       <div
                         key={post.id}
                         className={
@@ -341,7 +349,7 @@ export function PostListClient({
                         }
                       >
                         <Link
-                          href={`/posts/${activeCountry.slug.replace(/[^a-zA-Z0-9]/g, "")}/${post.slug}`}
+                          href={`/${normalizedCountrySlug}/${post.slug}`}
                           className="block hover:bg-gray-50 transition-colors"
                         >
                           <div className="px-3 sm:px-6 py-3 sm:py-4">
@@ -365,17 +373,22 @@ export function PostListClient({
                           </div>
                         </Link>
                       </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 ))}
               </div>
             ) : (
               // Simple list view
               <div>
-                {filteredPosts.map((post: any, index: number) => (
+                {filteredPosts.map((post: any, index: number) => {
+                  const postCountry = post.country || activeCountry
+                  const normalizedCountrySlug = postCountry?.slug ? postCountry.slug.replace(/[^a-zA-Z0-9]/g, "") : ""
+
+                  return (
                   <div key={post.id} className={index > 0 ? 'border-t border-gray-100' : ''}>
                     <Link
-                      href={`/posts/${activeCountry.slug.replace(/[^a-zA-Z0-9]/g, "")}/${post.slug}`}
+                      href={`/${normalizedCountrySlug}/${post.slug}`}
                       className="block hover:bg-gray-50 transition-colors"
                     >
                       <div className="px-3 sm:px-6 py-1">
@@ -398,7 +411,8 @@ export function PostListClient({
                       </div>
                     </Link>
                   </div>
-                ))}
+                  )
+                })}
               </div>
             )}
 

@@ -223,8 +223,8 @@ export function PostDetail({ post }: PostDetailProps) {
                 const country = typeof relatedPost.country === 'object' ? relatedPost.country : null
                 const normalizedCountrySlug = country?.slug ? country.slug.replace(/[^a-zA-Z0-9]/g, "") : ""
                 const postUrl = normalizedCountrySlug
-                  ? `/posts/${normalizedCountrySlug}/${relatedPost.slug}`
-                  : `/posts/${relatedPost.slug}`
+                  ? `/${normalizedCountrySlug}/${relatedPost.slug}`
+                  : `/${relatedPost.slug}`
 
                 return (
                   <Link
@@ -265,9 +265,8 @@ export default function ShareButtons({ post }: { post: any }) {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      // Use full URL for the specific post
-      const fullUrl = `${window.location.origin}/posts/${post.slug || post.id}`
-      setShareUrl(fullUrl)
+      // Use the current URL for sharing
+      setShareUrl(window.location.href)
     }
   }, [post])
 
