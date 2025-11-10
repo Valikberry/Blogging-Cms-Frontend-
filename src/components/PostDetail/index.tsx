@@ -99,6 +99,13 @@ export function PostDetail({ post }: PostDetailProps) {
           </p>
         )}
 
+        {/* Published Date */}
+        {publishedDate && (
+          <p className="text-sm text-gray-500 mb-3">
+            {publishedDate}
+          </p>
+        )}
+
         {/* Hero Image */}
         {post.heroImage && typeof post.heroImage === 'object' && (
           <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden mb-2">

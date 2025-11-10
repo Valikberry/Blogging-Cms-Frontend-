@@ -14,6 +14,8 @@ import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 import { HomeTemplate } from '@/components/HomeContent'
 
+// Revalidate pages every 60 seconds
+export const revalidate = 60
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })

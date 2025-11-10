@@ -281,24 +281,57 @@ export const seed = async ({
           {
             link: {
               type: 'custom',
-              label: 'Admin',
-              url: '/admin',
+              label: 'About us',
+              url: '/about',
             },
           },
           {
             link: {
               type: 'custom',
-              label: 'Source Code',
-              newTab: true,
-              url: 'https://github.com/payloadcms/payload/tree/main/templates/website',
+              label: 'Contact us',
+              url: '/contact',
             },
           },
           {
             link: {
               type: 'custom',
-              label: 'Payload',
-              newTab: true,
-              url: 'https://payloadcms.com/',
+              label: 'Privacy & User Agreement',
+              url: '/privacy',
+            },
+          },
+          {
+            link: {
+              type: 'custom',
+              label: 'Accessibility & Corrections',
+              url: '/accessibility',
+            },
+          },
+          {
+            link: {
+              type: 'custom',
+              label: 'Ethics & Editorial Standards',
+              url: '/ethics',
+            },
+          },
+          {
+            link: {
+              type: 'custom',
+              label: 'Newsletter',
+              url: '/newsletter',
+            },
+          },
+          {
+            link: {
+              type: 'custom',
+              label: 'Legal & Transparency',
+              url: '/legal',
+            },
+          },
+          {
+            link: {
+              type: 'custom',
+              label: 'Site Information',
+              url: '/site-info',
             },
           },
         ],

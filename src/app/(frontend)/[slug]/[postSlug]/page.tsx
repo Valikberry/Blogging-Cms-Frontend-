@@ -15,8 +15,11 @@ interface PostPageProps {
 
 // Helper function to normalize slug (remove spaces and special characters)
 function normalizeSlug(slug: string): string {
-  return slug.replace(/[^a-zA-Z0-9]/g, "")
+  return slug.replace(/[^a-zA-Z0-9]/g, '')
 }
+
+// Revalidate post pages every 60 seconds
+export const revalidate = 60
 
 // Cache the post query to prevent duplicate fetches
 const queryPostBySlug = cache(async (postSlug: string, normalizedCountrySlug: string) => {
@@ -29,7 +32,7 @@ const queryPostBySlug = cache(async (postSlug: string, normalizedCountrySlug: st
   })
 
   const matchingCountry = countriesResult.docs.find(
-    (country: any) => normalizeSlug(country.slug) === normalizedCountrySlug
+    (country: any) => normalizeSlug(country.slug) === normalizedCountrySlug,
   )
 
   if (!matchingCountry) {
@@ -90,41 +93,31 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
   const { postSlug, slug } = await params
   const post = await queryPostBySlug(postSlug, slug)
 
-  if (!post) {
-    return {}
-  }
+  if (!post) return {}
 
-  // Get the site URL
-  const siteUrl = process.env.NEXT_PUBLIC_SERVER_URL ||
-                  process.env.VERCEL_PROJECT_PRODUCTION_URL ||
-                  'https://askgeopolitics.com'
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SERVER_URL ||
+    process.env.VERCEL_PROJECT_PRODUCTION_URL ||
+    'https://askgeopolitics.com'
 
-  // Build canonical URL for this post
   const canonicalUrl = `${siteUrl}/${slug}/${postSlug}`
+  const defaultOgImage = `${siteUrl}/default-share-image.jpg`
 
-  // Get OG image with dimensions - prioritize heroImage over meta image
-  const ogImage = post.heroImage && typeof post.heroImage === 'object'
-    ? post.heroImage
-    : post.meta?.image && typeof post.meta.image === 'object'
-    ? post.meta.image
-    : null
+  const ogImage =
+    post.heroImage && typeof post.heroImage === 'object' && post.heroImage.url
+      ? post.heroImage
+      : post.meta?.image && typeof post.meta.image === 'object' && post.meta.image.url
+        ? post.meta.image
+        : null
 
-  // Ensure image URL is absolute
-  let ogImageUrl = ogImage?.url || ''
-  if (ogImageUrl && !ogImageUrl.startsWith('http')) {
-    ogImageUrl = `${siteUrl}${ogImageUrl}`
-  }
-
-  const ogImageWidth = ogImage?.width || 1200
-  const ogImageHeight = ogImage?.height || 630
+  let ogImageUrl = ogImage?.url || defaultOgImage
+  if (!ogImageUrl.startsWith('http')) ogImageUrl = `${siteUrl}${ogImageUrl}`
 
   const metadata: Metadata = {
     title: post.meta?.title || post.title,
     description: post.meta?.description || post.excerpt || undefined,
     metadataBase: new URL(siteUrl),
-    alternates: {
-      canonical: canonicalUrl,
-    },
+    alternates: { canonical: canonicalUrl },
     openGraph: {
       title: post.meta?.title || post.title,
       description: post.meta?.description || post.excerpt || undefined,
@@ -132,16 +125,14 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
       siteName: 'Ask Geopolitics',
       type: 'article',
       locale: 'en_US',
-      images: ogImageUrl
-        ? [
-            {
-              url: ogImageUrl,
-              width: ogImageWidth,
-              height: ogImageHeight,
-              alt: post.title || 'Ask Geopolitics',
-            },
-          ]
-        : [],
+      images: [
+        {
+          url: ogImageUrl,
+          width: ogImage?.width || 1200,
+          height: ogImage?.height || 630,
+          alt: post.title,
+        },
+      ],
       publishedTime: post.publishedAt || undefined,
       authors: post.submittedBy ? [post.submittedBy] : undefined,
     },
@@ -149,8 +140,16 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
       card: 'summary_large_image',
       title: post.meta?.title || post.title,
       description: post.meta?.description || post.excerpt || undefined,
-      images: ogImageUrl ? [ogImageUrl] : [],
+      images: [ogImageUrl],
       creator: '@askgeopolitics',
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+      },
     },
   }
 
@@ -166,9 +165,10 @@ export default async function PostPage({ params }: PostPageProps) {
   }
 
   // Get the site URL
-  const siteUrl = process.env.NEXT_PUBLIC_SERVER_URL ||
-                  process.env.VERCEL_PROJECT_PRODUCTION_URL ||
-                  'https://askgeopolitics.com'
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SERVER_URL ||
+    process.env.VERCEL_PROJECT_PRODUCTION_URL ||
+    'https://askgeopolitics.com'
 
   // Build canonical URL
   const canonicalUrl = `${siteUrl}/${slug}/${postSlug}`
@@ -187,7 +187,8 @@ export default async function PostPage({ params }: PostPageProps) {
 
   // Get country/continent for article section
   const countryObj = typeof post.country === 'object' ? post.country : null
-  const continentObj = countryObj && typeof countryObj.continent === 'object' ? countryObj.continent : null
+  const continentObj =
+    countryObj && typeof countryObj.continent === 'object' ? countryObj.continent : null
   const articleSection = continentObj?.name || countryObj?.name || 'Geopolitics'
 
   // JSON-LD structured data for NewsArticle
@@ -203,13 +204,15 @@ export default async function PostPage({ params }: PostPageProps) {
     alternativeHeadline: post.meta?.title || post.title,
     description: post.meta?.description || post.excerpt || '',
     articleBody: articleBody,
-    image: imageUrl ? {
-      '@type': 'ImageObject',
-      url: imageUrl,
-      width: imageObject?.width || 1200,
-      height: imageObject?.height || 675,
-      caption: heroImage?.alt || post.title,
-    } : undefined,
+    image: imageUrl
+      ? {
+          '@type': 'ImageObject',
+          url: imageUrl,
+          width: imageObject?.width || 1200,
+          height: imageObject?.height || 675,
+          caption: heroImage?.alt || post.title,
+        }
+      : undefined,
     datePublished: post.publishedAt || post.createdAt,
     dateModified: post.updatedAt || post.publishedAt || post.createdAt,
     author: {
@@ -230,7 +233,9 @@ export default async function PostPage({ params }: PostPageProps) {
       },
     },
     articleSection: articleSection,
-    keywords: post.tags?.map((tag: any) => typeof tag === 'object' ? tag.name : tag).filter(Boolean) || [],
+    keywords:
+      post.tags?.map((tag: any) => (typeof tag === 'object' ? tag.name : tag)).filter(Boolean) ||
+      [],
     inLanguage: 'en',
     isAccessibleForFree: true,
   }
