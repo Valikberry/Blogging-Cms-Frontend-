@@ -62,7 +62,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, countries = []
     searchTimeoutRef.current = setTimeout(async () => {
       try {
         const response = await fetch(
-          `/api/posts?where[title][contains]=${encodeURIComponent(searchQuery)}&limit=5&depth=1`
+          `/api/posts?where[title][contains]=${encodeURIComponent(searchQuery)}&limit=5&depth=1`,
         )
         const data = await response.json()
         setSearchResults(data.docs || [])
@@ -102,7 +102,6 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, countries = []
   }
 
   const isActivePath = (path: string) => pathname === path
-
 
   return (
     <header className="w-full relative z-40">
@@ -157,9 +156,12 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, countries = []
                           <div className="py-2">
                             {searchResults.map((post) => {
                               const country = typeof post.country === 'object' ? post.country : null
-                              const continent = country && typeof country.continent === 'object' ? country.continent : null
-                              const postUrl = country && continent
-                                ? `/${continent.slug}/${country.slug}/${post.slug}`
+
+                              const normalizedCountrySlug = country?.slug
+                                ? country.slug.replace(/[^a-zA-Z0-9]/g, '')
+                                : ''
+                              const postUrl = normalizedCountrySlug
+                                ? `/${normalizedCountrySlug}/${post.slug}`
                                 : `/${post.slug}`
 
                               return (
@@ -315,7 +317,9 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, countries = []
                 >
                   {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                 </button>
-              ):''}
+              ) : (
+                ''
+              )}
             </div>
           </div>
         </div>

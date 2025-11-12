@@ -115,35 +115,35 @@ html[data-theme='dark'] {
 
 /* RichText content styling */
 .rich-text {
-  font-size: 13.5px; /* 15px * 0.9 */
+  font-size: 15.5px; /* 13.5px + 2px */
   line-height: 1.6;
 }
 
 @media (min-width: 640px) {
   .rich-text {
-    font-size: 13.5px; /* 15px * 0.9 */
+    font-size: 15.5px; /* 13.5px + 2px */
   }
 }
 
 @media (min-width: 768px) {
   .rich-text {
-    font-size: 15.3px; /* 17px * 0.9 */
+    font-size: 17.3px; /* 15.3px + 2px */
   }
 }
 
 .rich-text p {
-  font-size: 13.5px; /* 15px * 0.9 */
+  font-size: 15.5px; /* 13.5px + 2px */
   margin-bottom: 1em;
 }
 
 @media (min-width: 640px) {
   .rich-text p {
-    font-size: 13.5px; /* 15px * 0.9 */
+    font-size: 15.5px; /* 13.5px + 2px */
   }
 }
 
 .rich-text h1 {
-  font-size: 16.2px; /* 18px * 0.9 */
+  font-size: 18.2px; /* 16.2px + 2px */
   font-weight: 700;
   margin-top: 1.5em;
   margin-bottom: 0.75em;
@@ -151,12 +151,12 @@ html[data-theme='dark'] {
 
 @media (min-width: 640px) {
   .rich-text h1 {
-    font-size: 18px; /* 20px * 0.9 */
+    font-size: 20px; /* 18px + 2px */
   }
 }
 
 .rich-text h2 {
-  font-size: 14.4px; /* 16px * 0.9 */
+  font-size: 16.4px; /* 14.4px + 2px */
   font-weight: 700;
   margin-top: 1.5em;
   margin-bottom: 0.75em;
@@ -164,12 +164,12 @@ html[data-theme='dark'] {
 
 @media (min-width: 640px) {
   .rich-text h2 {
-    font-size: 16.2px; /* 18px * 0.9 */
+    font-size: 18.2px; /* 16.2px + 2px */
   }
 }
 
 .rich-text h3 {
-  font-size: 13.5px; /* 15px * 0.9 */
+  font-size: 15.5px; /* 13.5px + 2px */
   font-weight: 600;
   margin-top: 1.5em;
   margin-bottom: 0.75em;
@@ -177,12 +177,12 @@ html[data-theme='dark'] {
 
 @media (min-width: 640px) {
   .rich-text h3 {
-    font-size: 14.4px; /* 16px * 0.9 */
+    font-size: 16.4px; /* 14.4px + 2px */
   }
 }
 
 .rich-text h4 {
-  font-size: 12.6px; /* 14px * 0.9 */
+  font-size: 14.6px; /* 12.6px + 2px */
   font-weight: 600;
   margin-top: 1.5em;
   margin-bottom: 0.75em;
@@ -190,7 +190,7 @@ html[data-theme='dark'] {
 
 .rich-text ul,
 .rich-text ol {
-  font-size: 11.7px; /* 13px * 0.9 */
+  font-size: 13.7px; /* 11.7px + 2px */
   margin-bottom: 1em;
   padding-left: 1.5em;
 }
@@ -198,7 +198,7 @@ html[data-theme='dark'] {
 @media (min-width: 640px) {
   .rich-text ul,
   .rich-text ol {
-    font-size: 12.6px; /* 14px * 0.9 */
+    font-size: 14.6px; /* 12.6px + 2px */
   }
 }
 
@@ -220,7 +220,7 @@ html[data-theme='dark'] {
 }
 
 .rich-text code {
-  font-size: 10.8px; /* 12px * 0.9 */
+  font-size: 12.8px; /* 10.8px + 2px */
   background-color: #f3f4f6;
   padding: 0.125rem 0.25rem;
   border-radius: 0.25rem;
@@ -228,12 +228,12 @@ html[data-theme='dark'] {
 
 @media (min-width: 640px) {
   .rich-text code {
-    font-size: 11.7px; /* 13px * 0.9 */
+    font-size: 13.7px; /* 11.7px + 2px */
   }
 }
 
 .rich-text pre {
-  font-size: 10.8px; /* 12px * 0.9 */
+  font-size: 12.8px; /* 10.8px + 2px */
   background-color: #f3f4f6;
   padding: 0.75rem;
   border-radius: 0.5rem;
@@ -243,13 +243,13 @@ html[data-theme='dark'] {
 
 @media (min-width: 640px) {
   .rich-text pre {
-    font-size: 11.7px; /* 13px * 0.9 */
+    font-size: 13.7px; /* 11.7px + 2px */
     padding: 1rem;
   }
 }
 
 .rich-text blockquote {
-  font-size: 11.7px; /* 13px * 0.9 */
+  font-size: 13.7px; /* 11.7px + 2px */
   border-left: 3px solid #e5e7eb;
   padding-left: 1rem;
   margin-left: 0;
@@ -259,6 +259,6 @@ html[data-theme='dark'] {
 
 @media (min-width: 640px) {
   .rich-text blockquote {
-    font-size: 12.6px; /* 14px * 0.9 */
+    font-size: 14.6px; /* 12.6px + 2px */
   }
 }

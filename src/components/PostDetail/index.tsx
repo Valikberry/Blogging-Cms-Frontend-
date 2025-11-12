@@ -88,7 +88,7 @@ export function PostDetail({ post }: PostDetailProps) {
     <article className="min-h-screen bg-white">
       <div className="max-w-4xl mx-auto mb-6xx">
         {/* Post Title */}
-        <h1 className="text-2xl sm:text-2xl md:text-[24px] font-bold text-gray-900 mb-2 leading-tight">
+        <h1 className="text-xl sm:text-xl md:text-[20px] font-bold text-gray-900 mb-2 leading-tight">
           {post.title}
         </h1>
 

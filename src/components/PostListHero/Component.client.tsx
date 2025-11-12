@@ -14,10 +14,13 @@ interface Post {
   source?: string | null
   isHot?: boolean
   isStories?: boolean
-  heroImage?: {
-    url?: string | null
-    alt?: string | null
-  } | string | null
+  heroImage?:
+    | {
+        url?: string | null
+        alt?: string | null
+      }
+    | string
+    | null
   excerpt?: string | null
 }
 
@@ -65,9 +68,7 @@ export function PostListClient({
   initialCountryId,
 }: PostListClientProps) {
   // Find the index of the initial country if provided
-  const initialIndex = initialCountryId
-    ? countries.findIndex((c) => c.id === initialCountryId)
-    : -1 // -1 means "All Countries"
+  const initialIndex = initialCountryId ? countries.findIndex((c) => c.id === initialCountryId) : -1 // -1 means "All Countries"
 
   const [activeCountryIndex, setActiveCountryIndex] = useState(initialIndex)
   const [activeFilter, setActiveFilter] = useState<FilterTab>('new')
@@ -80,7 +81,7 @@ export function PostListClient({
 
   // Collect all posts from all countries
   const allPosts = countries.flatMap((country) =>
-    country.posts.map((post) => ({ ...post, country }))
+    country.posts.map((post) => ({ ...post, country })),
   )
 
   // Collect all hot posts from all countries
@@ -236,14 +237,15 @@ export function PostListClient({
         </div>
 
         {/* Hot Posts Scrollable Section */}
-        {allHotPosts.length > 0 && (
+        {allHotPosts.length > 0 && activeFilter !== 'subscribe' && (
           <div className="mb-1">
             <div className="overflow-x-auto scrollbar-hide -mx-1 px-1">
               <div className="flex gap-3 pb-2">
                 {allHotPosts.map((post) => {
                   const imageUrl = typeof post.heroImage === 'object' ? post.heroImage?.url : null
-                  const imageAlt = typeof post.heroImage === 'object' ? post.heroImage?.alt : post.title
-                  const normalizedCountrySlug = post.country.slug.replace(/[^a-zA-Z0-9]/g, "")
+                  const imageAlt =
+                    typeof post.heroImage === 'object' ? post.heroImage?.alt : post.title
+                  const normalizedCountrySlug = post.country.slug.replace(/[^a-zA-Z0-9]/g, '')
 
                   return (
                     <Link
@@ -263,8 +265,18 @@ export function PostListClient({
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
                             <div className="w-12 h-12 border-2 border-gray-300 rounded flex items-center justify-center">
-                              <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              <svg
+                                className="w-6 h-6 text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                />
                               </svg>
                             </div>
                           </div>
@@ -272,11 +284,8 @@ export function PostListClient({
                       </div>
                       {/* Content */}
                       <div className="p-1">
-                     
                         {post.excerpt && (
-                          <p className="text-gray-600 text-xs line-clamp-2">
-                            {post.excerpt}
-                          </p>
+                          <p className="text-gray-600 text-xs line-clamp-2">{post.excerpt}</p>
                         )}
                       </div>
                     </Link>
@@ -292,8 +301,10 @@ export function PostListClient({
           <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-8">
             <div className="max-w-md mx-auto text-center">
               <Mail className="w-10 h-10 sm:w-12 sm:h-12 text-indigo-600 mx-auto mb-4" />
-              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Subscribe to Updates</h3>
-              <p className="text-base sm:text-lg text-gray-600 mb-6">
+              <h3 className="text-[20px] font-bold text-gray-900 mb-2">
+                Subscribe to Updates
+              </h3>
+              <p className="text-sm sm:text-base text-gray-600 mb-6">
                 Get the latest posts delivered straight to your inbox.
               </p>
               <form onSubmit={handleSubscribe} className="space-y-4">
@@ -321,7 +332,9 @@ export function PostListClient({
                 </button>
               </form>
               {subscribeMessage && (
-                <p className={`mt-4 font-medium ${messageType === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                <p
+                  className={`mt-4 font-medium ${messageType === 'success' ? 'text-green-600' : 'text-red-600'}`}
+                >
                   {subscribeMessage}
                 </p>
               )}
@@ -339,40 +352,44 @@ export function PostListClient({
                   <div key={date}>
                     {posts.map((post: any, postIndex) => {
                       const postCountry = post.country || activeCountry
-                      const normalizedCountrySlug = postCountry?.slug ? postCountry.slug.replace(/[^a-zA-Z0-9]/g, "") : ""
+                      const normalizedCountrySlug = postCountry?.slug
+                        ? postCountry.slug.replace(/[^a-zA-Z0-9]/g, '')
+                        : ''
 
                       return (
-                      <div
-                        key={post.id}
-                        className={
-                          groupIndex > 0 || postIndex > 0 ? 'border-t border-gray-100' : ''
-                        }
-                      >
-                        <Link
-                          href={`/${normalizedCountrySlug}/${post.slug}`}
-                          className="block hover:bg-gray-50 transition-colors"
+                        <div
+                          key={post.id}
+                          className={
+                            groupIndex > 0 || postIndex > 0 ? 'border-t border-gray-200 py-1' : ''
+                          }
                         >
-                          <div className="px-3 sm:px-6 py-3 sm:py-4">
-                            <div className="flex items-center justify-between gap-2 sm:gap-4">
-                              <div className="flex gap-2 sm:gap-4 items-start flex-1 min-w-0">
-                                <span className="text-indigo-600 font-medium text-sm sm:text-base shrink-0 pt-0.5">
-                                  {post.publishedAt}
-                                </span>
-                                <div className="flex-1 min-w-0">
-                                  <h3 className="text-gray-900 font-medium text-sm sm:text-base leading-snug">
-                                    {post.title}
-                                  </h3>
+                          <Link
+                            href={`/${normalizedCountrySlug}/${post.slug}`}
+                            className="block hover:bg-gray-50 transition-colors"
+                          >
+                            <div className="px-3 sm:px-6 py-3 sm:py-4">
+                              <div className="flex items-center justify-between gap-2 sm:gap-4">
+                                <div className="flex gap-2 sm:gap-4 items-start flex-1 min-w-0">
+                                  <span className="text-indigo-600 font-medium text-sm sm:text-base shrink-0 pt-0.5">
+                                    {post.publishedAt}
+                                  </span>
+                                  <div className="flex-1 min-w-0">
+                                    <h3 className="text-gray-900 font-medium text-sm sm:text-base leading-snug">
+                                      {post.title}
+                                    </h3>
 
-                                  {showSource && post.source && (
-                                    <p className="text-sm text-gray-500 mt-1">From {post.source}</p>
-                                  )}
+                                    {showSource && post.source && (
+                                      <p className="text-xs text-gray-500 mt-1">
+                                        From {post.source}
+                                      </p>
+                                    )}
+                                  </div>
                                 </div>
+                                <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 shrink-0" />
                               </div>
-                              <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 shrink-0" />
                             </div>
-                          </div>
-                        </Link>
-                      </div>
+                          </Link>
+                        </div>
                       )
                     })}
                   </div>
@@ -383,34 +400,36 @@ export function PostListClient({
               <div>
                 {filteredPosts.map((post: any, index: number) => {
                   const postCountry = post.country || activeCountry
-                  const normalizedCountrySlug = postCountry?.slug ? postCountry.slug.replace(/[^a-zA-Z0-9]/g, "") : ""
+                  const normalizedCountrySlug = postCountry?.slug
+                    ? postCountry.slug.replace(/[^a-zA-Z0-9]/g, '')
+                    : ''
 
                   return (
-                  <div key={post.id} className={index > 0 ? 'border-t border-gray-100' : ''}>
-                    <Link
-                      href={`/${normalizedCountrySlug}/${post.slug}`}
-                      className="block hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="px-3 sm:px-6 py-1">
-                        <div className="flex items-center justify-between gap-2 sm:gap-4">
-                          <div className="flex gap-2 sm:gap-4 items-start flex-1 min-w-0">
-                            <span className="text-indigo-600 font-medium text-sm sm:text-base shrink-0 pt-0.5">
-                              {post.publishedAt}
-                            </span>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="text-gray-900 font-medium text-base sm:text-lg leading-snug">
-                                {post.title}
-                              </h3>
-                              {showSource && post.source && (
-                                <p className="text-sm text-gray-500 mt-1">From {post.source}</p>
-                              )}
+                    <div key={post.id} className={index > 0 ? 'border-t border-gray-200 py-1' : ''}>
+                      <Link
+                        href={`/${normalizedCountrySlug}/${post.slug}`}
+                        className="block hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="px-3 sm:px-6 py-1">
+                          <div className="flex items-center justify-between gap-2 sm:gap-4">
+                            <div className="flex gap-2 sm:gap-4 items-start flex-1 min-w-0">
+                              <span className="text-indigo-600 font-medium text-sm sm:text-base shrink-0 pt-0.5">
+                                {post.publishedAt}
+                              </span>
+                              <div className="flex-1 min-w-0">
+                                <h3 className="text-gray-900 font-medium text-sm sm:text-base leading-snug">
+                                  {post.title}
+                                </h3>
+                                {showSource && post.source && (
+                                  <p className="text-xs text-gray-500 mt-1">From {post.source}</p>
+                                )}
+                              </div>
                             </div>
+                            <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 shrink-0" />
                           </div>
-                          <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 shrink-0" />
                         </div>
-                      </div>
-                    </Link>
-                  </div>
+                      </Link>
+                    </div>
                   )
                 })}
               </div>
