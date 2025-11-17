@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Flame, Book, ChevronRight, Edit, Mail } from 'lucide-react'
+import { Flame, Book, ChevronRight, Edit, Mail, ChevronLeft, X } from 'lucide-react'
 
 interface Post {
   id: string
@@ -57,7 +57,7 @@ function groupPostsByDate(posts: Post[]) {
   return grouped
 }
 
-type FilterTab = 'new' | 'hot' | 'stories' | 'subscribe'
+type FilterTab = 'new' | 'hot' | 'stories'
 
 export function PostListClient({
   title,
@@ -76,6 +76,9 @@ export function PostListClient({
   const [subscribeMessage, setSubscribeMessage] = useState('')
   const [isSubscribing, setIsSubscribing] = useState(false)
   const [messageType, setMessageType] = useState<'success' | 'error'>('success')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const postsPerPage = 10
 
   const activeCountry = activeCountryIndex >= 0 ? countries[activeCountryIndex] : null
 
@@ -102,8 +105,20 @@ export function PostListClient({
         return true
       })
 
-  // Group posts by date if enabled
-  const groupedPosts = groupByDate && filteredPosts ? groupPostsByDate(filteredPosts) : null
+  // Calculate pagination
+  const totalPosts = filteredPosts.length
+  const totalPages = Math.ceil(totalPosts / postsPerPage)
+  const startIndex = (currentPage - 1) * postsPerPage
+  const endIndex = startIndex + postsPerPage
+  const paginatedPosts = filteredPosts.slice(startIndex, endIndex)
+
+  // Group posts by date if enabled (use paginated posts)
+  const groupedPosts = groupByDate && paginatedPosts ? groupPostsByDate(paginatedPosts) : null
+
+  // Reset to page 1 when filter or country changes
+  React.useEffect(() => {
+    setCurrentPage(1)
+  }, [activeFilter, activeCountryIndex])
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -129,6 +144,11 @@ export function PostListClient({
         setMessageType('success')
         setSubscribeMessage(data.message || 'Thank you for subscribing!')
         setEmail('')
+        // Close modal after 2 seconds on success
+        setTimeout(() => {
+          setIsModalOpen(false)
+          setSubscribeMessage('')
+        }, 2000)
       } else {
         setMessageType('error')
         setSubscribeMessage(data.error || 'Failed to subscribe. Please try again.')
@@ -139,7 +159,6 @@ export function PostListClient({
       setSubscribeMessage('Network error. Please check your connection and try again.')
     } finally {
       setIsSubscribing(false)
-      setTimeout(() => setSubscribeMessage(''), 5000)
     }
   }
 
@@ -180,64 +199,58 @@ export function PostListClient({
           </div>
         )}
 
-        {/* Filter Tabs (New, Hot, Stories, Subscribe) */}
+        {/* Filter Tabs and Subscribe Button */}
         <div className="border-b border-gray-300 mb-3 overflow-x-auto scrollbar-hide">
-          <nav className="flex gap-3 sm:gap-8 px-1 min-w-max">
+          <nav className="flex justify-between items-center px-1">
+            <div className="flex gap-3 sm:gap-8 min-w-max">
+              <button
+                onClick={() => setActiveFilter('new')}
+                className={`flex items-center gap-1.5 pb-3 text-sm sm:text-base font-medium transition-colors relative whitespace-nowrap ${
+                  activeFilter === 'new' ? 'text-indigo-600' : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span>New</span>
+                {activeFilter === 'new' && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600" />
+                )}
+              </button>
+              <button
+                onClick={() => setActiveFilter('hot')}
+                className={`flex items-center gap-1.5 pb-3 text-sm sm:text-base font-medium transition-colors relative whitespace-nowrap ${
+                  activeFilter === 'hot' ? 'text-indigo-600' : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span>Hot</span>
+                {activeFilter === 'hot' && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600" />
+                )}
+              </button>
+              <button
+                onClick={() => setActiveFilter('stories')}
+                className={`flex items-center gap-1.5 pb-3 text-sm sm:text-base font-medium transition-colors relative whitespace-nowrap ${
+                  activeFilter === 'stories' ? 'text-indigo-600' : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <Book className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span>Stories</span>
+                {activeFilter === 'stories' && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600" />
+                )}
+              </button>
+            </div>
             <button
-              onClick={() => setActiveFilter('new')}
-              className={`flex items-center gap-1.5 pb-3 text-sm sm:text-base font-medium transition-colors relative whitespace-nowrap ${
-                activeFilter === 'new' ? 'text-indigo-600' : 'text-gray-600 hover:text-gray-900'
-              }`}
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors whitespace-nowrap"
             >
-              <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span>New</span>
-              {activeFilter === 'new' && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600" />
-              )}
-            </button>
-            <button
-              onClick={() => setActiveFilter('hot')}
-              className={`flex items-center gap-1.5 pb-3 text-sm sm:text-base font-medium transition-colors relative whitespace-nowrap ${
-                activeFilter === 'hot' ? 'text-indigo-600' : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span>Hot</span>
-              {activeFilter === 'hot' && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600" />
-              )}
-            </button>
-            <button
-              onClick={() => setActiveFilter('stories')}
-              className={`flex items-center gap-1.5 pb-3 text-sm sm:text-base font-medium transition-colors relative whitespace-nowrap ${
-                activeFilter === 'stories' ? 'text-indigo-600' : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <Book className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span>Stories</span>
-              {activeFilter === 'stories' && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600" />
-              )}
-            </button>
-            <button
-              onClick={() => setActiveFilter('subscribe')}
-              className={`flex items-center gap-1.5 pb-3 text-sm sm:text-base font-medium transition-colors relative whitespace-nowrap ${
-                activeFilter === 'subscribe'
-                  ? 'text-indigo-600'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <Mail className="w-4 h-4" />
               <span>Subscribe</span>
-              {activeFilter === 'subscribe' && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600" />
-              )}
             </button>
           </nav>
         </div>
-
         {/* Hot Posts Scrollable Section */}
-        {allHotPosts.length > 0 && activeFilter !== 'subscribe' && (
+        {allHotPosts.length > 0 && (
           <div className="mb-1">
             <div className="overflow-x-auto scrollbar-hide -mx-1 px-1">
               <div className="flex gap-3 pb-2">
@@ -296,55 +309,8 @@ export function PostListClient({
           </div>
         )}
 
-        {/* Subscribe Form */}
-        {activeFilter === 'subscribe' && (
-          <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-8">
-            <div className="max-w-md mx-auto text-center">
-              <Mail className="w-10 h-10 sm:w-12 sm:h-12 text-indigo-600 mx-auto mb-4" />
-              <h3 className="text-[20px] font-bold text-gray-900 mb-2">
-                Subscribe to Updates
-              </h3>
-              <p className="text-sm sm:text-base text-gray-600 mb-6">
-                Get the latest posts delivered straight to your inbox.
-              </p>
-              <form onSubmit={handleSubscribe} className="space-y-4">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-                <button
-                  type="submit"
-                  disabled={isSubscribing}
-                  className="w-full bg-indigo-600 text-white px-6 py-3 rounded-md font-medium hover:bg-indigo-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {isSubscribing ? (
-                    <>
-                      <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                      Subscribing...
-                    </>
-                  ) : (
-                    'Subscribe'
-                  )}
-                </button>
-              </form>
-              {subscribeMessage && (
-                <p
-                  className={`mt-4 font-medium ${messageType === 'success' ? 'text-green-600' : 'text-red-600'}`}
-                >
-                  {subscribeMessage}
-                </p>
-              )}
-            </div>
-          </div>
-        )}
-
         {/* Posts List */}
-        {activeFilter !== 'subscribe' && (
-          <div className="bg-white rounded-lg border border-gray-200">
+        <div className="bg-white rounded-lg border border-gray-200">
             {groupByDate && groupedPosts ? (
               // Grouped by date view
               <div>
@@ -398,7 +364,7 @@ export function PostListClient({
             ) : (
               // Simple list view
               <div>
-                {filteredPosts.map((post: any, index: number) => {
+                {paginatedPosts.map((post: any, index: number) => {
                   const postCountry = post.country || activeCountry
                   const normalizedCountrySlug = postCountry?.slug
                     ? postCountry.slug.replace(/[^a-zA-Z0-9]/g, '')
@@ -441,9 +407,145 @@ export function PostListClient({
                 No posts found for this filter.
               </div>
             )}
+        </div>
+
+        {/* Pagination Info and Controls */}
+        {filteredPosts.length > 0 && (
+          <div className="mt-6 space-y-4">
+            {/* Showing X-Y of Z posts */}
+            <div className="text-center text-sm text-gray-600">
+              Showing {startIndex + 1}-{Math.min(endIndex, totalPosts)} of {totalPosts} post
+              {totalPosts !== 1 ? 's' : ''}
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-1">
+                {/* Previous Button */}
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="w-9 h-9 flex items-center justify-center rounded hover:bg-gray-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                  aria-label="Previous page"
+                >
+                  <ChevronLeft className="w-5 h-5 text-gray-700" />
+                </button>
+
+                {/* Page Numbers */}
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                  // Show first page, last page, current page, and pages around current
+                  const showPage =
+                    page === 1 ||
+                    page === totalPages ||
+                    (page >= currentPage - 1 && page <= currentPage + 1)
+
+                  // Show ellipsis
+                  const showEllipsisBefore = page === currentPage - 2 && currentPage > 3
+                  const showEllipsisAfter = page === currentPage + 2 && currentPage < totalPages - 2
+
+                  if (!showPage && !showEllipsisBefore && !showEllipsisAfter) {
+                    return null
+                  }
+
+                  if (showEllipsisBefore || showEllipsisAfter) {
+                    return (
+                      <span key={`ellipsis-${page}`} className="w-9 h-9 flex items-center justify-center text-gray-600">
+                        ...
+                      </span>
+                    )
+                  }
+
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`w-9 h-9 flex items-center justify-center rounded text-sm font-medium transition-colors ${
+                        currentPage === page
+                          ? 'bg-indigo-600 text-white'
+                          : 'text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  )
+                })}
+
+                {/* Next Button */}
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="w-9 h-9 flex items-center justify-center rounded hover:bg-gray-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                  aria-label="Next page"
+                >
+                  <ChevronRight className="w-5 h-5 text-gray-700" />
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
+
+      {/* Subscribe Modal */}
+      {isModalOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={() => setIsModalOpen(false)}
+        >
+          <div
+            className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 sm:p-8 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="Close modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Modal content */}
+            <div className="text-center">
+              <Mail className="w-12 h-12 text-indigo-600 mx-auto mb-4" />
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Subscribe to Updates</h3>
+              <p className="text-base text-gray-600 mb-6">
+                Get the latest posts delivered straight to your inbox.
+              </p>
+              <form onSubmit={handleSubscribe} className="space-y-4">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                <button
+                  type="submit"
+                  disabled={isSubscribing}
+                  className="w-full bg-indigo-600 text-white px-6 py-3 rounded-md font-medium hover:bg-indigo-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isSubscribing ? (
+                    <>
+                      <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      Subscribing...
+                    </>
+                  ) : (
+                    'Subscribe'
+                  )}
+                </button>
+              </form>
+              {subscribeMessage && (
+                <p
+                  className={`mt-4 font-medium ${messageType === 'success' ? 'text-green-600' : 'text-red-600'}`}
+                >
+                  {subscribeMessage}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
