@@ -52,8 +52,8 @@ interface PostListClientProps {
 }
 
 // Group posts by date
-function groupPostsByDate(posts: Post[]) {
-  const grouped: { [key: string]: Post[] } = {}
+function groupPostsByDate(posts: PostWithCountry[]) {
+  const grouped: { [key: string]: PostWithCountry[] } = {}
 
   posts.forEach((post) => {
     const dateKey = post.publishedAt
@@ -110,21 +110,23 @@ export function PostListClient({
   const activeCountry = activeCountryIndex >= 0 ? countries[activeCountryIndex] : null
 
   // Collect all posts from all countries
-  const allPosts = countries.flatMap((country) =>
+  const allPosts: PostWithCountry[] = countries.flatMap((country) =>
     country.posts.map((post) => ({ ...post, country })),
   )
 
   // Collect all hot posts from all countries
-  const allHotPosts = allPosts.filter((post) => post.isHot)
+  const allHotPosts: PostWithCountry[] = allPosts.filter((post) => post.isHot)
 
   // Filter posts based on active filter tab and selected country
-  const filteredPosts = activeCountry
-    ? activeCountry.posts.filter((post) => {
-        if (activeFilter === 'hot') return post.isHot
-        if (activeFilter === 'stories') return post.isStories
-        if (activeFilter === 'new') return true
-        return true
-      })
+  const filteredPosts: PostWithCountry[] = activeCountry
+    ? activeCountry.posts
+        .map((post) => ({ ...post, country: activeCountry }))
+        .filter((post) => {
+          if (activeFilter === 'hot') return post.isHot
+          if (activeFilter === 'stories') return post.isStories
+          if (activeFilter === 'new') return true
+          return true
+        })
     : allPosts.filter((post) => {
         if (activeFilter === 'hot') return post.isHot
         if (activeFilter === 'stories') return post.isStories
