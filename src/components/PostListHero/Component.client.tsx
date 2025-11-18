@@ -38,6 +38,10 @@ interface Country {
   posts: Post[]
 }
 
+interface PostWithCountry extends Post {
+  country: Country
+}
+
 interface PostListClientProps {
   title: string
   description?: string
@@ -277,9 +281,9 @@ export function PostListClient({
           <div className="mb-1">
             <div className="overflow-x-auto scrollbar-hide -mx-1 px-1">
               <div className="flex gap-3 pb-2">
-                {allHotPosts.map((post) => {                  
+                {allHotPosts.map((post) => {
                   const hasVideo = post.videoEmbed?.enabled && post.videoEmbed?.embedUrl
-                  const videoThumbnail = hasVideo ? getVideoThumbnail(post.videoEmbed?.embedUrl!) : null
+                  const videoThumbnail = hasVideo && post.videoEmbed?.embedUrl ? getVideoThumbnail(post.videoEmbed.embedUrl) : null
                   const imageUrl = typeof post.heroImage === 'object' ? post.heroImage?.url : null
                   const imageAlt =
                     typeof post.heroImage === 'object' ? post.heroImage?.alt : post.title
@@ -300,6 +304,7 @@ export function PostListClient({
                           <>
                             {videoThumbnail ? (
                               // Use regular img tag for YouTube thumbnails
+                              // eslint-disable-next-line @next/next/no-img-element
                               <img
                                 src={displayImageUrl}
                                 alt={imageAlt || post.title}
@@ -372,7 +377,7 @@ export function PostListClient({
               <div>
                 {Object.entries(groupedPosts).map(([date, posts], groupIndex) => (
                   <div key={date}>
-                    {posts.map((post: any, postIndex) => {
+                    {posts.map((post: PostWithCountry, postIndex) => {
                       const postCountry = post.country || activeCountry
                       const normalizedCountrySlug = postCountry?.slug
                         ? postCountry.slug.replace(/[^a-zA-Z0-9]/g, '')
@@ -420,7 +425,7 @@ export function PostListClient({
             ) : (
               // Simple list view
               <div>
-                {paginatedPosts.map((post: any, index: number) => {
+                {paginatedPosts.map((post: PostWithCountry, index: number) => {
                   const postCountry = post.country || activeCountry
                   const normalizedCountrySlug = postCountry?.slug
                     ? postCountry.slug.replace(/[^a-zA-Z0-9]/g, '')
