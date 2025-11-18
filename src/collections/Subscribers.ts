@@ -1,15 +1,15 @@
 import type { CollectionConfig } from 'payload'
 
 import { anyone } from '../access/anyone'
-import { authenticated } from '../access/authenticated'
+import { isAdmin } from '../access/isAdmin'
 
 export const Subscribers: CollectionConfig = {
   slug: 'subscribers',
   access: {
     create: anyone, // Allow public to subscribe
-    delete: authenticated,
-    read: authenticated, // Only admins can see subscribers
-    update: authenticated,
+    delete: isAdmin, // Only admins can delete subscribers
+    read: isAdmin, // Only admins can see subscribers
+    update: isAdmin, // Only admins can update subscribers
   },
   admin: {
     useAsTitle: 'email',

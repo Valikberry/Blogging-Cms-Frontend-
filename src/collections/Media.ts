@@ -7,15 +7,17 @@ import {
 } from '@payloadcms/richtext-lexical'
 
 import { anyone } from '../access/anyone'
+import { isAdminOrAuthor } from '../access/isAdminOrAuthor'
 import { authenticated } from '../access/authenticated'
 
 export const Media: CollectionConfig = {
   slug: 'media',
   access: {
-    create: authenticated,
-    delete: authenticated,
+    admin: authenticated, // Authors can see in admin UI
+    create: isAdminOrAuthor, // Authors can upload media for their posts
+    delete: isAdminOrAuthor,
     read: anyone,
-    update: authenticated,
+    update: isAdminOrAuthor,
   },
   fields: [
     {

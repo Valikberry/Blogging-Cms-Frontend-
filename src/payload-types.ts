@@ -534,6 +534,10 @@ export interface Continent {
 export interface User {
   id: string;
   name?: string | null;
+  /**
+   * User roles - Admins have full access, Authors can only manage posts
+   */
+  roles: ('admin' | 'author')[];
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -1528,6 +1532,7 @@ export interface CategoriesSelect<T extends boolean = true> {
  */
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
+  roles?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;

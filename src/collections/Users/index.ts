@@ -1,18 +1,28 @@
 import type { CollectionConfig } from 'payload'
 
 import { authenticated } from '../../access/authenticated'
+import { isAdmin } from '../../access/isAdmin'
+import { isAdminFieldLevel } from '../../access/isAdminFieldLevel'
 
 export const Users: CollectionConfig = {
   slug: 'users',
   access: {
     admin: authenticated,
-    create: authenticated,
-    delete: authenticated,
+    create: isAdmin, // Only admins can create users
+    delete: isAdmin, // Only admins can delete users
     read: authenticated,
-    update: authenticated,
+    update: ({ req: { user } }) => {
+      // Admins can update anyone, users can update themselves
+      if (user?.roles?.includes('admin')) return true
+      return {
+        id: {
+          equals: user?.id,
+        },
+      }
+    },
   },
   admin: {
-    defaultColumns: ['name', 'email'],
+    defaultColumns: ['name', 'email', 'roles'],
     useAsTitle: 'name',
   },
   auth: true,
@@ -20,6 +30,30 @@ export const Users: CollectionConfig = {
     {
       name: 'name',
       type: 'text',
+    },
+    {
+      name: 'roles',
+      type: 'select',
+      hasMany: true,
+      defaultValue: ['author'],
+      options: [
+        {
+          label: 'Admin',
+          value: 'admin',
+        },
+        {
+          label: 'Author',
+          value: 'author',
+        },
+      ],
+      required: true,
+      access: {
+        create: isAdminFieldLevel,
+        update: isAdminFieldLevel,
+      },
+      admin: {
+        description: 'User roles - Admins have full access, Authors can only manage posts',
+      },
     },
   ],
   timestamps: true,

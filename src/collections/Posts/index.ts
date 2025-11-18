@@ -11,6 +11,7 @@ import {
 
 import { authenticated } from '../../access/authenticated'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
+import { isAdminOrAuthor } from '../../access/isAdminOrAuthor'
 import { Banner } from '../../blocks/Banner/config'
 import { Code } from '../../blocks/Code/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
@@ -30,10 +31,11 @@ import { slugField } from '@/fields/slug'
 export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
   access: {
-    create: authenticated,
-    delete: authenticated,
+    admin: authenticated, // Authors can see in admin UI
+    create: isAdminOrAuthor,
+    delete: isAdminOrAuthor,
     read: authenticatedOrPublished,
-    update: authenticated,
+    update: isAdminOrAuthor,
   },
   defaultPopulate: {
     title: true,

@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Flame, Book, ChevronRight, Edit, Mail, ChevronLeft, X } from 'lucide-react'
+import { Flame, Book, ChevronRight, Edit, Mail, ChevronLeft, X, Play } from 'lucide-react'
 
 interface Post {
   id: string
@@ -22,6 +22,11 @@ interface Post {
     | string
     | null
   excerpt?: string | null
+  videoEmbed?: {
+    enabled?: boolean | null
+    embedUrl?: string | null
+    aspectRatio?: ('16-9' | '4-3' | '1-1') | null
+  } | null
 }
 
 interface Country {
@@ -55,6 +60,24 @@ function groupPostsByDate(posts: Post[]) {
   })
 
   return grouped
+}
+
+// Extract video thumbnail from embed URL
+function getVideoThumbnail(embedUrl: string): string | null {
+  // YouTube
+  const youtubeMatch = embedUrl.match(/youtube\.com\/embed\/([^?]+)/)
+  if (youtubeMatch) {
+    return `https://img.youtube.com/vi/${youtubeMatch[1]}/maxresdefault.jpg`
+  }
+
+  // Vimeo - Note: Vimeo thumbnails require API call, so we'll handle it differently
+  const vimeoMatch = embedUrl.match(/player\.vimeo\.com\/video\/(\d+)/)
+  if (vimeoMatch) {
+    // We can't easily get Vimeo thumbnails without API, so return null
+    return null
+  }
+
+  return null
 }
 
 type FilterTab = 'new' | 'hot' | 'stories'
@@ -167,8 +190,8 @@ export function PostListClient({
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-gray-900 text-[20px] font-bold mb-2">{title}</h1>
-          <p className="text-gray-500 text-base sm:text-base">{description}</p>
+          <h1 className="text-gray-900 text-2xl sm:text-[20px] font-bold mb-2">{title}</h1>
+          <p className="text-gray-500 text-lg sm:text-base">{description}</p>
         </div>
 
         {/* Country Buttons */}
@@ -178,7 +201,7 @@ export function PostListClient({
               <button
                 key={country.id}
                 onClick={() => setActiveCountryIndex(index)}
-                className={`px-2 sm:px-4 py-1 sm:py-1.5 rounded-lg text-sm sm:text-base font-medium whitespace-nowrap transition-colors border flex items-center gap-1 sm:gap-1.5 flex-shrink-0 ${
+                className={`px-2 sm:px-4 py-1 sm:py-1.5 rounded-lg text-base sm:text-base font-medium whitespace-nowrap transition-colors border flex items-center gap-1 sm:gap-1.5 flex-shrink-0 ${
                   activeCountryIndex === index
                     ? 'bg-[#6366f1]/10 text-[#6366f1] border-[#6366f1]'
                     : 'bg-gray-200 text-gray-700 border-gray-300 hover:bg-gray-300'
@@ -205,11 +228,11 @@ export function PostListClient({
             <div className="flex gap-3 sm:gap-8 min-w-max">
               <button
                 onClick={() => setActiveFilter('new')}
-                className={`flex items-center gap-1.5 pb-3 text-sm sm:text-base font-medium transition-colors relative whitespace-nowrap ${
+                className={`flex items-center gap-1.5 pb-3 text-base sm:text-base font-medium transition-colors relative whitespace-nowrap ${
                   activeFilter === 'new' ? 'text-indigo-600' : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <Edit className="w-4 h-4 sm:w-4 sm:h-4" />
                 <span>New</span>
                 {activeFilter === 'new' && (
                   <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600" />
@@ -217,11 +240,11 @@ export function PostListClient({
               </button>
               <button
                 onClick={() => setActiveFilter('hot')}
-                className={`flex items-center gap-1.5 pb-3 text-sm sm:text-base font-medium transition-colors relative whitespace-nowrap ${
+                className={`flex items-center gap-1.5 pb-3 text-base sm:text-base font-medium transition-colors relative whitespace-nowrap ${
                   activeFilter === 'hot' ? 'text-indigo-600' : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <Flame className="w-4 h-4 sm:w-4 sm:h-4" />
                 <span>Hot</span>
                 {activeFilter === 'hot' && (
                   <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600" />
@@ -229,11 +252,11 @@ export function PostListClient({
               </button>
               <button
                 onClick={() => setActiveFilter('stories')}
-                className={`flex items-center gap-1.5 pb-3 text-sm sm:text-base font-medium transition-colors relative whitespace-nowrap ${
+                className={`flex items-center gap-1.5 pb-3 text-base sm:text-base font-medium transition-colors relative whitespace-nowrap ${
                   activeFilter === 'stories' ? 'text-indigo-600' : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                <Book className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <Book className="w-4 h-4 sm:w-4 sm:h-4" />
                 <span>Stories</span>
                 {activeFilter === 'stories' && (
                   <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600" />
@@ -242,7 +265,7 @@ export function PostListClient({
             </div>
             <button
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors whitespace-nowrap"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-base font-medium hover:bg-indigo-700 transition-colors whitespace-nowrap"
             >
               <Mail className="w-4 h-4" />
               <span>Subscribe</span>
@@ -254,11 +277,16 @@ export function PostListClient({
           <div className="mb-1">
             <div className="overflow-x-auto scrollbar-hide -mx-1 px-1">
               <div className="flex gap-3 pb-2">
-                {allHotPosts.map((post) => {
+                {allHotPosts.map((post) => {                  
+                  const hasVideo = post.videoEmbed?.enabled && post.videoEmbed?.embedUrl
+                  const videoThumbnail = hasVideo ? getVideoThumbnail(post.videoEmbed?.embedUrl!) : null
                   const imageUrl = typeof post.heroImage === 'object' ? post.heroImage?.url : null
                   const imageAlt =
                     typeof post.heroImage === 'object' ? post.heroImage?.alt : post.title
                   const normalizedCountrySlug = post.country.slug.replace(/[^a-zA-Z0-9]/g, '')
+
+                  // Prioritize video thumbnail, then hero image, then fallback
+                  const displayImageUrl = videoThumbnail || imageUrl
 
                   return (
                     <Link
@@ -266,16 +294,44 @@ export function PostListClient({
                       href={`/${normalizedCountrySlug}/${post.slug}`}
                       className="flex-shrink-0 w-[143px] bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
                     >
-                      {/* Image */}
+                      {/* Image/Video Thumbnail */}
                       <div className="relative w-full h-[90px] bg-gray-100">
-                        {imageUrl ? (
-                          <Image
-                            src={imageUrl}
-                            alt={imageAlt || post.title}
-                            fill
-                            className="object-cover"
-                          />
+                        {displayImageUrl ? (
+                          <>
+                            {videoThumbnail ? (
+                              // Use regular img tag for YouTube thumbnails
+                              <img
+                                src={displayImageUrl}
+                                alt={imageAlt || post.title}
+                                className="absolute inset-0 w-full h-full object-cover"
+                              />
+                            ) : (
+                              // Use Next.js Image for hero images
+                              <Image
+                                src={displayImageUrl}
+                                alt={imageAlt || post.title}
+                                fill
+                                className="object-cover"
+                              />
+                            )}
+                            {/* Play button overlay for videos */}
+                            {hasVideo && (
+                              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
+                                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg">
+                                  <Play className="w-5 h-5 text-indigo-600 ml-0.5" fill="currentColor" />
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        ) : hasVideo ? (
+                          // Video without thumbnail (e.g., Vimeo)
+                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600">
+                            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
+                              <Play className="w-6 h-6 text-indigo-600 ml-0.5" fill="currentColor" />
+                            </div>
+                          </div>
                         ) : (
+                          // No image or video
                           <div className="w-full h-full flex items-center justify-center">
                             <div className="w-12 h-12 border-2 border-gray-300 rounded flex items-center justify-center">
                               <svg
@@ -298,7 +354,7 @@ export function PostListClient({
                       {/* Content */}
                       <div className="p-1">
                         {post.excerpt && (
-                          <p className="text-gray-600 text-xs line-clamp-2">{post.excerpt}</p>
+                          <p className="text-gray-600 text-sm line-clamp-2">{post.excerpt}</p>
                         )}
                       </div>
                     </Link>
@@ -336,16 +392,16 @@ export function PostListClient({
                             <div className="px-3 sm:px-6 py-3 sm:py-4">
                               <div className="flex items-center justify-between gap-2 sm:gap-4">
                                 <div className="flex gap-2 sm:gap-4 items-start flex-1 min-w-0">
-                                  <span className="text-indigo-600 font-medium text-sm sm:text-base shrink-0 pt-0.5">
+                                  <span className="text-indigo-600 font-medium text-base sm:text-base shrink-0 pt-0.5">
                                     {post.publishedAt}
                                   </span>
                                   <div className="flex-1 min-w-0">
-                                    <h3 className="text-gray-900 font-medium text-sm sm:text-base leading-snug">
+                                    <h3 className="text-gray-900 font-medium text-base sm:text-base leading-snug">
                                       {post.title}
                                     </h3>
 
                                     {showSource && post.source && (
-                                      <p className="text-xs text-gray-500 mt-1">
+                                      <p className="text-sm text-gray-500 mt-1">
                                         From {post.source}
                                       </p>
                                     )}
@@ -379,15 +435,15 @@ export function PostListClient({
                         <div className="px-3 sm:px-6 py-1">
                           <div className="flex items-center justify-between gap-2 sm:gap-4">
                             <div className="flex gap-2 sm:gap-4 items-start flex-1 min-w-0">
-                              <span className="text-indigo-600 font-medium text-sm sm:text-base shrink-0 pt-0.5">
+                              <span className="text-indigo-600 font-medium text-base sm:text-base shrink-0 pt-0.5">
                                 {post.publishedAt}
                               </span>
                               <div className="flex-1 min-w-0">
-                                <h3 className="text-gray-900 font-medium text-sm sm:text-base leading-snug">
+                                <h3 className="text-gray-900 font-medium text-base sm:text-base leading-snug">
                                   {post.title}
                                 </h3>
                                 {showSource && post.source && (
-                                  <p className="text-xs text-gray-500 mt-1">From {post.source}</p>
+                                  <p className="text-sm text-gray-500 mt-1">From {post.source}</p>
                                 )}
                               </div>
                             </div>
@@ -413,7 +469,7 @@ export function PostListClient({
         {filteredPosts.length > 0 && (
           <div className="mt-6 space-y-4">
             {/* Showing X-Y of Z posts */}
-            <div className="text-center text-sm text-gray-600">
+            <div className="text-center text-base text-gray-600">
               Showing {startIndex + 1}-{Math.min(endIndex, totalPosts)} of {totalPosts} post
               {totalPosts !== 1 ? 's' : ''}
             </div>

@@ -179,4 +179,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     creator: '@askgeopolitics',
   },
+  icons: {
+    icon: '/api/media/file/Ask%20Geopolitics%20Logo',
+  },
 }

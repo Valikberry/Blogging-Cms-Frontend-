@@ -1,4 +1,6 @@
 import type { CollectionConfig } from 'payload'
+import { isAdmin } from '../access/isAdmin'
+import { authenticated } from '../access/authenticated'
 
 export const Countries: CollectionConfig = {
   slug: 'countries',
@@ -12,7 +14,11 @@ export const Countries: CollectionConfig = {
   // OR
   // defaultSort: 'name', // ← For alphabetical
   access: {
-    read: () => true,
+    admin: authenticated, // Authors can see in admin UI
+    create: isAdmin,
+    delete: isAdmin,
+    update: isAdmin,
+    read: () => true, // Public read access
   },
   fields: [
     {

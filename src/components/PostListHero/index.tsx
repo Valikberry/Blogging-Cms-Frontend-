@@ -161,6 +161,7 @@ export async function PostListHero(props: PostListHeroProps) {
           isStories: post.isStories || false,
           heroImage: heroImage ? { url: heroImage.url || null, alt: heroImage.alt || null } : null,
           excerpt: post.excerpt || null,
+          videoEmbed: post.videoEmbed || null,
         }
       })
 

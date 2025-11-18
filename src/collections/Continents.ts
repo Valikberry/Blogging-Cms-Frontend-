@@ -1,4 +1,6 @@
 import type { CollectionConfig } from 'payload'
+import { isAdmin } from '../access/isAdmin'
+import { authenticated } from '../access/authenticated'
 
 export const Continents: CollectionConfig = {
   slug: 'continents',
@@ -7,7 +9,11 @@ export const Continents: CollectionConfig = {
     defaultColumns: ['name', 'slug'],
   },
   access: {
-    read: () => true,
+    admin: authenticated, // Authors can see in admin UI
+    create: isAdmin,
+    delete: isAdmin,
+    update: isAdmin,
+    read: () => true, // Public read access
   },
   fields: [
     {
