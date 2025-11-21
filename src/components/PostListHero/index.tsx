@@ -108,24 +108,24 @@ export async function PostListHero(props: PostListHeroProps) {
     countries = countriesResult.docs
   }
 
-  // For each country, fetch all posts
+  // For each country, fetch only hot posts for the horizontal scroll section
+  // Main posts will be fetched via API on the client side with pagination
   const countriesWithPosts = await Promise.all(
     countries.map(async (country) => {
-      // Build query
-      const whereQuery: any = {
-        _status: { equals: 'published' },
-        country: { equals: country.id },
-      }
-
-      const result = await payload.find({
+      // Fetch only hot posts for the scrollable section
+      const hotPostsResult = await payload.find({
         collection: 'posts',
-        where: whereQuery,
-        limit: postsPerPage,
+        where: {
+          _status: { equals: 'published' },
+          country: { equals: country.id },
+          isHot: { equals: true },
+        },
+        limit: 20,
         sort: '-publishedAt',
         depth: 1,
       })
 
-      const posts = result.docs.map((post: any) => {
+      const posts = hotPostsResult.docs.map((post: any) => {
         // Format date based on dateFormat prop
         let formattedDate = ''
         const date = new Date(post.publishedAt)
@@ -187,6 +187,8 @@ export async function PostListHero(props: PostListHeroProps) {
       groupByDate={groupByDate}
       showSource={showSource}
       initialCountryId={selectedCountryId}
+      postsPerPage={postsPerPage}
+      dateFormat={dateFormat}
     />
   )
 }

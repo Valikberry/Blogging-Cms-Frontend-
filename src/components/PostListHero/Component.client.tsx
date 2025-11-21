@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Flame, Book, ChevronRight, Edit, Mail, ChevronLeft, X, Play } from 'lucide-react'
+import { Flame, Book, ChevronRight, Edit, Mail, X, Play } from 'lucide-react'
 
 interface Post {
   id: string
@@ -49,6 +49,8 @@ interface PostListClientProps {
   groupByDate?: boolean
   showSource?: boolean
   initialCountryId?: string | null
+  postsPerPage?: number
+  dateFormat?: 'short' | 'long' | 'full'
 }
 
 // Group posts by date
@@ -93,6 +95,8 @@ export function PostListClient({
   groupByDate = true,
   showSource = true,
   initialCountryId,
+  postsPerPage = 15,
+  dateFormat = 'short',
 }: PostListClientProps) {
   // Find the index of the initial country if provided
   const initialIndex = initialCountryId ? countries.findIndex((c) => c.id === initialCountryId) : -1 // -1 means "All Countries"
@@ -103,51 +107,67 @@ export function PostListClient({
   const [subscribeMessage, setSubscribeMessage] = useState('')
   const [isSubscribing, setIsSubscribing] = useState(false)
   const [messageType, setMessageType] = useState<'success' | 'error'>('success')
-  const [currentPage, setCurrentPage] = useState(1)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const postsPerPage = 10
+  const [currentPage, setCurrentPage] = useState(1)
+  const [posts, setPosts] = useState<PostWithCountry[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [pagination, setPagination] = useState({
+    totalPages: 1,
+    totalDocs: 0,
+    hasNextPage: false,
+    hasPrevPage: false,
+  })
 
   const activeCountry = activeCountryIndex >= 0 ? countries[activeCountryIndex] : null
 
-  // Collect all posts from all countries
-  const allPosts: PostWithCountry[] = countries.flatMap((country) =>
-    country.posts.map((post) => ({ ...post, country })),
+  // Collect all hot posts from all countries (for the hot posts scrollable section)
+  const allHotPosts: PostWithCountry[] = countries.flatMap((country) =>
+    country.posts.filter((post) => post.isHot).map((post) => ({ ...post, country })),
   )
 
-  // Collect all hot posts from all countries
-  const allHotPosts: PostWithCountry[] = allPosts.filter((post) => post.isHot)
-
-  // Filter posts based on active filter tab and selected country
-  const filteredPosts: PostWithCountry[] = activeCountry
-    ? activeCountry.posts
-        .map((post) => ({ ...post, country: activeCountry }))
-        .filter((post) => {
-          if (activeFilter === 'hot') return post.isHot
-          if (activeFilter === 'stories') return post.isStories
-          if (activeFilter === 'new') return true
-          return true
-        })
-    : allPosts.filter((post) => {
-        if (activeFilter === 'hot') return post.isHot
-        if (activeFilter === 'stories') return post.isStories
-        if (activeFilter === 'new') return true
-        return true
+  // Fetch posts from API
+  const fetchPosts = React.useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: postsPerPage.toString(),
+        filter: activeFilter,
+        dateFormat,
       })
 
-  // Calculate pagination
-  const totalPosts = filteredPosts.length
-  const totalPages = Math.ceil(totalPosts / postsPerPage)
-  const startIndex = (currentPage - 1) * postsPerPage
-  const endIndex = startIndex + postsPerPage
-  const paginatedPosts = filteredPosts.slice(startIndex, endIndex)
+      if (activeCountry) {
+        params.append('countryId', activeCountry.id)
+      }
 
-  // Group posts by date if enabled (use paginated posts)
-  const groupedPosts = groupByDate && paginatedPosts ? groupPostsByDate(paginatedPosts) : null
+      const response = await fetch(`/api/posts/paginated?${params}`)
+      const data = await response.json()
+
+      if (response.ok) {
+        setPosts(data.posts)
+        setPagination(data.pagination)
+      } else {
+        console.error('Failed to fetch posts:', data.error)
+      }
+    } catch (error) {
+      console.error('Error fetching posts:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [currentPage, postsPerPage, activeFilter, activeCountry, dateFormat])
+
+  // Fetch posts when dependencies change
+  React.useEffect(() => {
+    fetchPosts()
+  }, [fetchPosts])
 
   // Reset to page 1 when filter or country changes
   React.useEffect(() => {
     setCurrentPage(1)
   }, [activeFilter, activeCountryIndex])
+
+  // Group posts by date if enabled
+  const groupedPosts = groupByDate && posts ? groupPostsByDate(posts) : null
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -374,12 +394,18 @@ export function PostListClient({
 
         {/* Posts List */}
         <div className="bg-white rounded-lg border border-gray-200">
-            {groupByDate && groupedPosts ? (
+            {isLoading ? (
+              // Loading state
+              <div className="text-center py-12 text-gray-500 text-base">
+                <div className="inline-block w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                <p className="mt-2">Loading posts...</p>
+              </div>
+            ) : groupByDate && groupedPosts ? (
               // Grouped by date view
               <div>
-                {Object.entries(groupedPosts).map(([date, posts], groupIndex) => (
+                {Object.entries(groupedPosts).map(([date, datePosts], groupIndex) => (
                   <div key={date}>
-                    {posts.map((post: PostWithCountry, postIndex) => {
+                    {datePosts.map((post: PostWithCountry, postIndex) => {
                       const postCountry = post.country || activeCountry
                       const normalizedCountrySlug = postCountry?.slug
                         ? postCountry.slug.replace(/[^a-zA-Z0-9]/g, '')
@@ -427,7 +453,7 @@ export function PostListClient({
             ) : (
               // Simple list view
               <div>
-                {paginatedPosts.map((post: PostWithCountry, index: number) => {
+                {posts.map((post: PostWithCountry, index: number) => {
                   const postCountry = post.country || activeCountry
                   const normalizedCountrySlug = postCountry?.slug
                     ? postCountry.slug.replace(/[^a-zA-Z0-9]/g, '')
@@ -465,85 +491,83 @@ export function PostListClient({
             )}
 
             {/* Empty state */}
-            {filteredPosts.length === 0 && (
+            {!isLoading && posts.length === 0 && (
               <div className="text-center py-12 text-gray-500 text-base">
                 No posts found for this filter.
               </div>
             )}
         </div>
 
-        {/* Pagination Info and Controls */}
-        {filteredPosts.length > 0 && (
+        {/* Pagination */}
+        {!isLoading && pagination.totalPages > 1 && (
           <div className="mt-6 space-y-4">
             {/* Showing X-Y of Z posts */}
             <div className="text-center text-base text-gray-600">
-              Showing {startIndex + 1}-{Math.min(endIndex, totalPosts)} of {totalPosts} post
-              {totalPosts !== 1 ? 's' : ''}
+              Showing {(currentPage - 1) * postsPerPage + 1}-{Math.min(currentPage * postsPerPage, pagination.totalDocs)} of {pagination.totalDocs} post
+              {pagination.totalDocs !== 1 ? 's' : ''}
             </div>
 
             {/* Pagination Controls */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-1">
-                {/* Previous Button */}
-                <button
-                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="w-9 h-9 flex items-center justify-center rounded hover:bg-gray-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-                  aria-label="Previous page"
-                >
-                  <ChevronLeft className="w-5 h-5 text-gray-700" />
-                </button>
+            <div className="flex items-center justify-center gap-1">
+              {/* Previous Button */}
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={!pagination.hasPrevPage}
+                className="w-9 h-9 flex items-center justify-center rounded hover:bg-gray-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                aria-label="Previous page"
+              >
+                <ChevronRight className="w-5 h-5 text-gray-700 rotate-180" />
+              </button>
 
-                {/* Page Numbers */}
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                  // Show first page, last page, current page, and pages around current
-                  const showPage =
-                    page === 1 ||
-                    page === totalPages ||
-                    (page >= currentPage - 1 && page <= currentPage + 1)
+              {/* Page Numbers */}
+              {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((page) => {
+                // Show first page, last page, current page, and pages around current
+                const showPage =
+                  page === 1 ||
+                  page === pagination.totalPages ||
+                  (page >= currentPage - 1 && page <= currentPage + 1)
 
-                  // Show ellipsis
-                  const showEllipsisBefore = page === currentPage - 2 && currentPage > 3
-                  const showEllipsisAfter = page === currentPage + 2 && currentPage < totalPages - 2
+                // Show ellipsis
+                const showEllipsisBefore = page === currentPage - 2 && currentPage > 3
+                const showEllipsisAfter = page === currentPage + 2 && currentPage < pagination.totalPages - 2
 
-                  if (!showPage && !showEllipsisBefore && !showEllipsisAfter) {
-                    return null
-                  }
+                if (!showPage && !showEllipsisBefore && !showEllipsisAfter) {
+                  return null
+                }
 
-                  if (showEllipsisBefore || showEllipsisAfter) {
-                    return (
-                      <span key={`ellipsis-${page}`} className="w-9 h-9 flex items-center justify-center text-gray-600">
-                        ...
-                      </span>
-                    )
-                  }
-
+                if (showEllipsisBefore || showEllipsisAfter) {
                   return (
-                    <button
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      className={`w-9 h-9 flex items-center justify-center rounded text-sm font-medium transition-colors ${
-                        currentPage === page
-                          ? 'bg-indigo-600 text-white'
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                    >
-                      {page}
-                    </button>
+                    <span key={`ellipsis-${page}`} className="w-9 h-9 flex items-center justify-center text-gray-600">
+                      ...
+                    </span>
                   )
-                })}
+                }
 
-                {/* Next Button */}
-                <button
-                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages}
-                  className="w-9 h-9 flex items-center justify-center rounded hover:bg-gray-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-                  aria-label="Next page"
-                >
-                  <ChevronRight className="w-5 h-5 text-gray-700" />
-                </button>
-              </div>
-            )}
+                return (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-9 h-9 flex items-center justify-center rounded text-sm font-medium transition-colors ${
+                      currentPage === page
+                        ? 'bg-indigo-600 text-white'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                )
+              })}
+
+              {/* Next Button */}
+              <button
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, pagination.totalPages))}
+                disabled={!pagination.hasNextPage}
+                className="w-9 h-9 flex items-center justify-center rounded hover:bg-gray-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                aria-label="Next page"
+              >
+                <ChevronRight className="w-5 h-5 text-gray-700" />
+              </button>
+            </div>
           </div>
         )}
       </div>
