@@ -41,7 +41,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           width: 1280,
           height: 720,
         },
-        description: 'AskGeopolitics breaks big global stories into clear questions that reveal what\'s at stake, who\'s involved, and what could happen next.',
+        description:
+          "AskGeopolitics breaks big global stories into clear questions that reveal what's at stake, who's involved, and what could happen next.",
         foundingDate: '2025-09-16',
         foundingLocation: {
           '@type': 'Place',
@@ -107,17 +108,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           url: `${siteUrl}/og-image.jpg`,
         },
         dateModified: new Date().toISOString(),
-        description: 'AskGeopolitics breaks big global stories into clear questions that reveal what\'s at stake, who\'s involved, and what could happen next.',
+        description:
+          "AskGeopolitics breaks big global stories into clear questions that reveal what's at stake, who's involved, and what could happen next.",
       },
     ],
   }
 
   return (
-    <html
-      className={cn(GeistSans.variable, GeistMono.variable)}
-      lang="en"
-      suppressHydrationWarning
-    >
+    <html className={cn(GeistSans.variable, GeistMono.variable)} lang="en" suppressHydrationWarning>
       <head>
         <link href="/favicon.ico" rel="icon" sizes="32x32" />
 
@@ -134,10 +132,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
 
         {/* ✅ Google Analytics */}
-        <Script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=G-3QV12VHXQM"
-        />
+        <Script async src="https://www.googletagmanager.com/gtag/js?id=G-3QV12VHXQM" />
         <Script
           id="google-analytics"
           strategy="afterInteractive"
@@ -153,20 +148,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
 
       <body className="flex flex-col min-h-screen">
-        <main className="flex-1">
-          <Providers>
-            <AdminBar
-              adminBarProps={{
-                preview: isEnabled,
-              }}
-            />
-            <Header />
-            <div className="container mx-auto max-w-3xl py-4 px-4 sm:px-6 lg:px-8 pt-16">
-              {children}
-            </div>
-            <Footer />
-          </Providers>
-        </main>
+        <Providers>
+          <AdminBar
+            adminBarProps={{
+              preview: isEnabled,
+            }}
+          />
+          <Header />
+          <main className="flex-1 zoom-content">
+            <div className="container mx-auto max-w-3xl py-4 px-4 sm:px-6 lg:px-8">{children}</div>
+          </main>
+          <Footer />
+        </Providers>
       </body>
     </html>
   )

@@ -502,10 +502,10 @@ export function PostListClient({
         {!isLoading && pagination.totalPages > 1 && (
           <div className="mt-6 space-y-4">
             {/* Showing X-Y of Z posts */}
-            <div className="text-center text-base text-gray-600">
+            {/* <div className="text-center text-base text-gray-600">
               Showing {(currentPage - 1) * postsPerPage + 1}-{Math.min(currentPage * postsPerPage, pagination.totalDocs)} of {pagination.totalDocs} post
               {pagination.totalDocs !== 1 ? 's' : ''}
-            </div>
+            </div> */}
 
             {/* Pagination Controls */}
             <div className="flex items-center justify-center gap-1">
