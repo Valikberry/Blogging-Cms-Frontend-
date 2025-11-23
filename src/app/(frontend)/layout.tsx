@@ -161,7 +161,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               }}
             />
             <Header />
-            <div className="container mx-auto max-w-3xl py-4 px-4 sm:px-6 lg:px-8">
+            <div className="container mx-auto max-w-3xl py-4 px-4 sm:px-6 lg:px-8 pt-16">
               {children}
             </div>
             <Footer />

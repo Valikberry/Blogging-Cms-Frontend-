@@ -55,6 +55,12 @@ const iconColors = {
 }
 
 export function PostDetail({ post }: PostDetailProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [email, setEmail] = useState('')
+  const [subscribeMessage, setSubscribeMessage] = useState('')
+  const [isSubscribing, setIsSubscribing] = useState(false)
+  const [messageType, setMessageType] = useState<'success' | 'error'>('success')
+
   // Increment view count on mount
   useEffect(() => {
     const incrementViewCount = async () => {
@@ -69,6 +75,57 @@ export function PostDetail({ post }: PostDetailProps) {
 
     incrementViewCount()
   }, [post.id])
+
+  // Show subscribe modal after 10 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsModalOpen(true)
+    }, 10000) // 10 seconds
+
+    return () => clearTimeout(timer)
+  }, [])
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubscribing(true)
+    setSubscribeMessage('')
+
+    try {
+      const response = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          source: 'post-detail',
+          countryId: typeof post.country === 'object' ? post.country.id : post.country,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        setMessageType('success')
+        setSubscribeMessage(data.message || 'Thank you for subscribing!')
+        setEmail('')
+        // Close modal after 2 seconds on success
+        setTimeout(() => {
+          setIsModalOpen(false)
+          setSubscribeMessage('')
+        }, 2000)
+      } else {
+        setMessageType('error')
+        setSubscribeMessage(data.error || 'Failed to subscribe. Please try again.')
+      }
+    } catch (error) {
+      console.error('Subscription error:', error)
+      setMessageType('error')
+      setSubscribeMessage('Network error. Please check your connection and try again.')
+    } finally {
+      setIsSubscribing(false)
+    }
+  }
 
   const authorName =
     post.submittedBy ||
@@ -263,6 +320,68 @@ export function PostDetail({ post }: PostDetailProps) {
           </div>
         )}
       </div>
+
+      {/* Subscribe Modal */}
+      {isModalOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={() => setIsModalOpen(false)}
+        >
+          <div
+            className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 sm:p-8 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="Close modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Modal content */}
+            <div className="text-center">
+              <Mail className="w-12 h-12 text-indigo-600 mx-auto mb-4" />
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Subscribe to Updates</h3>
+              <p className="text-base text-gray-600 mb-6">
+                Get the latest posts delivered straight to your inbox.
+              </p>
+              <form onSubmit={handleSubscribe} className="space-y-4">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                <button
+                  type="submit"
+                  disabled={isSubscribing}
+                  className="w-full bg-indigo-600 text-white px-6 py-3 rounded-md font-medium hover:bg-indigo-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isSubscribing ? (
+                    <>
+                      <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      Subscribing...
+                    </>
+                  ) : (
+                    'Subscribe'
+                  )}
+                </button>
+              </form>
+              {subscribeMessage && (
+                <p
+                  className={`mt-4 font-medium ${messageType === 'success' ? 'text-green-600' : 'text-red-600'}`}
+                >
+                  {subscribeMessage}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </article>
   )
 }
