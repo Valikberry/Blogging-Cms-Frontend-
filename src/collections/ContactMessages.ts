@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { isAdminHidden } from '../access/isAdminHidden'
 
 export const ContactMessages: CollectionConfig = {
   slug: 'contact-messages',
@@ -6,6 +7,7 @@ export const ContactMessages: CollectionConfig = {
     useAsTitle: 'subject',
     defaultColumns: ['subject', 'name', 'email', 'createdAt', 'status'],
     group: 'Communications',
+    hidden: isAdminHidden,
   },
   access: {
     read: ({ req: { user } }) => !!user,

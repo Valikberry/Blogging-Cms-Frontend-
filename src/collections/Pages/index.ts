@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload'
 import { authenticated } from '../../access/authenticated'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
 import { isAdmin } from '../../access/isAdmin'
+import { isAdminHidden } from '../../access/isAdminHidden'
 import { Archive } from '../../blocks/ArchiveBlock/config'
 import { CallToAction } from '../../blocks/CallToAction/config'
 import { Content } from '../../blocks/Content/config'
@@ -40,6 +41,7 @@ export const Pages: CollectionConfig<'pages'> = {
   },
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
+    hidden: isAdminHidden,
     livePreview: {
       url: ({ data, req }) => {
         const path = generatePreviewPath({

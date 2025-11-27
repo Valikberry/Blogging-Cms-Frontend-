@@ -106,7 +106,9 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, countries = []
   return (
     <header className="w-full fixed top-0 left-0 right-0 z-40">
       <div className="w-full bg-[#6366f1]">
-        <div className="container mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+        <div
+          className="container mx-auto max-w-[44rem] px-4 sm:px-6 lg:px-8"
+        >
           <div className="flex items-center justify-between h-12 relative">
             {/* Logo */}
             <Link

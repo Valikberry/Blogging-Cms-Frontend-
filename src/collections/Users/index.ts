@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload'
 import { authenticated } from '../../access/authenticated'
 import { isAdmin } from '../../access/isAdmin'
 import { isAdminFieldLevel } from '../../access/isAdminFieldLevel'
+import { isAdminHidden } from '../../access/isAdminHidden'
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -24,6 +25,7 @@ export const Users: CollectionConfig = {
   admin: {
     defaultColumns: ['name', 'email', 'roles'],
     useAsTitle: 'name',
+    hidden: isAdminHidden,
   },
   auth: true,
   fields: [

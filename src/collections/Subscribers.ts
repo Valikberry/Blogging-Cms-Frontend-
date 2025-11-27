@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { anyone } from '../access/anyone'
 import { isAdmin } from '../access/isAdmin'
+import { isAdminHidden } from '../access/isAdminHidden'
 
 export const Subscribers: CollectionConfig = {
   slug: 'subscribers',
@@ -15,6 +16,7 @@ export const Subscribers: CollectionConfig = {
     useAsTitle: 'email',
     defaultColumns: ['email', 'subscribedAt', 'isActive'],
     group: 'Marketing',
+    hidden: isAdminHidden,
   },
   fields: [
     {

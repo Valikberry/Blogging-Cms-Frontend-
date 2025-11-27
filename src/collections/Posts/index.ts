@@ -10,8 +10,8 @@ import {
 } from '@payloadcms/richtext-lexical'
 
 import { authenticated } from '../../access/authenticated'
-import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
 import { isAdminOrAuthor } from '../../access/isAdminOrAuthor'
+import { readPostsAccess, updatePostsAccess, deletePostsAccess } from '../../access/postsAccess'
 import { Banner } from '../../blocks/Banner/config'
 import { Code } from '../../blocks/Code/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
@@ -33,9 +33,9 @@ export const Posts: CollectionConfig<'posts'> = {
   access: {
     admin: authenticated, // Authors can see in admin UI
     create: isAdminOrAuthor,
-    delete: isAdminOrAuthor,
-    read: authenticatedOrPublished,
-    update: isAdminOrAuthor,
+    delete: deletePostsAccess,
+    read: readPostsAccess,
+    update: updatePostsAccess,
   },
   defaultPopulate: {
     title: true,
@@ -433,6 +433,17 @@ export const Posts: CollectionConfig<'posts'> = {
     ...slugField(),
   ],
   hooks: {
+    beforeChange: [
+      ({ req, operation, data }) => {
+        // Auto-assign current user as author on create if no authors specified
+        if (operation === 'create' && req.user) {
+          if (!data.authors || data.authors.length === 0) {
+            data.authors = [req.user.id]
+          }
+        }
+        return data
+      },
+    ],
     afterChange: [revalidatePost],
     afterRead: [populateAuthors],
     afterDelete: [revalidateDelete],

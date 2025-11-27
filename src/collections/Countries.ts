@@ -1,12 +1,14 @@
 import type { CollectionConfig } from 'payload'
 import { isAdmin } from '../access/isAdmin'
 import { authenticated } from '../access/authenticated'
+import { isAdminHidden } from '../access/isAdminHidden'
 
 export const Countries: CollectionConfig = {
   slug: 'countries',
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'flag', 'continent', 'slug'],
+    hidden: isAdminHidden,
   },
   defaultSort: 'createdAt', // ← Add this for oldest first
   // OR

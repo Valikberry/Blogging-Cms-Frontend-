@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { authenticated } from '../access/authenticated'
+import { isAdminHidden } from '../access/isAdminHidden'
 
 export const ArticleGenerator: CollectionConfig = {
   slug: 'article-generator',
@@ -7,6 +8,7 @@ export const ArticleGenerator: CollectionConfig = {
     useAsTitle: 'sourceUrl',
     defaultColumns: ['sourceUrl', 'status', 'createdAt'],
     group: 'Tools',
+    hidden: isAdminHidden,
     components: {
       edit: {
         PreviewButton: false,

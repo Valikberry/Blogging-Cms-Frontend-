@@ -279,7 +279,9 @@ export function PostListClient({
               <button
                 onClick={() => setActiveFilter('stories')}
                 className={`flex items-center gap-1.5 pb-3 text-base sm:text-base font-medium transition-colors relative whitespace-nowrap ${
-                  activeFilter === 'stories' ? 'text-indigo-600' : 'text-gray-600 hover:text-gray-900'
+                  activeFilter === 'stories'
+                    ? 'text-indigo-600'
+                    : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
                 <Book className="w-4 h-4 sm:w-4 sm:h-4" />
@@ -305,11 +307,16 @@ export function PostListClient({
               <div className="flex gap-3 pb-2">
                 {allHotPosts.map((post) => {
                   const hasVideo = post.videoEmbed?.enabled && post.videoEmbed?.embedUrl
-                  const videoThumbnail = hasVideo && post.videoEmbed?.embedUrl ? getVideoThumbnail(post.videoEmbed.embedUrl) : null
+                  const videoThumbnail =
+                    hasVideo && post.videoEmbed?.embedUrl
+                      ? getVideoThumbnail(post.videoEmbed.embedUrl)
+                      : null
                   const imageUrl = typeof post.heroImage === 'object' ? post.heroImage?.url : null
                   const imageAlt =
                     typeof post.heroImage === 'object' ? post.heroImage?.alt : post.title
-                  const normalizedCountrySlug = post.country.slug.replace(/[^a-zA-Z0-9]/g, '')
+                  const normalizedCountrySlug = post.country.slug
+                    .replace(/[^a-zA-Z0-9]/g, '')
+                    .toLocaleLowerCase()
 
                   // Prioritize video thumbnail, then hero image, then fallback
                   const displayImageUrl = videoThumbnail || imageUrl
@@ -345,7 +352,10 @@ export function PostListClient({
                             {hasVideo && (
                               <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
                                 <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg">
-                                  <Play className="w-5 h-5 text-indigo-600 ml-0.5" fill="currentColor" />
+                                  <Play
+                                    className="w-5 h-5 text-indigo-600 ml-0.5"
+                                    fill="currentColor"
+                                  />
                                 </div>
                               </div>
                             )}
@@ -354,7 +364,10 @@ export function PostListClient({
                           // Video without thumbnail (e.g., Vimeo)
                           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600">
                             <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
-                              <Play className="w-6 h-6 text-indigo-600 ml-0.5" fill="currentColor" />
+                              <Play
+                                className="w-6 h-6 text-indigo-600 ml-0.5"
+                                fill="currentColor"
+                              />
                             </div>
                           </div>
                         ) : (
@@ -394,108 +407,106 @@ export function PostListClient({
 
         {/* Posts List */}
         <div className="bg-white rounded-lg border border-gray-200">
-            {isLoading ? (
-              // Loading state
-              <div className="text-center py-12 text-gray-500 text-base">
-                <div className="inline-block w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-                <p className="mt-2">Loading posts...</p>
-              </div>
-            ) : groupByDate && groupedPosts ? (
-              // Grouped by date view
-              <div>
-                {Object.entries(groupedPosts).map(([date, datePosts], groupIndex) => (
-                  <div key={date}>
-                    {datePosts.map((post: PostWithCountry, postIndex) => {
-                      const postCountry = post.country || activeCountry
-                      const normalizedCountrySlug = postCountry?.slug
-                        ? postCountry.slug.replace(/[^a-zA-Z0-9]/g, '')
-                        : ''
+          {isLoading ? (
+            // Loading state
+            <div className="text-center py-12 text-gray-500 text-base">
+              <div className="inline-block w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+              <p className="mt-2">Loading posts...</p>
+            </div>
+          ) : groupByDate && groupedPosts ? (
+            // Grouped by date view
+            <div>
+              {Object.entries(groupedPosts).map(([date, datePosts], groupIndex) => (
+                <div key={date}>
+                  {datePosts.map((post: PostWithCountry, postIndex) => {
+                    const postCountry = post.country || activeCountry
+                    const normalizedCountrySlug = postCountry?.slug
+                      ? postCountry.slug.replace(/[^a-zA-Z0-9]/g, '')?.toLocaleLowerCase()
+                      : ''
 
-                      return (
-                        <div
-                          key={post.id}
-                          className={
-                            groupIndex > 0 || postIndex > 0 ? 'border-t border-gray-200 py-1' : ''
-                          }
-                        >
-                          <Link
-                            href={`/${normalizedCountrySlug}/${post.slug}`}
-                            className="block hover:bg-gray-50 transition-colors"
-                          >
-                            <div className="px-3 sm:px-6 py-3 sm:py-4">
-                              <div className="flex items-center justify-between gap-2 sm:gap-4">
-                                <div className="flex gap-2 sm:gap-4 items-start flex-1 min-w-0">
-                                  <span className="text-indigo-600 font-medium text-base sm:text-base shrink-0 pt-0.5">
-                                    {post.publishedAt}
-                                  </span>
-                                  <div className="flex-1 min-w-0">
-                                    <h3 className="text-gray-900 font-medium text-base sm:text-base leading-snug">
-                                      {post.title}
-                                    </h3>
-
-                                    {showSource && post.source && (
-                                      <p className="text-sm text-gray-500 mt-1">
-                                        From {post.source}
-                                      </p>
-                                    )}
-                                  </div>
-                                </div>
-                                <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 shrink-0" />
-                              </div>
-                            </div>
-                          </Link>
-                        </div>
-                      )
-                    })}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              // Simple list view
-              <div>
-                {posts.map((post: PostWithCountry, index: number) => {
-                  const postCountry = post.country || activeCountry
-                  const normalizedCountrySlug = postCountry?.slug
-                    ? postCountry.slug.replace(/[^a-zA-Z0-9]/g, '')
-                    : ''
-
-                  return (
-                    <div key={post.id} className={index > 0 ? 'border-t border-gray-200 py-1' : ''}>
-                      <Link
-                        href={`/${normalizedCountrySlug}/${post.slug}`}
-                        className="block hover:bg-gray-50 transition-colors"
+                    return (
+                      <div
+                        key={post.id}
+                        className={
+                          groupIndex > 0 || postIndex > 0 ? 'border-t border-gray-200 py-1' : ''
+                        }
                       >
-                        <div className="px-3 sm:px-6 py-1">
-                          <div className="flex items-center justify-between gap-2 sm:gap-4">
-                            <div className="flex gap-2 sm:gap-4 items-start flex-1 min-w-0">
-                              <span className="text-indigo-600 font-medium text-base sm:text-base shrink-0 pt-0.5">
-                                {post.publishedAt}
-                              </span>
-                              <div className="flex-1 min-w-0">
-                                <h3 className="text-gray-900 font-medium text-base sm:text-base leading-snug">
-                                  {post.title}
-                                </h3>
-                                {showSource && post.source && (
-                                  <p className="text-sm text-gray-500 mt-1">From {post.source}</p>
-                                )}
-                              </div>
-                            </div>
-                            <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 shrink-0" />
-                          </div>
-                        </div>
-                      </Link>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
+                        <Link
+                          href={`/${normalizedCountrySlug}/${post.slug}`}
+                          className="block hover:bg-gray-50 transition-colors"
+                        >
+                          <div className="px-3 sm:px-6 py-3 sm:py-4">
+                            <div className="flex items-center justify-between gap-2 sm:gap-4">
+                              <div className="flex gap-2 sm:gap-4 items-start flex-1 min-w-0">
+                                <span className="text-indigo-600 font-medium text-base sm:text-base shrink-0 pt-0.5">
+                                  {post.publishedAt}
+                                </span>
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="text-gray-900 font-medium text-base sm:text-base leading-snug">
+                                    {post.title}
+                                  </h3>
 
-            {/* Empty state */}
-            {!isLoading && posts.length === 0 && (
-              <div className="text-center py-12 text-gray-500 text-base">
-                No posts found for this filter.
-              </div>
-            )}
+                                  {showSource && post.source && (
+                                    <p className="text-sm text-gray-500 mt-1">From {post.source}</p>
+                                  )}
+                                </div>
+                              </div>
+                              <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 shrink-0" />
+                            </div>
+                          </div>
+                        </Link>
+                      </div>
+                    )
+                  })}
+                </div>
+              ))}
+            </div>
+          ) : (
+            // Simple list view
+            <div>
+              {posts.map((post: PostWithCountry, index: number) => {
+                const postCountry = post.country || activeCountry
+                const normalizedCountrySlug = postCountry?.slug
+                  ? postCountry.slug.replace(/[^a-zA-Z0-9]/g, '')?.toLocaleLowerCase()
+                  : ''
+
+                return (
+                  <div key={post.id} className={index > 0 ? 'border-t border-gray-200 py-1' : ''}>
+                    <Link
+                      href={`/${normalizedCountrySlug}/${post.slug}`}
+                      className="block hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="px-3 sm:px-6 py-1">
+                        <div className="flex items-center justify-between gap-2 sm:gap-4">
+                          <div className="flex gap-2 sm:gap-4 items-start flex-1 min-w-0">
+                            <span className="text-indigo-600 font-medium text-base sm:text-base shrink-0 pt-0.5">
+                              {post.publishedAt}
+                            </span>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-gray-900 font-medium text-base sm:text-base leading-snug">
+                                {post.title}
+                              </h3>
+                              {showSource && post.source && (
+                                <p className="text-sm text-gray-500 mt-1">From {post.source}</p>
+                              )}
+                            </div>
+                          </div>
+                          <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 shrink-0" />
+                        </div>
+                      </div>
+                    </Link>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {/* Empty state */}
+          {!isLoading && posts.length === 0 && (
+            <div className="text-center py-12 text-gray-500 text-base">
+              No posts found for this filter.
+            </div>
+          )}
         </div>
 
         {/* Pagination */}
@@ -529,7 +540,8 @@ export function PostListClient({
 
                 // Show ellipsis
                 const showEllipsisBefore = page === currentPage - 2 && currentPage > 3
-                const showEllipsisAfter = page === currentPage + 2 && currentPage < pagination.totalPages - 2
+                const showEllipsisAfter =
+                  page === currentPage + 2 && currentPage < pagination.totalPages - 2
 
                 if (!showPage && !showEllipsisBefore && !showEllipsisAfter) {
                   return null
@@ -537,7 +549,10 @@ export function PostListClient({
 
                 if (showEllipsisBefore || showEllipsisAfter) {
                   return (
-                    <span key={`ellipsis-${page}`} className="w-9 h-9 flex items-center justify-center text-gray-600">
+                    <span
+                      key={`ellipsis-${page}`}
+                      className="w-9 h-9 flex items-center justify-center text-gray-600"
+                    >
                       ...
                     </span>
                   )

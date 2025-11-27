@@ -2,6 +2,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+import ReactDOM from 'react-dom'
 import Image from 'next/image'
 import Link from 'next/link'
 import RichText from '@/components/RichText'
@@ -56,6 +57,7 @@ const iconColors = {
 
 export function PostDetail({ post }: PostDetailProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [hasSeenModal, setHasSeenModal] = useState(true) // Start true to prevent flash
   const [email, setEmail] = useState('')
   const [subscribeMessage, setSubscribeMessage] = useState('')
   const [isSubscribing, setIsSubscribing] = useState(false)
@@ -76,13 +78,19 @@ export function PostDetail({ post }: PostDetailProps) {
     incrementViewCount()
   }, [post.id])
 
-  // Show subscribe modal after 10 seconds
+  // Check localStorage on mount and show subscribe modal after 10 seconds if not seen before
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsModalOpen(true)
-    }, 10000) // 10 seconds
+    const hasSubscribeModalBeenShown = localStorage.getItem('subscribeModalShown')
+    setHasSeenModal(!!hasSubscribeModalBeenShown)
 
-    return () => clearTimeout(timer)
+    if (!hasSubscribeModalBeenShown) {
+      const timer = setTimeout(() => {
+        setIsModalOpen(true)
+        localStorage.setItem('subscribeModalShown', 'true')
+      }, 10000) // 10 seconds
+
+      return () => clearTimeout(timer)
+    }
   }, [])
 
   const handleSubscribe = async (e: React.FormEvent) => {
@@ -322,13 +330,23 @@ export function PostDetail({ post }: PostDetailProps) {
       </div>
 
       {/* Subscribe Modal */}
-      {isModalOpen && (
+      {isModalOpen && typeof document !== 'undefined' && ReactDOM.createPortal(
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          className="bg-black/50 flex items-center justify-center p-4"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            width: '100%',
+            height: '100%',
+            zIndex: 9999,
+          }}
           onClick={() => setIsModalOpen(false)}
         >
           <div
-            className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 sm:p-8 relative"
+            className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6 sm:p-8 relative"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close button */}
@@ -380,7 +398,8 @@ export function PostDetail({ post }: PostDetailProps) {
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </article>
   )
