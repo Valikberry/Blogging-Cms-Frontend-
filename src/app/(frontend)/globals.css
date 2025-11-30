@@ -98,7 +98,7 @@
     transform: scale(0.9);
     transform-origin: top left;
     width: 111.11%; /* 100 / 0.9 to compensate for scale */
-    min-height: 111.11vh;
+    margin-bottom: -10%; /* Compensate for scale leaving empty space at bottom */
   }
 }
 

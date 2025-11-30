@@ -155,10 +155,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             }}
           />
           <Header />
-          <main className="flex-1 zoom-content">
-            <div className="container mx-auto max-w-3xl py-4 px-4 sm:px-6 lg:px-8">{children}</div>
-          </main>
-          <Footer />
+          <div className="zoom-content">
+            <main>
+              <div className="container mx-auto max-w-3xl py-4 px-4 sm:px-6 lg:px-8">{children}</div>
+            </main>
+            <Footer />
+          </div>
         </Providers>
       </body>
     </html>
