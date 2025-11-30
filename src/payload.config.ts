@@ -16,6 +16,8 @@ import { Users } from './collections/Users'
 import { ArticleGenerator } from './collections/ArticleGenerator'
 import { Subscribers } from './collections/Subscribers'
 import { ContactMessages } from './collections/ContactMessages'
+import { Polls } from './collections/Polls'
+import { PollVotes } from './collections/PollVotes'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
 import { AboutUs } from './globals/AboutUs'
@@ -69,7 +71,7 @@ export default buildConfig({
   db: mongooseAdapter({
     url: process.env.DATABASE_URI || '',
   }),
-  collections: [Pages, Posts, Media, Categories, Users, Continents, Countries, ArticleGenerator, Subscribers, ContactMessages],
+  collections: [Pages, Posts, Polls, PollVotes, Media, Categories, Users, Continents, Countries, ArticleGenerator, Subscribers, ContactMessages],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer, AboutUs],
   plugins: [

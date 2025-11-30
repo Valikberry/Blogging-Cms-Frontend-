@@ -13,6 +13,7 @@ import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 import { HomeTemplate } from '@/components/HomeContent'
+import { CountryPage } from '@/components/CountryPage'
 
 // Revalidate pages every 60 seconds
 export const revalidate = 60
@@ -87,10 +88,11 @@ const queryContinentBySlug = cache(async (slug: string) => {
   return result.docs[0] || null
 })
 
-// Cache country query to prevent duplicate fetches
+// Cache country query to prevent duplicate fetches - handles slugs with or without spaces
 const queryCountryBySlug = cache(async (slug: string) => {
   const payload = await getPayload({ config: configPromise })
 
+  // Try exact match first
   const result = await payload.find({
     collection: 'countries',
     where: {
@@ -101,7 +103,23 @@ const queryCountryBySlug = cache(async (slug: string) => {
     limit: 1,
   })
 
-  return result.docs[0] || null
+  if (result.docs[0]) {
+    return result.docs[0]
+  }
+
+  // If not found, fetch all countries and find one where slug (with spaces removed) matches
+  const allCountries = await payload.find({
+    collection: 'countries',
+    limit: 100,
+  })
+
+  const normalizedSlug = slug.toLowerCase().replace(/\s+/g, '')
+  const match = allCountries.docs.find((c) => {
+    const countrySlug = (c.slug || '').toLowerCase().replace(/\s+/g, '')
+    return countrySlug === normalizedSlug
+  })
+
+  return match || null
 })
 
 export default async function Page({ params: paramsPromise }: Args) {
@@ -126,15 +144,15 @@ export default async function Page({ params: paramsPromise }: Args) {
   // Check if it's a country
   const country = await queryCountryBySlug(slug)
 
-  // If it's a country, fetch the home page and pass country filter
+  // If it's a country, show the new Country page
   if (country) {
-    const page = await queryPageBySlug({ slug: 'home' })
-
-    if (!page) {
-      return <PayloadRedirects url={url} />
+    const countryData = {
+      id: country.id,
+      name: country.name,
+      slug: country.slug,
+      flag: typeof country.flag === 'object' && country.flag ? { url: country.flag.url } : null,
     }
-
-    return <HomeTemplate page={page} url={url} draft={draft} countrySlug={slug} />
+    return <CountryPage country={countryData} />
   }
 
   // Otherwise, treat it as a regular page

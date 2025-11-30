@@ -69,6 +69,8 @@ export interface Config {
   collections: {
     pages: Page;
     posts: Post;
+    polls: Poll;
+    'poll-votes': PollVote;
     media: Media;
     categories: Category;
     users: User;
@@ -90,6 +92,8 @@ export interface Config {
   collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    polls: PollsSelect<false> | PollsSelect<true>;
+    'poll-votes': PollVotesSelect<false> | PollVotesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -851,6 +855,117 @@ export interface Form {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "polls".
+ */
+export interface Poll {
+  id: string;
+  /**
+   * The poll question (e.g., "Will you support Trump in the next election?")
+   */
+  question: string;
+  /**
+   * Featured image for the poll
+   */
+  heroImage: string | Media;
+  /**
+   * Optional description shown after voting
+   */
+  description?: string | null;
+  /**
+   * Poll options (minimum 2, maximum 10)
+   */
+  options: {
+    /**
+     * Option text (e.g., "Yes", "No", "Maybe")
+     */
+    text: string;
+    /**
+     * Number of votes for this option
+     */
+    votes?: number | null;
+    id?: string | null;
+  }[];
+  /**
+   * Total number of votes
+   */
+  totalVotes?: number | null;
+  /**
+   * Country this poll is associated with
+   */
+  country: string | Country;
+  /**
+   * Tags for the poll (e.g., "Melania", "Trumps")
+   */
+  tags?:
+    | {
+        tag?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Poll status
+   */
+  status?: ('active' | 'closed' | 'draft') | null;
+  /**
+   * When the poll was published
+   */
+  publishedAt?: string | null;
+  /**
+   * When the poll will close (optional)
+   */
+  closedAt?: string | null;
+  /**
+   * Related polls to show after voting
+   */
+  relatedPolls?: (string | Poll)[] | null;
+  /**
+   * Related articles to show after voting
+   */
+  relatedPosts?: (string | Post)[] | null;
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (string | null) | Media;
+    description?: string | null;
+  };
+  slug?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "poll-votes".
+ */
+export interface PollVote {
+  id: string;
+  /**
+   * The poll that was voted on
+   */
+  poll: string | Poll;
+  /**
+   * Index of the selected option (0-based)
+   */
+  optionIndex: number;
+  /**
+   * Unique identifier for the visitor (fingerprint or cookie)
+   */
+  visitorId: string;
+  /**
+   * IP address of the voter (for fraud prevention)
+   */
+  ipAddress?: string | null;
+  /**
+   * User agent of the voter
+   */
+  userAgent?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories".
  */
 export interface Category {
@@ -1122,6 +1237,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'posts';
         value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'polls';
+        value: string | Poll;
+      } | null)
+    | ({
+        relationTo: 'poll-votes';
+        value: string | PollVote;
       } | null)
     | ({
         relationTo: 'media';
@@ -1412,6 +1535,59 @@ export interface PostsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "polls_select".
+ */
+export interface PollsSelect<T extends boolean = true> {
+  question?: T;
+  heroImage?: T;
+  description?: T;
+  options?:
+    | T
+    | {
+        text?: T;
+        votes?: T;
+        id?: T;
+      };
+  totalVotes?: T;
+  country?: T;
+  tags?:
+    | T
+    | {
+        tag?: T;
+        id?: T;
+      };
+  status?: T;
+  publishedAt?: T;
+  closedAt?: T;
+  relatedPolls?: T;
+  relatedPosts?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        image?: T;
+        description?: T;
+      };
+  slug?: T;
+  slugLock?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "poll-votes_select".
+ */
+export interface PollVotesSelect<T extends boolean = true> {
+  poll?: T;
+  optionIndex?: T;
+  visitorId?: T;
+  ipAddress?: T;
+  userAgent?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
