@@ -18,6 +18,15 @@ const nextConfig = {
           protocol: url.protocol.replace(':', ''),
         }
       }),
+      // Allow Vercel Blob storage images
+      {
+        hostname: '**.blob.vercel-storage.com',
+        protocol: 'https',
+      },
+      {
+        hostname: '**.public.blob.vercel-storage.com',
+        protocol: 'https',
+      },
     ],
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 60,
