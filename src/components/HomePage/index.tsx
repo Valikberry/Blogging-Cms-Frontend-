@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Search, FileText, BarChart3, Mail } from 'lucide-react'
+import { FileText, BarChart3, Mail, Play, MessageSquare } from 'lucide-react'
 
 interface Post {
   id: string
@@ -11,9 +11,15 @@ interface Post {
   slug: string
   publishedAt: string
   source?: string | null
+  excerpt?: string | null
+  isHot?: boolean
   heroImage?: {
     url?: string | null
     alt?: string | null
+  } | null
+  videoEmbed?: {
+    enabled?: boolean | null
+    embedUrl?: string | null
   } | null
   country?: {
     id: string
@@ -49,8 +55,27 @@ interface CountrySection {
   polls: Poll[]
 }
 
+function getVideoThumbnail(embedUrl: string): string | null {
+  // YouTube
+  const youtubeMatch = embedUrl.match(/youtube\.com\/embed\/([^?]+)/)
+  if (youtubeMatch) {
+    return `https://img.youtube.com/vi/${youtubeMatch[1]}/maxresdefault.jpg`
+  }
+
+  // Vimeo - Note: Vimeo thumbnails require API call, so we'll handle it differently
+  const vimeoMatch = embedUrl.match(/player\.vimeo\.com\/video\/(\d+)/)
+  if (vimeoMatch) {
+    return null
+  }
+
+  return null
+}
+
 export function HomePage() {
-  const [searchQuery, setSearchQuery] = useState('')
+  const [email, setEmail] = useState('')
+  const [isSubscribing, setIsSubscribing] = useState(false)
+  const [subscribeMessage, setSubscribeMessage] = useState('')
+  const [messageType, setMessageType] = useState<'success' | 'error'>('success')
   const [countrySections, setCountrySections] = useState<CountrySection[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<Record<string, 'news' | 'polls'>>({})
@@ -76,7 +101,7 @@ export function HomePage() {
         countries.slice(0, 5).map(async (country) => {
           // Fetch hot posts for the horizontal scroll section
           const hotPostsRes = await fetch(
-            `/api/posts/paginated?countryId=${country.id}&limit=4&dateFormat=short&filter=hot`,
+            `/api/posts/paginated?countryId=${country.id}&limit=20&dateFormat=short&filter=hot`,
           )
           const hotPostsData = await hotPostsRes.json()
 
@@ -118,10 +143,35 @@ export function HomePage() {
     fetchData()
   }, [fetchData])
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (searchQuery.trim()) {
-      window.location.href = `/search?q=${encodeURIComponent(searchQuery)}`
+    if (!email.trim()) return
+
+    setIsSubscribing(true)
+    setSubscribeMessage('')
+
+    try {
+      const response = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setMessageType('success')
+        setSubscribeMessage(data.message || 'Successfully subscribed!')
+        setEmail('')
+      } else {
+        setMessageType('error')
+        setSubscribeMessage(data.error || 'Failed to subscribe')
+      }
+    } catch {
+      setMessageType('error')
+      setSubscribeMessage('Something went wrong. Please try again.')
+    } finally {
+      setIsSubscribing(false)
     }
   }
 
@@ -137,44 +187,55 @@ export function HomePage() {
   }
 
   return (
-    <div className="bg-white">
-      {/* Search Bar */}
-      <div className="mb-6">
-        <form onSubmit={handleSearch} className="relative max-w-xl mx-auto">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search for a story, poll or news..."
-            className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-[15px]"
-          />
-          <button
-            type="submit"
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-600 hover:text-indigo-700"
-          >
-            <Search className="w-5 h-5" />
-          </button>
-        </form>
-      </div>
-
+    <div className="bg-white py-2">
       {/* Tagline */}
-      <p className="text-center text-gray-600 mb-8 text-[15px]">
+      <p className="text-center text-gray-600 mb-8 text-[17px]">
         AskGeopolitics breaks big global stories into clear questions that reveal what&apos;s at
         stake, who&apos;s involved, and what could happen next.
       </p>
-
+      {/* Subscribe Form */}
+      <div className="mb-6">
+        <form
+          onSubmit={handleSubscribe}
+          className="flex  mx-auto overflow-hidden rounded-lg"
+        >
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your email..."
+            className="flex-1 px-4 py-4 bg-gray-100 text-gray-700 text-[15px] focus:outline-none"
+            disabled={isSubscribing}
+          />
+          <button
+            type="submit"
+            disabled={isSubscribing}
+            className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 text-[15px] font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50"
+          >
+            <Mail className="w-5 h-5" />
+            {isSubscribing ? 'Subscribing...' : 'Subscribe'}
+          </button>
+        </form>
+        {subscribeMessage && (
+          <p
+            className={`text-center mt-2 text-[14px] ${messageType === 'success' ? 'text-green-600' : 'text-red-600'}`}
+          >
+            {subscribeMessage}
+          </p>
+        )}
+      </div>
       {/* Country Sections */}
       {countrySections.map((section) => (
         <div key={section.country.id} className="mb-10">
           {/* Tabs and Country Badge */}
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 border-b border-gray-200">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setActiveTab((prev) => ({ ...prev, [section.country.id]: 'news' }))}
-                className={`flex items-center gap-2 pb-2 text-[15px] font-medium transition-colors ${
+                className={`flex items-center gap-2 pb-2 mb-[-1px] text-[15px] font-medium transition-colors ${
                   activeTab[section.country.id] === 'news'
                     ? 'text-indigo-600 border-b-2 border-indigo-600'
-                    : 'text-gray-500 hover:text-gray-700'
+                    : 'text-gray-500 hover:text-gray-700 border-b-2 border-transparent'
                 }`}
               >
                 <FileText className="w-4 h-4" />
@@ -182,10 +243,10 @@ export function HomePage() {
               </button>
               <button
                 onClick={() => setActiveTab((prev) => ({ ...prev, [section.country.id]: 'polls' }))}
-                className={`flex items-center gap-2 pb-2 text-[15px] font-medium transition-colors ${
+                className={`flex items-center gap-2 pb-2 mb-[-1px] text-[15px] font-medium transition-colors ${
                   activeTab[section.country.id] === 'polls'
                     ? 'text-indigo-600 border-b-2 border-indigo-600'
-                    : 'text-gray-500 hover:text-gray-700'
+                    : 'text-gray-500 hover:text-gray-700 border-b-2 border-transparent'
                 }`}
               >
                 <BarChart3 className="w-4 h-4" />
@@ -215,47 +276,111 @@ export function HomePage() {
             <>
               {/* Hot Stories - Horizontal Scroll */}
               {section.hotPosts.length > 0 && (
-                <div className="mb-4">
-                  <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                    {section.hotPosts.map((post) => {
-                      const countrySlug = post.country?.slug
-                        ? post.country.slug.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()
-                        : section.country.slug
-                      const imageUrl = post.heroImage?.url
+                <div className="mb-1">
+                  <div className="overflow-x-auto scrollbar-hide -mx-1 px-1">
+                    <div className="flex gap-3 pb-2">
+                      {section.hotPosts.map((post) => {
+                        const hasVideo = post.videoEmbed?.enabled && post.videoEmbed?.embedUrl
+                        const videoThumbnail =
+                          hasVideo && post.videoEmbed?.embedUrl
+                            ? getVideoThumbnail(post.videoEmbed.embedUrl)
+                            : null
+                        const imageUrl = post.heroImage?.url || null
+                        const imageAlt = post.heroImage?.alt || post.title
+                        const countrySlug = post.country?.slug
+                          ? post.country.slug.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()
+                          : section.country.slug
 
-                      return (
-                        <Link
-                          key={post.id}
-                          href={`/${countrySlug}/${post.slug}`}
-                          className="flex-shrink-0 w-[160px] group"
-                        >
-                          <div className="relative w-full h-[100px] rounded-lg overflow-hidden bg-gray-100 mb-2">
-                            {imageUrl ? (
-                              <Image
-                                src={imageUrl}
-                                alt={post.heroImage?.alt || post.title}
-                                fill
-                                className="object-cover group-hover:scale-105 transition-transform"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                                <FileText className="w-8 h-8 text-gray-400" />
-                              </div>
-                            )}
-                          </div>
-                          <p className="text-[13px] text-gray-700 line-clamp-2 group-hover:text-indigo-600 transition-colors">
-                            {post.title}
-                          </p>
-                        </Link>
-                      )
-                    })}
+                        // Prioritize video thumbnail, then hero image, then fallback
+                        const displayImageUrl = videoThumbnail || imageUrl
+
+                        return (
+                          <Link
+                            key={post.id}
+                            href={`/${countrySlug}/${post.slug}`}
+                            className="flex-shrink-0 w-[143px] bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+                          >
+                            {/* Image/Video Thumbnail */}
+                            <div className="relative w-full h-[90px] bg-gray-100">
+                              {displayImageUrl ? (
+                                <>
+                                  {videoThumbnail ? (
+                                    // Use regular img tag for YouTube thumbnails
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img
+                                      src={displayImageUrl}
+                                      alt={imageAlt || post.title}
+                                      className="absolute inset-0 w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    // Use Next.js Image for hero images
+                                    <Image
+                                      src={displayImageUrl}
+                                      alt={imageAlt || post.title}
+                                      fill
+                                      className="object-cover"
+                                    />
+                                  )}
+                                  {/* Play button overlay for videos */}
+                                  {hasVideo && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
+                                      <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg">
+                                        <Play
+                                          className="w-5 h-5 text-indigo-600 ml-0.5"
+                                          fill="currentColor"
+                                        />
+                                      </div>
+                                    </div>
+                                  )}
+                                </>
+                              ) : hasVideo ? (
+                                // Video without thumbnail (e.g., Vimeo)
+                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600">
+                                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
+                                    <Play
+                                      className="w-6 h-6 text-indigo-600 ml-0.5"
+                                      fill="currentColor"
+                                    />
+                                  </div>
+                                </div>
+                              ) : (
+                                // No image or video
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <div className="w-12 h-12 border-2 border-gray-300 rounded flex items-center justify-center">
+                                    <svg
+                                      className="w-6 h-6 text-gray-400"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                      />
+                                    </svg>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                            {/* Content */}
+                            <div className="p-1">
+                              <p className="text-gray-600 text-sm line-clamp-2">
+                                {post.excerpt || post.title}
+                              </p>
+                            </div>
+                          </Link>
+                        )
+                      })}
+                    </div>
                   </div>
                 </div>
               )}
 
               {/* Trendy Topics */}
               <div>
-                <div className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg mb-3">
+                <div className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg">
                   <Mail className="w-4 h-4" />
                   <span className="font-medium text-[14px]">Trendy Topics</span>
                 </div>
@@ -283,69 +408,137 @@ export function HomePage() {
                           <span className="text-indigo-600 font-medium text-[14px] whitespace-nowrap min-w-[55px]">
                             {post.publishedAt}
                           </span>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-gray-900 text-[14px] line-clamp-1 font-medium">
+                          <div className="flex-1 min-w-0 overflow-hidden">
+                            <p className="text-gray-900 text-[14px] font-medium truncate">
                               {post.title}
                             </p>
                             {post.source && (
-                              <p className="text-[12px] text-gray-500 mt-0.5">From {post.source}</p>
+                              <p className="text-[12px] text-gray-500 mt-0.5 truncate">
+                                From {post.source}
+                              </p>
                             )}
                           </div>
-                          {imageUrl && (
-                            <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+                          <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                            {imageUrl ? (
                               <Image
                                 src={imageUrl}
                                 alt={post.heroImage?.alt || post.title}
                                 fill
                                 className="object-cover"
                               />
-                            </div>
-                          )}
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <FileText className="w-6 h-6 text-gray-400" />
+                              </div>
+                            )}
+                          </div>
                         </Link>
                       )
                     })
                   )}
                 </div>
               </div>
+
+              {/* Everything You Need To Know Section */}
+              <div className="mt-8">
+                <div className="flex items-center gap-2 mb-4">
+                  <MessageSquare className="w-6 h-6 text-green-500" />
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Everything You Need To Know About AskGeoPolitics
+                  </h3>
+                </div>
+                <div className="border border-gray-200 rounded-lg overflow-hidden">
+                  <div className="border-l-4 border-indigo-600 p-4">
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      What is AskGeoPolitics and how does it work?
+                    </h4>
+                    <p className="text-gray-600 text-[14px]">
+                      AskGeoPolitics is a platform that breaks down complex global news stories into
+                      clear, digestible questions. We help you understand what&apos;s at stake,
+                      who&apos;s involved, and what could happen next in world events.
+                    </p>
+                  </div>
+                  <div className="border-l-4 border-indigo-600 p-4 border-t border-gray-200">
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      How are stories selected and verified?
+                    </h4>
+                    <p className="text-gray-600 text-[14px]">
+                      Our editorial team curates stories from multiple reliable sources worldwide. We
+                      focus on geopolitical events that have significant impact and present them in an
+                      unbiased, question-based format to encourage critical thinking.
+                    </p>
+                  </div>
+                  <div className="border-l-4 border-indigo-600 p-4 border-t border-gray-200">
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      Can I participate in polls and discussions?
+                    </h4>
+                    <p className="text-gray-600 text-[14px]">
+                      Yes! Our polls allow you to share your perspective on current geopolitical
+                      issues. Your vote contributes to understanding public opinion on important global
+                      matters.
+                    </p>
+                  </div>
+                  <div className="border-l-4 border-indigo-600 p-4 border-t border-gray-200">
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      How can I stay updated with the latest news?
+                    </h4>
+                    <p className="text-gray-600 text-[14px]">
+                      Subscribe to our newsletter using the form above to receive daily or weekly
+                      updates on the most important geopolitical stories. You can also follow specific
+                      countries or topics that interest you.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </>
           ) : (
-            /* Polls Grid */
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            /* Polls - Horizontal Scroll */
+            <div className="mb-1">
               {section.polls.length === 0 ? (
-                <div className="col-span-full text-center py-8 text-gray-500 text-[14px]">
+                <div className="text-center py-8 text-gray-500 text-[14px]">
                   No polls available for this country.
                 </div>
               ) : (
-                section.polls.map((poll) => {
-                  const imageUrl = poll.heroImage?.url
-                  const pollSlug = poll.slug || poll.id
+                <div className="overflow-x-auto scrollbar-hide -mx-1 px-1">
+                  <div className="flex gap-3 pb-2">
+                    {section.polls.map((poll) => {
+                      const imageUrl = poll.heroImage?.url
+                      const pollSlug = poll.slug || poll.id
 
-                  return (
-                    <Link
-                      key={poll.id}
-                      href={`/${section.country.slug}/poll/${pollSlug}`}
-                      className="group"
-                    >
-                      <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-gray-100 mb-2">
-                        {imageUrl ? (
-                          <Image
-                            src={imageUrl}
-                            alt={poll.heroImage?.alt || poll.question}
-                            fill
-                            className="object-cover group-hover:scale-105 transition-transform"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                            <BarChart3 className="w-10 h-10 text-gray-400" />
+                      return (
+                        <Link
+                          key={poll.id}
+                          href={`/${section.country.slug}/poll/${pollSlug}`}
+                          className="flex-shrink-0 w-[143px] bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+                        >
+                          {/* Image */}
+                          <div className="relative w-full h-[90px] bg-gray-100">
+                            {imageUrl ? (
+                              <Image
+                                src={imageUrl}
+                                alt={poll.heroImage?.alt || poll.question}
+                                fill
+                                className="object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <div className="w-12 h-12 border-2 border-gray-300 rounded flex items-center justify-center">
+                                  <BarChart3 className="w-6 h-6 text-gray-400" />
+                                </div>
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
-                      <p className="text-[13px] text-gray-700 line-clamp-2 group-hover:text-indigo-600 transition-colors">
-                        {poll.question}
-                      </p>
-                    </Link>
-                  )
-                })
+                          {/* Content */}
+                          <div className="p-1">
+                            <p className="text-gray-600 text-sm line-clamp-2">
+                              {poll.question}
+                            </p>
+                          </div>
+                        </Link>
+                      )
+                    })}
+                  </div>
+                </div>
               )}
             </div>
           )}
