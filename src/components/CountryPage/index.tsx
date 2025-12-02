@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useSearchParams } from 'next/navigation'
 import { Search, FileText, BookOpen, BarChart3, ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface Post {
@@ -45,8 +46,16 @@ interface CountryPageProps {
 type TabType = 'news' | 'stories' | 'polls'
 
 export function CountryPage({ country }: CountryPageProps) {
+  const searchParams = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
-  const [activeTab, setActiveTab] = useState<TabType>('news')
+  const [activeTab, setActiveTab] = useState<TabType>(() => {
+    // Initialize from URL if available
+    const tab = searchParams.get('tab')
+    if (tab === 'polls' || tab === 'stories' || tab === 'news') {
+      return tab
+    }
+    return 'news'
+  })
   const [posts, setPosts] = useState<Post[]>([])
   const [polls, setPolls] = useState<Poll[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -101,6 +110,14 @@ export function CountryPage({ country }: CountryPageProps) {
   useEffect(() => {
     setCurrentPage(1)
   }, [activeTab])
+
+  // Sync tab state with URL changes
+  useEffect(() => {
+    const tab = searchParams.get('tab')
+    if (tab === 'polls' || tab === 'stories' || tab === 'news') {
+      setActiveTab(tab)
+    }
+  }, [searchParams])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -184,14 +201,14 @@ export function CountryPage({ country }: CountryPageProps) {
       </div>
 
       {/* Tabs and Country Badge */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4 border-b border-gray-200">
         <div className="flex items-center gap-4">
           <button
             onClick={() => setActiveTab('news')}
-            className={`flex items-center gap-2 pb-2 text-[15px] font-medium transition-colors ${
+            className={`flex items-center gap-2 pb-2 mb-[-1px] text-[15px] font-medium transition-colors ${
               activeTab === 'news'
                 ? 'text-indigo-600 border-b-2 border-indigo-600'
-                : 'text-gray-500 hover:text-gray-700'
+                : 'text-gray-500 hover:text-gray-700 border-b-2 border-transparent'
             }`}
           >
             <FileText className="w-4 h-4" />
@@ -199,10 +216,10 @@ export function CountryPage({ country }: CountryPageProps) {
           </button>
           <button
             onClick={() => setActiveTab('stories')}
-            className={`flex items-center gap-2 pb-2 text-[15px] font-medium transition-colors ${
+            className={`flex items-center gap-2 pb-2 mb-[-1px] text-[15px] font-medium transition-colors ${
               activeTab === 'stories'
                 ? 'text-indigo-600 border-b-2 border-indigo-600'
-                : 'text-gray-500 hover:text-gray-700'
+                : 'text-gray-500 hover:text-gray-700 border-b-2 border-transparent'
             }`}
           >
             <BookOpen className="w-4 h-4" />
@@ -210,10 +227,10 @@ export function CountryPage({ country }: CountryPageProps) {
           </button>
           <button
             onClick={() => setActiveTab('polls')}
-            className={`flex items-center gap-2 pb-2 text-[15px] font-medium transition-colors ${
+            className={`flex items-center gap-2 pb-2 mb-[-1px] text-[15px] font-medium transition-colors ${
               activeTab === 'polls'
                 ? 'text-indigo-600 border-b-2 border-indigo-600'
-                : 'text-gray-500 hover:text-gray-700'
+                : 'text-gray-500 hover:text-gray-700 border-b-2 border-transparent'
             }`}
           >
             <BarChart3 className="w-4 h-4" />
@@ -243,44 +260,55 @@ export function CountryPage({ country }: CountryPageProps) {
           <p className="mt-2 text-gray-500">Loading...</p>
         </div>
       ) : activeTab === 'polls' ? (
-        /* Polls Grid */
-        <div>
+        /* Polls - Horizontal Scroll */
+        <div className="mb-1">
           {polls.length === 0 ? (
-            <div className="py-12 text-center text-gray-500">
+            <div className="text-center py-8 text-gray-500 text-[14px]">
               No polls available for this country.
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              {polls.map((poll) => {
-                const imageUrl = poll.heroImage?.url
-                const pollSlug = poll.slug || poll.id
+            <div className="overflow-x-auto scrollbar-hide -mx-1 px-1">
+              <div className="flex gap-3 pb-2 flex-wrap">
+                {polls.map((poll) => {
+                  const imageUrl = poll.heroImage?.url
+                  const pollSlug = poll.slug || poll.id
+                  const normalizedCountrySlug = country.slug
+                    .replace(/[^a-zA-Z0-9]/g, '')
+                    .toLowerCase()
 
-                return (
-                  <Link
-                    key={poll.id}
-                    href={`/${country.slug}/poll/${pollSlug}`}
-                    className="group"
-                  >
-                    <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-gray-100 mb-2">
-                      {imageUrl ? (
-                        <Image
-                          src={imageUrl}
-                          alt={poll.heroImage?.alt || poll.question}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                          <BarChart3 className="w-10 h-10 text-gray-400" />
-                        </div>
-                      )}
-                    </div>
-                    <p className="text-[13px] text-gray-700 line-clamp-2 group-hover:text-indigo-600 transition-colors">
-                      {poll.question}
-                    </p>
-                  </Link>
-                )
-              })}
+                  return (
+                    <Link
+                      key={poll.id}
+                      href={`/${normalizedCountrySlug}/poll/${pollSlug}`}
+                      className="flex-shrink-0 w-[143px] bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+                    >
+                      {/* Image */}
+                      <div className="relative w-full h-[90px] bg-gray-100">
+                        {imageUrl ? (
+                          <Image
+                            src={imageUrl}
+                            alt={poll.heroImage?.alt || poll.question}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <div className="w-12 h-12 border-2 border-gray-300 rounded flex items-center justify-center">
+                              <BarChart3 className="w-6 h-6 text-gray-400" />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      {/* Content */}
+                      <div className="p-1">
+                        <p className="text-gray-600 text-sm line-clamp-2">
+                          {poll.question}
+                        </p>
+                      </div>
+                    </Link>
+                  )
+                })}
+              </div>
             </div>
           )}
         </div>
@@ -294,11 +322,14 @@ export function CountryPage({ country }: CountryPageProps) {
           ) : (
             posts.map((post, index) => {
               const imageUrl = post.heroImage?.url
+              const normalizedCountrySlug = country.slug
+                .replace(/[^a-zA-Z0-9]/g, '')
+                .toLowerCase()
 
               return (
                 <Link
                   key={post.id}
-                  href={`/${country.slug}/${post.slug}`}
+                  href={`/${normalizedCountrySlug}/${post.slug}`}
                   className={`flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors ${
                     index > 0 ? 'border-t border-gray-200' : ''
                   }`}
@@ -306,24 +337,30 @@ export function CountryPage({ country }: CountryPageProps) {
                   <span className="text-indigo-600 font-medium text-[14px] whitespace-nowrap min-w-[55px]">
                     {post.publishedAt}
                   </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-gray-900 text-[14px] line-clamp-1 font-medium">
+                  <div className="flex-1 min-w-0 overflow-hidden">
+                    <p className="text-gray-900 text-[14px] font-medium truncate">
                       {post.title}
                     </p>
                     {post.source && (
-                      <p className="text-[12px] text-gray-500 mt-0.5">From {post.source}</p>
+                      <p className="text-[12px] text-gray-500 mt-0.5 truncate">
+                        From {post.source}
+                      </p>
                     )}
                   </div>
-                  {imageUrl && (
-                    <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+                  <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                    {imageUrl ? (
                       <Image
                         src={imageUrl}
                         alt={post.heroImage?.alt || post.title}
                         fill
                         className="object-cover"
                       />
-                    </div>
-                  )}
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <FileText className="w-6 h-6 text-gray-400" />
+                      </div>
+                    )}
+                  </div>
                 </Link>
               )
             })
