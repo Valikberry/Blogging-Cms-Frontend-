@@ -212,6 +212,166 @@ function DonutChart({
   )
 }
 
+// Share Card Component for social sharing
+function ShareCard({
+  question,
+  results,
+  heroImageUrl,
+  votedOption,
+}: {
+  question: string
+  results: Array<{ text: string; votes: number; percentage: number }>
+  heroImageUrl?: string | null
+  votedOption?: string | null
+}) {
+  const colors = ['#6366f1', '#a3e635', '#f97316', '#ec4899', '#8b5cf6', '#14b8a6']
+  const size = 180
+  const strokeWidth = 28
+  const radius = (size - strokeWidth) / 2
+  const center = size / 2
+
+  // Full circle donut
+  const polarToCartesian = (cx: number, cy: number, r: number, angleDegrees: number) => {
+    const angleRadians = ((angleDegrees - 90) * Math.PI) / 180
+    return {
+      x: cx + r * Math.cos(angleRadians),
+      y: cy + r * Math.sin(angleRadians),
+    }
+  }
+
+  const describeArc = (cx: number, cy: number, r: number, startAngle: number, endAngle: number) => {
+    const start = polarToCartesian(cx, cy, r, endAngle)
+    const end = polarToCartesian(cx, cy, r, startAngle)
+    const largeArcFlag = endAngle - startAngle <= 180 ? 0 : 1
+    return `M ${start.x} ${start.y} A ${r} ${r} 0 ${largeArcFlag} 0 ${end.x} ${end.y}`
+  }
+
+  // Calculate segment angles
+  let currentAngle = -90 // Start from top
+  const segments = results.map((option, index) => {
+    const segmentDegrees = (option.percentage / 100) * 360
+    const segment = {
+      startAngle: currentAngle,
+      endAngle: currentAngle + segmentDegrees,
+      color: colors[index % colors.length],
+    }
+    currentAngle += segmentDegrees
+    return segment
+  })
+
+  return (
+    <div
+      style={{
+        width: 600,
+        padding: '32px',
+        backgroundColor: '#f3f4f6',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+      }}
+    >
+      {/* Question */}
+      <h2
+        style={{
+          fontSize: '20px',
+          fontWeight: 'bold',
+          color: '#111827',
+          textAlign: 'center',
+          marginBottom: '24px',
+        }}
+      >
+        {question}
+      </h2>
+
+      {/* Chart and Legend Container */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '32px' }}>
+        {/* Donut Chart with Image */}
+        <div style={{ position: 'relative', width: size, height: size }}>
+          <svg width={size} height={size}>
+            {/* Background circle */}
+            <circle
+              cx={center}
+              cy={center}
+              r={radius}
+              fill="none"
+              stroke="#e5e7eb"
+              strokeWidth={strokeWidth}
+            />
+            {/* Segments */}
+            {segments.map((segment, index) => (
+              <path
+                key={index}
+                d={describeArc(center, center, radius, segment.startAngle, segment.endAngle - 0.5)}
+                fill="none"
+                stroke={segment.color}
+                strokeWidth={strokeWidth}
+                strokeLinecap="round"
+              />
+            ))}
+          </svg>
+          {/* Center Image */}
+          {heroImageUrl && (
+            <div
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: size - strokeWidth * 2 - 16,
+                height: size - strokeWidth * 2 - 16,
+                borderRadius: '50%',
+                overflow: 'hidden',
+                border: '4px solid white',
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={heroImageUrl}
+                alt=""
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Legend */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {results.map((option, index) => (
+            <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div
+                style={{
+                  width: '16px',
+                  height: '16px',
+                  borderRadius: '4px',
+                  backgroundColor: colors[index % colors.length],
+                }}
+              />
+              <span style={{ fontSize: '16px', color: '#374151', minWidth: '60px' }}>
+                {option.text}
+              </span>
+              <span style={{ fontSize: '16px', color: '#6b7280' }}>
+                {option.votes} votes {option.percentage}%
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Voted Message */}
+      {votedOption && (
+        <p
+          style={{
+            fontSize: '16px',
+            color: '#374151',
+            textAlign: 'center',
+            marginTop: '24px',
+          }}
+        >
+          I voted {votedOption}. What about you?
+        </p>
+      )}
+    </div>
+  )
+}
+
 export function PollDetail({ poll, countrySlug }: PollDetailProps) {
   const [hasVoted, setHasVoted] = useState(false)
   const [votedOptionIndex, setVotedOptionIndex] = useState<number | null>(null)
@@ -223,7 +383,65 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [isVoting, setIsVoting] = useState(false)
   const [showResults, setShowResults] = useState(false)
+  const [nextPollSlug, setNextPollSlug] = useState<string | null>(null)
+  const [nextPollCountrySlug, setNextPollCountrySlug] = useState<string | null>(null)
   const resultsRef = useRef<HTMLDivElement>(null)
+  const shareCardRef = useRef<HTMLDivElement>(null)
+
+  // Fetch next poll that user hasn't voted on
+  const fetchNextPoll = useCallback(async () => {
+    try {
+      // Fetch all polls (no country filter to ensure we get results)
+      const res = await fetch(`/api/polls-list?limit=50`)
+      const data = await res.json()
+
+      if (data.polls && data.polls.length > 0) {
+        const visitorId = getVisitorId()
+
+        // Filter out current poll
+        const otherPolls = data.polls.filter((p: any) => p.id !== poll.id && p.slug !== poll.slug)
+
+        if (otherPolls.length === 0) {
+          return
+        }
+
+        // Helper to set next poll with country slug
+        const setNextPoll = (p: any) => {
+          setNextPollSlug(p.slug)
+          // Get country slug from poll or use current countrySlug
+          const pCountrySlug = p.country?.slug
+            ? p.country.slug.toLowerCase().replace(/\s+/g, '')
+            : countrySlug
+          setNextPollCountrySlug(pCountrySlug)
+        }
+
+        // Check each poll to find one user hasn't voted on
+        for (const p of otherPolls) {
+          try {
+            const voteRes = await fetch(`/api/poll-vote/${p.id}?visitorId=${visitorId}`)
+            const voteData = await voteRes.json()
+            if (!voteData.hasVoted) {
+              setNextPoll(p)
+              return
+            }
+          } catch {
+            // If check fails, still use this poll
+            setNextPoll(p)
+            return
+          }
+        }
+
+        // If all polls are voted, just use the first other poll
+        setNextPoll(otherPolls[0])
+      }
+    } catch (error) {
+      console.error('Error fetching next poll:', error)
+    }
+  }, [poll.id, poll.slug, countrySlug])
+
+  useEffect(() => {
+    fetchNextPoll()
+  }, [fetchNextPoll])
 
   const checkVoteStatus = useCallback(async () => {
     const visitorId = getVisitorId()
@@ -241,7 +459,8 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
         setVotedOptionIndex(data.votedOptionIndex)
         setResults(data.results)
         setTotalVotes(data.totalVotes)
-        setShowResults(true)
+        // Don't show results immediately - user needs to click "See Results"
+        setShowResults(false)
       }
     } catch (error) {
       console.error('Error checking vote status:', error)
@@ -277,7 +496,8 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
         setVotedOptionIndex(selectedOption)
         setResults(data.results)
         setTotalVotes(data.totalVotes)
-        setShowResults(true)
+        // Don't show results immediately - user needs to click "See Results"
+        setShowResults(false)
       } else {
         alert(data.error || 'Failed to record vote')
       }
@@ -290,22 +510,31 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
   }
 
   const captureAndShare = async (platform: string) => {
-    if (!resultsRef.current) return
+    if (!shareCardRef.current) return
 
     try {
       const html2canvas = (await import('html2canvas')).default
-      const canvas = await html2canvas(resultsRef.current, {
-        backgroundColor: '#ffffff',
+      await html2canvas(shareCardRef.current, {
+        backgroundColor: '#f3f4f6',
         scale: 2,
+        useCORS: true,
+        allowTaint: true,
       })
 
-      const imageData = canvas.toDataURL('image/png')
-      const url = encodeURIComponent(window.location.href)
-      const text = encodeURIComponent(`${poll.question} - See the results!`)
+      // Get voted option text
+      const votedText = votedOptionIndex !== null ? results[votedOptionIndex]?.text : ''
+      const shareText = votedText
+        ? `I voted ${votedText}. What about you? ${poll.question}`
+        : `${poll.question} - See the results!`
 
+      const url = encodeURIComponent(window.location.href)
+      const text = encodeURIComponent(shareText)
+
+      // For platforms that support image sharing, we could upload the image
+      // For now, we share the URL with the text
       switch (platform) {
         case 'facebook':
-          window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank')
+          window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`, '_blank')
           break
         case 'whatsapp':
           window.open(`https://wa.me/?text=${text}%20${url}`, '_blank')
@@ -364,7 +593,7 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
           Home
         </Link>
         <ChevronRight className="w-4 h-4" />
-        <Link href={`/${countrySlug}`} className="hover:text-gray-700 uppercase">
+        <Link href={`/${countrySlug}`} className="hover:text-gray-700">
           {countrySlug}
         </Link>
         <ChevronRight className="w-4 h-4" />
@@ -388,47 +617,55 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
         </div>
       )}
 
-      {/* Question */}
-      <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{poll.question}</h1>
+      {/* Hero Image - show before voting OR after voting but before showing results */}
+      {(!hasVoted || (hasVoted && !showResults)) && poll.heroImage?.url && (
+        <div className="relative w-full h-48 sm:h-64 md:h-80 rounded-lg overflow-hidden mb-4">
+          <Image
+            src={poll.heroImage.url}
+            alt={poll.heroImage.alt || poll.question}
+            fill
+            className="object-cover"
+          />
+        </div>
+      )}
 
-      {/* Date */}
-      <p className="text-gray-500 text-[14px] mb-6">
-        {new Date().toLocaleDateString('en-US', {
-          day: 'numeric',
-          month: 'short',
-          year: 'numeric',
-        })}{' '}
-        | {new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
-      </p>
-
-      {/* Voting Options or Results */}
-      {!hasVoted ? (
-        /* Voting Options */
+      {/* Options - show before voting OR after voting but before showing results */}
+      {(!hasVoted || (hasVoted && !showResults)) && (
         <div className="space-y-3 mb-4">
           {poll.options.map((option, index) => (
             <button
               key={index}
-              onClick={() => setSelectedOption(index)}
-              className={`w-full p-4 text-left rounded-lg border-2 transition-all ${
-                selectedOption === index
-                  ? 'border-indigo-600 bg-indigo-50'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
+              onClick={() => !hasVoted && setSelectedOption(index)}
+              disabled={hasVoted}
+              className={`w-full p-4 text-left text-lg rounded-lg border-2 transition-all ${
+                hasVoted && votedOptionIndex === index
+                  ? 'border-indigo-600 bg-indigo-100'
+                  : selectedOption === index
+                    ? 'border-indigo-600 bg-indigo-50'
+                    : 'border-gray-200 hover:border-gray-300'
+              } ${hasVoted ? 'cursor-default' : ''}`}
             >
-              <span className="font-medium text-[15px]">{option.text}</span>
+              <span className="font-medium text-lg">{option.text}</span>
             </button>
           ))}
         </div>
-      ) : (
-        /* Results View */
+      )}
+
+      {/* Vote Count - show on voting screen and after voting but before showing results */}
+      {(!hasVoted || (hasVoted && !showResults)) && (
+        <p className="text-gray-600 text-base mb-4">{totalVotes.toLocaleString()} Votes</p>
+      )}
+
+      {/* Results View - only show when showResults is true */}
+      {hasVoted && showResults && (
         <div ref={resultsRef} className="bg-indigo-50/50 rounded-xl p-6 mb-6">
           {/* Thank You Header */}
           <div className="text-center mb-6">
             <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
               <CheckCircle className="w-6 h-6 text-gray-500" />
             </div>
-            <h2 className="text-xl font-bold text-gray-900 mb-1">Thank You!</h2>
-            <p className="text-gray-600 text-[14px]">
+            <h2 className="text-lg font-bold text-gray-900 mb-1">Thank You!</h2>
+            <p className="text-gray-600 text-base">
               Your response has been recorded successfully. Here are the results below.
             </p>
           </div>
@@ -489,11 +726,27 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
         >
           {isVoting ? 'Voting...' : 'Vote'}
         </button>
+      ) : !showResults ? (
+        /* After voting, before showing results - show two buttons side by side */
+        <div className="flex gap-3 mb-6">
+          <Link
+            href={nextPollSlug && nextPollCountrySlug ? `/${nextPollCountrySlug}/poll/${nextPollSlug}` : `/${countrySlug}?tab=polls`}
+            className="flex-1 flex items-center justify-center gap-2 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            Take Another Poll
+          </Link>
+          <button
+            onClick={() => setShowResults(true)}
+            className="flex-1 py-3 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 transition-colors"
+          >
+            See results
+          </button>
+        </div>
       ) : (
         <>
-          {/* Take Another Poll Button */}
+          {/* After showing results - show Take Another Poll button */}
           <Link
-            href={`/${countrySlug}?tab=polls`}
+            href={nextPollSlug && nextPollCountrySlug ? `/${nextPollCountrySlug}/poll/${nextPollSlug}` : `/${countrySlug}?tab=polls`}
             className="flex items-center justify-center gap-2 w-full py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors mb-6"
           >
             <ListTodo className="w-5 h-5" />
@@ -606,46 +859,75 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
           {/* Similar Topics (Related Posts) */}
           {poll.relatedPosts && poll.relatedPosts.length > 0 && (
             <div>
-              <div className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg mb-4">
+              <div className="inline-flex items-center gap-2 bg-indigo-600 text-white px-3 py-1.5 rounded-lg">
                 <span>&#9733;</span>
                 <span className="font-medium text-[14px]">Similar Topics</span>
               </div>
               <div className="border border-gray-200 rounded-lg overflow-hidden">
-                {poll.relatedPosts.map((post, index) => (
-                  <Link
-                    key={post.id}
-                    href={`/${countrySlug}/${post.slug}`}
-                    className={`flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors ${
-                      index > 0 ? 'border-t border-gray-200' : ''
-                    }`}
-                  >
-                    <span className="text-indigo-600 font-medium text-[14px] whitespace-nowrap min-w-[55px]">
-                      {post.publishedAt || 'Nov 22'}
-                    </span>
-                    <div className="flex-1 min-w-0 overflow-hidden">
-                      <p className="text-gray-900 text-[14px] font-medium truncate">{post.title}</p>
-                      <p className="text-[12px] text-gray-500 mt-0.5 truncate">From Politico</p>
-                    </div>
-                    <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
-                      {post.heroImage?.url ? (
-                        <Image
-                          src={post.heroImage.url}
-                          alt={post.heroImage.alt || post.title}
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <span className="text-gray-400 text-2xl">&#128196;</span>
+                {poll.relatedPosts.map((post, index) => {
+                  const imageUrl = post.heroImage?.url
+                  return (
+                    <div
+                      key={post.id}
+                      className={index > 0 ? 'border-t border-gray-200 py-1' : ''}
+                    >
+                      <Link
+                        href={`/${countrySlug}/${post.slug}`}
+                        className="block hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="px-3 sm:px-6 py-3 sm:py-4">
+                          <div className="flex items-center justify-between gap-2 sm:gap-4">
+                            <div className="flex gap-2 sm:gap-4 items-start flex-1 min-w-0">
+                              <span className="text-indigo-600 text-sm sm:text-sm shrink-0 pt-0.5">
+                                {post.publishedAt || 'Nov 22'}
+                              </span>
+                              <div className="flex-1 min-w-0">
+                                <h3 className="text-gray-900 font-medium text-base sm:text-base leading-snug">
+                                  {post.title}
+                                </h3>
+                              </div>
+                            </div>
+                            {imageUrl ? (
+                              <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                                <Image
+                                  src={imageUrl}
+                                  alt={post.heroImage?.alt || post.title}
+                                  fill
+                                  className="object-cover"
+                                />
+                              </div>
+                            ) : (
+                              <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 shrink-0" />
+                            )}
+                          </div>
                         </div>
-                      )}
+                      </Link>
                     </div>
-                  </Link>
-                ))}
+                  )
+                })}
               </div>
             </div>
           )}
         </>
+      )}
+
+      {/* Hidden Share Card for capturing */}
+      {hasVoted && results.length > 0 && (
+        <div
+          ref={shareCardRef}
+          style={{
+            position: 'absolute',
+            left: '-9999px',
+            top: 0,
+          }}
+        >
+          <ShareCard
+            question={poll.question}
+            results={results}
+            heroImageUrl={poll.heroImage?.url}
+            votedOption={votedOptionIndex !== null ? results[votedOptionIndex]?.text : null}
+          />
+        </div>
       )}
     </div>
   )
