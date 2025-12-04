@@ -72,29 +72,33 @@ export function CountryPage({ country }: CountryPageProps) {
     try {
       if (activeTab === 'polls') {
         const res = await fetch(
-          `/api/polls-list?countryId=${country.id}&page=${currentPage}&limit=12`
+          `/api/polls-list?countryId=${country.id}&page=${currentPage}&limit=12`,
         )
         const data = await res.json()
         setPolls(data.polls || [])
-        setPagination(data.pagination || {
-          totalPages: 1,
-          totalDocs: 0,
-          hasNextPage: false,
-          hasPrevPage: false,
-        })
+        setPagination(
+          data.pagination || {
+            totalPages: 1,
+            totalDocs: 0,
+            hasNextPage: false,
+            hasPrevPage: false,
+          },
+        )
       } else {
         const isStories = activeTab === 'stories' ? '&isStories=true' : ''
         const res = await fetch(
-          `/api/posts/paginated?countryId=${country.id}&page=${currentPage}&limit=10&dateFormat=short${isStories}`
+          `/api/posts/paginated?countryId=${country.id}&page=${currentPage}&limit=10&dateFormat=short${isStories}`,
         )
         const data = await res.json()
         setPosts(data.posts || [])
-        setPagination(data.pagination || {
-          totalPages: 1,
-          totalDocs: 0,
-          hasNextPage: false,
-          hasPrevPage: false,
-        })
+        setPagination(
+          data.pagination || {
+            totalPages: 1,
+            totalDocs: 0,
+            hasNextPage: false,
+            hasPrevPage: false,
+          },
+        )
       }
     } catch (error) {
       console.error('Error fetching data:', error)
@@ -170,14 +174,23 @@ export function CountryPage({ country }: CountryPageProps) {
 
   return (
     <div className="bg-white">
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+        <Link href="/" className="hover:text-gray-700">
+          Home
+        </Link>
+        <ChevronRight className="w-4 h-4" />
+        <span className="text-indigo-600"> {country.name}</span>
+      </nav>
       {/* Page Title */}
       <div className="text-center mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+        <h1 className="text-gray-900 text-2xl sm:text-[20px] font-bold mb-2">
           {getTitle()}
           <span className="text-indigo-600">?</span>
         </h1>
-        <p className="text-gray-600 text-[15px]">
-          AskGeopolitics breaks big global stories into clear questions that reveal what&apos;s at stake, who&apos;s involved, and what could happen next.
+        <p className="text-gray-600 text-lg sm:text-base">
+          AskGeopolitics breaks big global stories into clear questions that reveal what&apos;s at
+          stake, who&apos;s involved, and what could happen next.
         </p>
       </div>
 
@@ -189,7 +202,7 @@ export function CountryPage({ country }: CountryPageProps) {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search for a story, poll or news..."
-            className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-[15px]"
+            className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-[15px]"
           />
           <button
             type="submit"
@@ -239,7 +252,7 @@ export function CountryPage({ country }: CountryPageProps) {
         </div>
 
         {/* Country Badge */}
-        <div className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg">
+        <div className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-1.5 rounded-lg">
           {country.flag?.url && (
             <Image
               src={country.flag.url}
@@ -301,9 +314,7 @@ export function CountryPage({ country }: CountryPageProps) {
                       </div>
                       {/* Content */}
                       <div className="p-1">
-                        <p className="text-gray-600 text-sm line-clamp-2">
-                          {poll.question}
-                        </p>
+                        <p className="text-gray-600 text-sm line-clamp-2">{poll.question}</p>
                       </div>
                     </Link>
                   )
@@ -322,46 +333,45 @@ export function CountryPage({ country }: CountryPageProps) {
           ) : (
             posts.map((post, index) => {
               const imageUrl = post.heroImage?.url
-              const normalizedCountrySlug = country.slug
-                .replace(/[^a-zA-Z0-9]/g, '')
-                .toLowerCase()
+              const normalizedCountrySlug = country.slug.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()
 
               return (
-                <Link
-                  key={post.id}
-                  href={`/${normalizedCountrySlug}/${post.slug}`}
-                  className={`flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors ${
-                    index > 0 ? 'border-t border-gray-200' : ''
-                  }`}
-                >
-                  <span className="text-indigo-600 font-medium text-[14px] whitespace-nowrap min-w-[55px]">
-                    {post.publishedAt}
-                  </span>
-                  <div className="flex-1 min-w-0 overflow-hidden">
-                    <p className="text-gray-900 text-[14px] font-medium truncate">
-                      {post.title}
-                    </p>
-                    {post.source && (
-                      <p className="text-[12px] text-gray-500 mt-0.5 truncate">
-                        From {post.source}
-                      </p>
-                    )}
-                  </div>
-                  <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
-                    {imageUrl ? (
-                      <Image
-                        src={imageUrl}
-                        alt={post.heroImage?.alt || post.title}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <FileText className="w-6 h-6 text-gray-400" />
+                <div key={post.id} className={index > 0 ? 'border-t border-gray-200 py-1' : ''}>
+                  <Link
+                    href={`/${normalizedCountrySlug}/${post.slug}`}
+                    className="block hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="px-3 sm:px-6 py-3 sm:py-4">
+                      <div className="flex items-center justify-between gap-2 sm:gap-4">
+                        <div className="flex gap-2 sm:gap-4 items-start flex-1 min-w-0">
+                          <span className="text-indigo-600 text-sm sm:text-sm shrink-0 pt-0.5">
+                            {post.publishedAt}
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-gray-900 font-medium text-base sm:text-base leading-snug">
+                              {post.title}
+                            </h3>
+                            {post.source && (
+                              <p className="text-sm text-gray-500 mt-1">From {post.source}</p>
+                            )}
+                          </div>
+                        </div>
+                        {imageUrl ? (
+                          <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                            <Image
+                              src={imageUrl}
+                              alt={post.heroImage?.alt || post.title}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 shrink-0" />
+                        )}
                       </div>
-                    )}
-                  </div>
-                </Link>
+                    </div>
+                  </Link>
+                </div>
               )
             })
           )}
@@ -410,7 +420,7 @@ export function CountryPage({ country }: CountryPageProps) {
               >
                 {page}
               </button>
-            )
+            ),
           )}
 
           {/* Next */}

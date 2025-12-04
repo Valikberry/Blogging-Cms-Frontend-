@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { FileText, BarChart3, Mail, Play, MessageSquare } from 'lucide-react'
+import { FileText, BarChart3, Mail, Play, MessageSquare, ChevronRight } from 'lucide-react'
 
 interface Post {
   id: string
@@ -189,28 +189,25 @@ export function HomePage() {
   return (
     <div className="bg-white py-2">
       {/* Tagline */}
-      <p className="text-center text-gray-600 mb-8 text-[17px]">
+      <p className="text-gray-500 text-lg sm:text-base">
         AskGeopolitics breaks big global stories into clear questions that reveal what&apos;s at
         stake, who&apos;s involved, and what could happen next.
       </p>
       {/* Subscribe Form */}
-      <div className="mb-6">
-        <form
-          onSubmit={handleSubscribe}
-          className="flex  mx-auto overflow-hidden rounded-lg"
-        >
+      <div className="py-3">
+        <form onSubmit={handleSubscribe} className="flex max-w-lg overflow-hidden rounded-lg">
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email..."
-            className="flex-1 px-4 py-4 bg-gray-100 text-gray-700 text-[15px] focus:outline-none"
+            className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 text-[15px] focus:outline-none"
             disabled={isSubscribing}
           />
           <button
             type="submit"
             disabled={isSubscribing}
-            className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 text-[15px] font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-base font-medium hover:bg-indigo-700 transition-colors whitespace-nowrap"
           >
             <Mail className="w-5 h-5" />
             {isSubscribing ? 'Subscribing...' : 'Subscribe'}
@@ -218,7 +215,7 @@ export function HomePage() {
         </form>
         {subscribeMessage && (
           <p
-            className={`text-center mt-2 text-[14px] ${messageType === 'success' ? 'text-green-600' : 'text-red-600'}`}
+            className={`px-5 mt-2 text-sm ${messageType === 'success' ? 'text-green-600' : 'text-red-600'}`}
           >
             {subscribeMessage}
           </p>
@@ -228,48 +225,61 @@ export function HomePage() {
       {countrySections.map((section) => (
         <div key={section.country.id} className="mb-10">
           {/* Tabs and Country Badge */}
-          <div className="flex items-center justify-between mb-4 border-b border-gray-200">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setActiveTab((prev) => ({ ...prev, [section.country.id]: 'news' }))}
-                className={`flex items-center gap-2 pb-2 mb-[-1px] text-[15px] font-medium transition-colors ${
-                  activeTab[section.country.id] === 'news'
-                    ? 'text-indigo-600 border-b-2 border-indigo-600'
-                    : 'text-gray-500 hover:text-gray-700 border-b-2 border-transparent'
-                }`}
-              >
-                <FileText className="w-4 h-4" />
-                News
-              </button>
-              <button
-                onClick={() => setActiveTab((prev) => ({ ...prev, [section.country.id]: 'polls' }))}
-                className={`flex items-center gap-2 pb-2 mb-[-1px] text-[15px] font-medium transition-colors ${
-                  activeTab[section.country.id] === 'polls'
-                    ? 'text-indigo-600 border-b-2 border-indigo-600'
-                    : 'text-gray-500 hover:text-gray-700 border-b-2 border-transparent'
-                }`}
-              >
-                <BarChart3 className="w-4 h-4" />
-                Polls
-              </button>
-            </div>
 
-            {/* Country Badge */}
-            <Link
-              href={`/${section.country.slug}`}
-              className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
-            >
-              {section.country.flag?.url && (
-                <Image
-                  src={section.country.flag.url}
-                  alt={`${section.country.name} flag`}
-                  width={24}
-                  height={16}
-                  className="object-cover rounded-sm"
-                />
-              )}
-              <span className="font-medium text-[14px]">{section.country.name}</span>
-            </Link>
+          <div className="border-b border-gray-300 mb-3 overflow-x-auto scrollbar-hide">
+            <nav className="flex justify-between items-center px-1">
+              <div className="flex gap-3 sm:gap-8 min-w-max">
+                <button
+                  onClick={() =>
+                    setActiveTab((prev) => ({ ...prev, [section.country.id]: 'news' }))
+                  }
+                  className={`flex items-center gap-1.5 pb-3 text-base sm:text-base font-medium transition-colors relative whitespace-nowrap ${
+                    activeTab[section.country.id] === 'news'
+                      ? 'text-indigo-600'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  <FileText className="w-4 h-4 sm:w-4 sm:h-4" />
+                  <span>News</span>
+                  {activeTab[section.country.id] === 'news' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600" />
+                  )}
+                </button>
+                <button
+                  onClick={() =>
+                    setActiveTab((prev) => ({ ...prev, [section.country.id]: 'polls' }))
+                  }
+                  className={`flex items-center gap-1.5 pb-3 text-base sm:text-base font-medium transition-colors relative whitespace-nowrap ${
+                    activeTab[section.country.id] === 'polls'
+                      ? 'text-indigo-600'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  <BarChart3 className="w-4 h-4 sm:w-4 sm:h-4" />
+                  <span>Polls</span>
+                  {activeTab[section.country.id] === 'polls' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600" />
+                  )}
+                </button>
+              </div>
+
+              {/* Country Badge */}
+              <Link
+                href={`/${section.country.slug}`}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-base font-medium hover:bg-indigo-700 transition-colors whitespace-nowrap"
+              >
+                {section.country.flag?.url && (
+                  <Image
+                    src={section.country.flag.url}
+                    alt={`${section.country.name} flag`}
+                    width={24}
+                    height={16}
+                    className="object-cover rounded-sm"
+                  />
+                )}
+                <span>{section.country.name}</span>
+              </Link>
+            </nav>
           </div>
 
           {activeTab[section.country.id] === 'news' ? (
@@ -380,7 +390,7 @@ export function HomePage() {
 
               {/* Trendy Topics */}
               <div>
-                <div className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg">
+                <div className="inline-flex items-center gap-2 bg-indigo-600 text-white px-3 py-1.5 rounded-lg">
                   <Mail className="w-4 h-4" />
                   <span className="font-medium text-[14px]">Trendy Topics</span>
                 </div>
@@ -398,41 +408,47 @@ export function HomePage() {
                       const imageUrl = post.heroImage?.url
 
                       return (
-                        <Link
+                        <div
                           key={post.id}
-                          href={`/${countrySlug}/${post.slug}`}
-                          className={`flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors ${
-                            index > 0 ? 'border-t border-gray-200' : ''
-                          }`}
+                          className={index > 0 ? 'border-t border-gray-200 py-1' : ''}
                         >
-                          <span className="text-indigo-600 font-medium text-[14px] whitespace-nowrap min-w-[55px]">
-                            {post.publishedAt}
-                          </span>
-                          <div className="flex-1 min-w-0 overflow-hidden">
-                            <p className="text-gray-900 text-[14px] font-medium truncate">
-                              {post.title}
-                            </p>
-                            {post.source && (
-                              <p className="text-[12px] text-gray-500 mt-0.5 truncate">
-                                From {post.source}
-                              </p>
-                            )}
-                          </div>
-                          <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
-                            {imageUrl ? (
-                              <Image
-                                src={imageUrl}
-                                alt={post.heroImage?.alt || post.title}
-                                fill
-                                className="object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <FileText className="w-6 h-6 text-gray-400" />
+                          <Link
+                            href={`/${countrySlug}/${post.slug}`}
+                            className="block hover:bg-gray-50 transition-colors"
+                          >
+                            <div className="px-3 sm:px-6 py-3 sm:py-4">
+                              <div className="flex items-center justify-between gap-2 sm:gap-4">
+                                <div className="flex gap-2 sm:gap-4 items-start flex-1 min-w-0">
+                                  <span className="text-indigo-600  text-sm sm:text-sm shrink-0 pt-0.5">
+                                    {post.publishedAt}
+                                  </span>
+                                  <div className="flex-1 min-w-0">
+                                    <h3 className="text-gray-900 font-medium text-base sm:text-base leading-snug">
+                                      {post.title}
+                                    </h3>
+                                    {post.source && (
+                                      <p className="text-sm text-gray-500 mt-1">
+                                        From {post.source}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                                {imageUrl ? (
+                                  <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                                    <Image
+                                      src={imageUrl}
+                                      alt={post.heroImage?.alt || post.title}
+                                      fill
+                                      className="object-cover"
+                                    />
+                                  </div>
+                                ) : (
+                                  <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 shrink-0" />
+                                )}
                               </div>
-                            )}
-                          </div>
-                        </Link>
+                            </div>
+                          </Link>
+                        </div>
                       )
                     })
                   )}
@@ -463,9 +479,9 @@ export function HomePage() {
                       How are stories selected and verified?
                     </h4>
                     <p className="text-gray-600 text-[14px]">
-                      Our editorial team curates stories from multiple reliable sources worldwide. We
-                      focus on geopolitical events that have significant impact and present them in an
-                      unbiased, question-based format to encourage critical thinking.
+                      Our editorial team curates stories from multiple reliable sources worldwide.
+                      We focus on geopolitical events that have significant impact and present them
+                      in an unbiased, question-based format to encourage critical thinking.
                     </p>
                   </div>
                   <div className="border-l-4 border-indigo-600 p-4 border-t border-gray-200">
@@ -474,8 +490,8 @@ export function HomePage() {
                     </h4>
                     <p className="text-gray-600 text-[14px]">
                       Yes! Our polls allow you to share your perspective on current geopolitical
-                      issues. Your vote contributes to understanding public opinion on important global
-                      matters.
+                      issues. Your vote contributes to understanding public opinion on important
+                      global matters.
                     </p>
                   </div>
                   <div className="border-l-4 border-indigo-600 p-4 border-t border-gray-200">
@@ -484,8 +500,8 @@ export function HomePage() {
                     </h4>
                     <p className="text-gray-600 text-[14px]">
                       Subscribe to our newsletter using the form above to receive daily or weekly
-                      updates on the most important geopolitical stories. You can also follow specific
-                      countries or topics that interest you.
+                      updates on the most important geopolitical stories. You can also follow
+                      specific countries or topics that interest you.
                     </p>
                   </div>
                 </div>
@@ -530,9 +546,7 @@ export function HomePage() {
                           </div>
                           {/* Content */}
                           <div className="p-1">
-                            <p className="text-gray-600 text-sm line-clamp-2">
-                              {poll.question}
-                            </p>
+                            <p className="text-gray-600 text-sm line-clamp-2">{poll.question}</p>
                           </div>
                         </Link>
                       )
