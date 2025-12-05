@@ -227,45 +227,26 @@ function ShareCard({
   const colors = ['#6366f1', '#a3e635', '#f97316', '#ec4899', '#8b5cf6', '#14b8a6']
   const size = 180
   const strokeWidth = 28
-  const radius = (size - strokeWidth) / 2
-  const center = size / 2
 
-  // Full circle donut
-  const polarToCartesian = (cx: number, cy: number, r: number, angleDegrees: number) => {
-    const angleRadians = ((angleDegrees - 90) * Math.PI) / 180
-    return {
-      x: cx + r * Math.cos(angleRadians),
-      y: cy + r * Math.sin(angleRadians),
-    }
-  }
-
-  const describeArc = (cx: number, cy: number, r: number, startAngle: number, endAngle: number) => {
-    const start = polarToCartesian(cx, cy, r, endAngle)
-    const end = polarToCartesian(cx, cy, r, startAngle)
-    const largeArcFlag = endAngle - startAngle <= 180 ? 0 : 1
-    return `M ${start.x} ${start.y} A ${r} ${r} 0 ${largeArcFlag} 0 ${end.x} ${end.y}`
-  }
-
-  // Calculate segment angles
-  let currentAngle = -90 // Start from top
+  // Calculate segments for manual rendering
+  let currentPercent = 0
   const segments = results.map((option, index) => {
-    const segmentDegrees = (option.percentage / 100) * 360
     const segment = {
-      startAngle: currentAngle,
-      endAngle: currentAngle + segmentDegrees,
+      startPercent: currentPercent,
+      endPercent: currentPercent + option.percentage,
       color: colors[index % colors.length],
     }
-    currentAngle += segmentDegrees
+    currentPercent += option.percentage
     return segment
   })
 
   return (
     <div
       style={{
-        width: 600,
+        width: '600px',
         padding: '32px',
         backgroundColor: '#f3f4f6',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
+        fontFamily: 'Arial, sans-serif',
       }}
     >
       {/* Question */}
@@ -274,8 +255,9 @@ function ShareCard({
           fontSize: '20px',
           fontWeight: 'bold',
           color: '#111827',
-          textAlign: 'center',
-          marginBottom: '24px',
+          textAlign: 'center' as const,
+          margin: '0 0 24px 0',
+          wordSpacing: '4px',
         }}
       >
         {question}
@@ -283,53 +265,64 @@ function ShareCard({
 
       {/* Chart and Legend Container */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '32px' }}>
-        {/* Donut Chart with Image */}
-        <div style={{ position: 'relative', width: size, height: size }}>
-          <svg width={size} height={size}>
-            {/* Background circle */}
-            <circle
-              cx={center}
-              cy={center}
-              r={radius}
-              fill="none"
-              stroke="#e5e7eb"
-              strokeWidth={strokeWidth}
-            />
-            {/* Segments */}
-            {segments.map((segment, index) => (
-              <path
+        {/* Donut Chart with Image - using multiple overlapping circles */}
+        <div
+          style={{
+            position: 'relative',
+            width: `${size}px`,
+            height: `${size}px`,
+          }}
+        >
+          {/* Colored segments as pie slices */}
+          {segments.map((segment, index) => {
+            const startAngle = (segment.startPercent / 100) * 360 - 90
+            const endAngle = (segment.endPercent / 100) * 360 - 90
+            const largeArc = endAngle - startAngle > 180 ? 1 : 0
+            const radius = size / 2
+            const startX = radius + radius * Math.cos((startAngle * Math.PI) / 180)
+            const startY = radius + radius * Math.sin((startAngle * Math.PI) / 180)
+            const endX = radius + radius * Math.cos((endAngle * Math.PI) / 180)
+            const endY = radius + radius * Math.sin((endAngle * Math.PI) / 180)
+
+            return (
+              <svg
                 key={index}
-                d={describeArc(center, center, radius, segment.startAngle, segment.endAngle - 0.5)}
-                fill="none"
-                stroke={segment.color}
-                strokeWidth={strokeWidth}
-                strokeLinecap="round"
-              />
-            ))}
-          </svg>
-          {/* Center Image */}
-          {heroImageUrl && (
-            <div
-              style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: size - strokeWidth * 2 - 16,
-                height: size - strokeWidth * 2 - 16,
-                borderRadius: '50%',
-                overflow: 'hidden',
-                border: '4px solid white',
-              }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
+                width={size}
+                height={size}
+                style={{ position: 'absolute', top: 0, left: 0 }}
+              >
+                <path
+                  d={`M ${radius} ${radius} L ${startX} ${startY} A ${radius} ${radius} 0 ${largeArc} 1 ${endX} ${endY} Z`}
+                  fill={segment.color}
+                />
+              </svg>
+            )
+          })}
+
+          {/* Center circle (white ring + image/hole) */}
+          <div
+            style={{
+              position: 'absolute',
+              top: `${strokeWidth}px`,
+              left: `${strokeWidth}px`,
+              width: `${size - strokeWidth * 2}px`,
+              height: `${size - strokeWidth * 2}px`,
+              borderRadius: '50%',
+              backgroundColor: '#f3f4f6',
+              overflow: 'hidden',
+              border: '4px solid white',
+            }}
+          >
+            {heroImageUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={heroImageUrl}
                 alt=""
+                crossOrigin="anonymous"
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* Legend */}
@@ -342,13 +335,14 @@ function ShareCard({
                   height: '16px',
                   borderRadius: '4px',
                   backgroundColor: colors[index % colors.length],
+                  flexShrink: 0,
                 }}
               />
-              <span style={{ fontSize: '16px', color: '#374151', minWidth: '60px' }}>
+              <span style={{ fontSize: '16px', color: '#374151', minWidth: '40px' }}>
                 {option.text}
               </span>
               <span style={{ fontSize: '16px', color: '#6b7280' }}>
-                {option.votes} votes {option.percentage}%
+                {option.votes}&nbsp;votes&nbsp;{option.percentage}%
               </span>
             </div>
           ))}
@@ -361,11 +355,11 @@ function ShareCard({
           style={{
             fontSize: '16px',
             color: '#374151',
-            textAlign: 'center',
-            marginTop: '24px',
+            textAlign: 'center' as const,
+            margin: '24px 0 0 0',
           }}
         >
-          I voted {votedOption}. What about you?
+          I&nbsp;voted&nbsp;{votedOption}.&nbsp;What&nbsp;about&nbsp;you?
         </p>
       )}
     </div>
@@ -513,13 +507,21 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
     if (!shareCardRef.current) return
 
     try {
+      // Small delay to ensure image is loaded
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
       const html2canvas = (await import('html2canvas')).default
-      await html2canvas(shareCardRef.current, {
+      const canvas = await html2canvas(shareCardRef.current, {
         backgroundColor: '#f3f4f6',
         scale: 2,
         useCORS: true,
         allowTaint: true,
+        logging: false,
       })
+
+      // Convert to blob for potential download/sharing
+      const imageDataUrl = canvas.toDataURL('image/png')
+      console.log('Share image generated:', imageDataUrl.substring(0, 100))
 
       // Get voted option text
       const votedText = votedOptionIndex !== null ? results[votedOptionIndex]?.text : ''
@@ -530,9 +532,15 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
       const url = encodeURIComponent(window.location.href)
       const text = encodeURIComponent(shareText)
 
-      // For platforms that support image sharing, we could upload the image
-      // For now, we share the URL with the text
+      // Handle different platforms
       switch (platform) {
+        case 'download':
+          // Download the image
+          const link = document.createElement('a')
+          link.download = `poll-results-${poll.slug}.png`
+          link.href = imageDataUrl
+          link.click()
+          break
         case 'facebook':
           window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`, '_blank')
           break
@@ -617,6 +625,11 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
         </div>
       )}
 
+      {/* Question - show before voting OR after voting but before showing results */}
+      {(!hasVoted || (hasVoted && !showResults)) && (
+        <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-4">{poll.question}</h1>
+      )}
+
       {/* Hero Image - show before voting OR after voting but before showing results */}
       {(!hasVoted || (hasVoted && !showResults)) && poll.heroImage?.url && (
         <div className="relative w-full h-48 sm:h-64 md:h-80 rounded-lg overflow-hidden mb-4">
@@ -672,7 +685,7 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
 
           {/* Response Count */}
           <p className="font-semibold text-gray-900 mb-4">
-            {totalVotes} Responses: {poll.question}
+            {totalVotes} Responses
           </p>
 
           {/* Results Label with Star */}
@@ -756,6 +769,16 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
           {/* Share Section */}
           <div className="mb-8">
             <h3 className="font-semibold text-gray-900 mb-4">Tell Your Friends About This Poll</h3>
+            {/* Download Button */}
+            {/* <button
+              onClick={() => captureAndShare('download')}
+              className="w-full flex items-center justify-center gap-2 py-3 mb-3 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              <span className="text-[14px] font-medium">Download Share Image</span>
+            </button> */}
             <div className="flex gap-3">
               <button
                 onClick={() => captureAndShare('facebook')}
@@ -914,19 +937,23 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
       {/* Hidden Share Card for capturing */}
       {hasVoted && results.length > 0 && (
         <div
-          ref={shareCardRef}
           style={{
-            position: 'absolute',
-            left: '-9999px',
+            position: 'fixed',
+            left: 0,
             top: 0,
+            zIndex: -1,
+            opacity: 0,
+            pointerEvents: 'none',
           }}
         >
-          <ShareCard
-            question={poll.question}
-            results={results}
-            heroImageUrl={poll.heroImage?.url}
-            votedOption={votedOptionIndex !== null ? results[votedOptionIndex]?.text : null}
-          />
+          <div ref={shareCardRef}>
+            <ShareCard
+              question={poll.question}
+              results={results}
+              heroImageUrl={poll.heroImage?.url}
+              votedOption={votedOptionIndex !== null ? results[votedOptionIndex]?.text : null}
+            />
+          </div>
         </div>
       )}
     </div>
