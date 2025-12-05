@@ -137,6 +137,7 @@ export default async function PollPage({ params: paramsPromise }: Args) {
         title: rp.title,
         slug: rp.slug || '',
         excerpt: rp.excerpt || null,
+        publishedAt: rp.publishedAt || null,
         heroImage: rpImage ? { url: rpImage.url || null, alt: rpImage.alt || null } : null,
       }
     }).filter((item): item is NonNullable<typeof item> => item !== null)) || [],

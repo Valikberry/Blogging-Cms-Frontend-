@@ -225,7 +225,7 @@ export function CountryPage({ country }: CountryPageProps) {
             }`}
           >
             <FileText className="w-4 h-4" />
-            News
+            <h3> News</h3>
           </button>
           <button
             onClick={() => setActiveTab('stories')}
@@ -236,7 +236,7 @@ export function CountryPage({ country }: CountryPageProps) {
             }`}
           >
             <BookOpen className="w-4 h-4" />
-            Stories
+            <h3> Stories</h3>
           </button>
           <button
             onClick={() => setActiveTab('polls')}
@@ -247,7 +247,7 @@ export function CountryPage({ country }: CountryPageProps) {
             }`}
           >
             <BarChart3 className="w-4 h-4" />
-            Polls
+            <h3>Polls</h3>
           </button>
         </div>
 
@@ -262,7 +262,7 @@ export function CountryPage({ country }: CountryPageProps) {
               className="object-cover rounded-sm"
             />
           )}
-          <span className="font-medium text-[14px]">{country.name}</span>
+          <h2 className="font-medium text-[14px]">{country.name}</h2>
         </div>
       </div>
 
@@ -341,14 +341,14 @@ export function CountryPage({ country }: CountryPageProps) {
                     href={`/${normalizedCountrySlug}/${post.slug}`}
                     className="block hover:bg-gray-50 transition-colors"
                   >
-                    <div className="px-3 sm:px-6 py-3 sm:py-4">
+                    <div className="px-3 sm:px-6 py-1">
                       <div className="flex items-center justify-between gap-2 sm:gap-4">
                         <div className="flex gap-2 sm:gap-4 items-start flex-1 min-w-0">
-                          <span className="text-indigo-600 text-sm sm:text-sm shrink-0 pt-0.5">
+                          <span className="text-indigo-600  text-sm sm:text-sm shrink-0 pt-0.5">
                             {post.publishedAt}
                           </span>
                           <div className="flex-1 min-w-0">
-                            <h3 className="text-gray-900 font-medium text-base sm:text-base leading-snug">
+                            <h3 className="text-gray-900 font-medium text-base sm:text-base leading-snug truncate">
                               {post.title}
                             </h3>
                             {post.source && (
@@ -356,18 +356,19 @@ export function CountryPage({ country }: CountryPageProps) {
                             )}
                           </div>
                         </div>
-                        {imageUrl ? (
-                          <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
-                            <Image
-                              src={imageUrl}
-                              alt={post.heroImage?.alt || post.title}
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                        ) : (
-                          <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 shrink-0" />
-                        )}
+                        <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 shrink-0" />
+                        {/* {imageUrl ? (
+                                  <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                                    <Image
+                                      src={imageUrl}
+                                      alt={post.heroImage?.alt || post.title}
+                                      fill
+                                      className="object-cover"
+                                    />
+                                  </div>
+                                ) : (
+                                  <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 shrink-0" />
+                                )} */}
                       </div>
                     </div>
                   </Link>
