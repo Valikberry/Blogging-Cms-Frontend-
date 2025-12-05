@@ -250,7 +250,7 @@ function ShareCard({
       }}
     >
       {/* Question */}
-      <h2
+      <h1
         style={{
           fontSize: '20px',
           fontWeight: 'bold',
@@ -261,7 +261,7 @@ function ShareCard({
         }}
       >
         {question}
-      </h2>
+      </h1>
 
       {/* Chart and Legend Container */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '32px' }}>
@@ -625,13 +625,13 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
         </div>
       )}
 
-      {/* Question - show before voting OR after voting but before showing results */}
-      {(!hasVoted || (hasVoted && !showResults)) && (
+      {/* Question - show only before voting */}
+      {!hasVoted && (
         <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-4">{poll.question}</h1>
       )}
 
-      {/* Hero Image - show before voting OR after voting but before showing results */}
-      {(!hasVoted || (hasVoted && !showResults)) && poll.heroImage?.url && (
+      {/* Hero Image - show only before voting */}
+      {!hasVoted && poll.heroImage?.url && (
         <div className="relative w-full h-48 sm:h-64 md:h-80 rounded-lg overflow-hidden mb-4">
           <Image
             src={poll.heroImage.url}
@@ -642,21 +642,18 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
         </div>
       )}
 
-      {/* Options - show before voting OR after voting but before showing results */}
-      {(!hasVoted || (hasVoted && !showResults)) && (
+      {/* Options - show only before voting */}
+      {!hasVoted && (
         <div className="space-y-3 mb-4">
           {poll.options.map((option, index) => (
             <button
               key={index}
-              onClick={() => !hasVoted && setSelectedOption(index)}
-              disabled={hasVoted}
+              onClick={() => setSelectedOption(index)}
               className={`w-full p-4 text-left text-lg rounded-lg border-2 transition-all ${
-                hasVoted && votedOptionIndex === index
-                  ? 'border-indigo-600 bg-indigo-100'
-                  : selectedOption === index
-                    ? 'border-indigo-600 bg-indigo-50'
-                    : 'border-gray-200 hover:border-gray-300'
-              } ${hasVoted ? 'cursor-default' : ''}`}
+                selectedOption === index
+                  ? 'border-indigo-600 bg-indigo-50'
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
             >
               <span className="font-medium text-lg">{option.text}</span>
             </button>
@@ -664,71 +661,61 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
         </div>
       )}
 
-      {/* Vote Count - show on voting screen and after voting but before showing results */}
-      {(!hasVoted || (hasVoted && !showResults)) && (
+      {/* Vote Count - show only before voting */}
+      {!hasVoted && (
         <p className="text-gray-600 text-base mb-4">{totalVotes.toLocaleString()} Votes</p>
       )}
 
-      {/* Results View - only show when showResults is true */}
-      {hasVoted && showResults && (
-        <div ref={resultsRef} className="bg-indigo-50/50 rounded-xl p-6 mb-6">
-          {/* Thank You Header */}
-          <div className="text-center mb-6">
-            <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
-              <CheckCircle className="w-6 h-6 text-gray-500" />
+      {/* Share Card - show after voting but before showing results */}
+      {hasVoted && !showResults && results.length > 0 && (
+        <div className="mb-6">
+          <div className="bg-gray-100 rounded-xl overflow-hidden">
+            <ShareCard
+              question={poll.question}
+              results={results}
+              heroImageUrl={poll.heroImage?.url}
+              votedOption={votedOptionIndex !== null ? results[votedOptionIndex]?.text : null}
+            />
+          </div>
+
+          {/* Share buttons */}
+          <div className="mt-4">
+            <h3 className="font-semibold text-gray-900 mb-3">Share Your Vote</h3>
+            <div className="flex gap-3">
+              <button
+                onClick={() => captureAndShare('facebook')}
+                className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <FacebookIcon />
+                <span className="text-[14px] font-medium">Facebook</span>
+              </button>
+              <button
+                onClick={() => captureAndShare('whatsapp')}
+                className="flex-1 flex items-center justify-center gap-2 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+              >
+                <WhatsAppIcon />
+                <span className="text-[14px] font-medium">Whatsapp</span>
+              </button>
+              <button
+                onClick={() => captureAndShare('twitter')}
+                className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+              >
+                <XTwitterIcon />
+                <span className="text-[14px] font-medium">Twitter</span>
+              </button>
+              <button
+                onClick={() => captureAndShare('linkedin')}
+                className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors"
+              >
+                <LinkedInIcon />
+                <span className="text-[14px] font-medium">Linkedin</span>
+              </button>
             </div>
-            <h2 className="text-lg font-bold text-gray-900 mb-1">Thank You!</h2>
-            <p className="text-gray-600 text-base">
-              Your response has been recorded successfully. Here are the results below.
-            </p>
-          </div>
-
-          {/* Response Count */}
-          <p className="font-semibold text-gray-900 mb-4">
-            {totalVotes} Responses
-          </p>
-
-          {/* Results Label with Star */}
-          <div className="flex items-center gap-2 justify-center mb-4">
-            <span className="text-indigo-600"><StarIcon /></span>
-            <span className="text-indigo-600 font-medium">Results</span>
-          </div>
-
-          {/* Donut Chart */}
-          <div className="flex justify-center mb-4">
-            <DonutChart results={results} />
-          </div>
-
-          {/* Legend below chart */}
-          <div className="flex justify-center gap-6 mb-6">
-            {results.map((option, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <div
-                  className="w-4 h-4 rounded-sm"
-                  style={{ backgroundColor: colors[index % colors.length] }}
-                />
-                <span className="text-[14px] text-gray-700">{option.text}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Vote Breakdown List */}
-          <div className="space-y-3 bg-white rounded-lg p-4">
-            {results.map((option, index) => (
-              <div key={index} className="flex items-center gap-3">
-                <div
-                  className="w-4 h-4 rounded-sm flex-shrink-0"
-                  style={{ backgroundColor: colors[index % colors.length] }}
-                />
-                <span className="flex-1 text-[14px] text-gray-700">{option.text}</span>
-                <span className="text-[14px] text-gray-600 font-medium">
-                  {option.votes} votes {option.percentage}%
-                </span>
-              </div>
-            ))}
           </div>
         </div>
       )}
+
+     
 
       {/* Action Buttons */}
       {!hasVoted ? (
@@ -740,21 +727,92 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
           {isVoting ? 'Voting...' : 'Vote'}
         </button>
       ) : !showResults ? (
-        /* After voting, before showing results - show two buttons side by side */
-        <div className="flex gap-3 mb-6">
-          <Link
-            href={nextPollSlug && nextPollCountrySlug ? `/${nextPollCountrySlug}/poll/${nextPollSlug}` : `/${countrySlug}?tab=polls`}
-            className="flex-1 flex items-center justify-center gap-2 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors"
-          >
-            Take Another Poll
-          </Link>
-          <button
-            onClick={() => setShowResults(true)}
-            className="flex-1 py-3 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 transition-colors"
-          >
-            See results
-          </button>
-        </div>
+        /* After voting, before showing results - show related polls and posts */
+        <>
+          {/* Similar Polls */}
+          {poll.relatedPolls && poll.relatedPolls.length > 0 && (
+            <div className="mb-6">
+              <div className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg mb-4">
+                <span>&#9733;</span>
+                <span className="font-medium text-[14px]">Similar Polls</span>
+              </div>
+              <div className="overflow-x-auto scrollbar-hide -mx-1 px-1">
+                <div className="flex gap-3 pb-2">
+                  {poll.relatedPolls.map((relatedPoll) => (
+                    <Link
+                      key={relatedPoll.id}
+                      href={`/${countrySlug}/poll/${relatedPoll.slug}`}
+                      className="flex-shrink-0 w-[143px] bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+                    >
+                      <div className="relative w-full h-[90px] bg-gray-100">
+                        {relatedPoll.heroImage?.url ? (
+                          <Image
+                            src={relatedPoll.heroImage.url}
+                            alt={relatedPoll.heroImage.alt || relatedPoll.question}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                            <ListTodo className="w-6 h-6 text-gray-400" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-2">
+                        <p className="text-gray-600 text-[13px] line-clamp-2">
+                          {relatedPoll.description || relatedPoll.question}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Similar Topics (Related Posts) */}
+          {poll.relatedPosts && poll.relatedPosts.length > 0 && (
+            <div>
+              <div className="inline-flex items-center gap-2 bg-indigo-600 text-white px-3 py-1.5 rounded-lg mb-2">
+                <span>&#9733;</span>
+                <span className="font-medium text-[14px]">Similar Topics</span>
+              </div>
+              <div className="border border-gray-200 rounded-lg overflow-hidden">
+                {poll.relatedPosts.map((post, index) => {
+                  const formattedDate = post.publishedAt
+                    ? new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                    : null
+                  return (
+                    <div key={post.id} className={index > 0 ? 'border-t border-gray-200' : ''}>
+                      <Link
+                        href={`/${countrySlug}/${post.slug}`}
+                        className="block hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="px-3 sm:px-6 py-3">
+                          <div className="flex items-center justify-between gap-2 sm:gap-4">
+                            <div className="flex gap-2 sm:gap-4 items-start flex-1 min-w-0">
+                              {formattedDate && (
+                                <span className="text-indigo-600 text-sm shrink-0 pt-0.5">
+                                  {formattedDate}
+                                </span>
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <h3 className="text-gray-900 font-medium text-base leading-snug truncate">
+                                  {post.title}
+                                </h3>
+                              </div>
+                            </div>
+                            <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 shrink-0" />
+                          </div>
+                        </div>
+                      </Link>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+        </>
       ) : (
         <>
           {/* After showing results - show Take Another Poll button */}

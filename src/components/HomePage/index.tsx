@@ -188,14 +188,17 @@ export function HomePage() {
 
   return (
     <div className="bg-white py-2">
+      <h1 className="text-gray-900 text-xl sm:text-[22px] font-bold mb-2">
+        AskGeopolitics — Politics explained through questions and polls
+      </h1>
       {/* Tagline */}
       <p className="text-gray-500 text-lg sm:text-base">
         AskGeopolitics breaks big global stories into clear questions that reveal what&apos;s at
         stake, who&apos;s involved, and what could happen next.
       </p>
       {/* Subscribe Form */}
-      <div className="py-3">
-        <form onSubmit={handleSubscribe} className="flex max-w-lg overflow-hidden rounded-lg">
+      <div className="py-6">
+        <form onSubmit={handleSubscribe} className="flex max-w-auto overflow-hidden rounded-lg">
           <input
             type="email"
             value={email}
@@ -228,6 +231,22 @@ export function HomePage() {
 
           <div className="border-b border-gray-300 mb-3 overflow-x-auto scrollbar-hide">
             <nav className="flex justify-between items-center px-1">
+              {/* Country Badge */}
+              <Link
+                href={`/${section.country.slug}`}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-base font-medium hover:bg-indigo-700 transition-colors whitespace-nowrap"
+              >
+                {section.country.flag?.url && (
+                  <Image
+                    src={section.country.flag.url}
+                    alt={`${section.country.name} flag`}
+                    width={24}
+                    height={16}
+                    className="object-cover rounded-sm"
+                  />
+                )}
+                <h2>{section.country.name}</h2>
+              </Link>
               <div className="flex gap-3 sm:gap-8 min-w-max">
                 <button
                   onClick={() =>
@@ -240,7 +259,7 @@ export function HomePage() {
                   }`}
                 >
                   <FileText className="w-4 h-4 sm:w-4 sm:h-4" />
-                  <span>News</span>
+                  <h3>News</h3>
                   {activeTab[section.country.id] === 'news' && (
                     <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600" />
                   )}
@@ -256,29 +275,12 @@ export function HomePage() {
                   }`}
                 >
                   <BarChart3 className="w-4 h-4 sm:w-4 sm:h-4" />
-                  <span>Polls</span>
+                  <h3>Polls</h3>
                   {activeTab[section.country.id] === 'polls' && (
                     <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600" />
                   )}
                 </button>
               </div>
-
-              {/* Country Badge */}
-              <Link
-                href={`/${section.country.slug}`}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-base font-medium hover:bg-indigo-700 transition-colors whitespace-nowrap"
-              >
-                {section.country.flag?.url && (
-                  <Image
-                    src={section.country.flag.url}
-                    alt={`${section.country.name} flag`}
-                    width={24}
-                    height={16}
-                    className="object-cover rounded-sm"
-                  />
-                )}
-                <span>{section.country.name}</span>
-              </Link>
             </nav>
           </div>
 
@@ -416,14 +418,14 @@ export function HomePage() {
                             href={`/${countrySlug}/${post.slug}`}
                             className="block hover:bg-gray-50 transition-colors"
                           >
-                            <div className="px-3 sm:px-6 py-3 sm:py-4">
+                            <div className="px-3 sm:px-6 py-1">
                               <div className="flex items-center justify-between gap-2 sm:gap-4">
                                 <div className="flex gap-2 sm:gap-4 items-start flex-1 min-w-0">
                                   <span className="text-indigo-600  text-sm sm:text-sm shrink-0 pt-0.5">
                                     {post.publishedAt}
                                   </span>
                                   <div className="flex-1 min-w-0">
-                                    <h3 className="text-gray-900 font-medium text-base sm:text-base leading-snug">
+                                    <h3 className="text-gray-900 font-medium text-base sm:text-base leading-snug truncate">
                                       {post.title}
                                     </h3>
                                     {post.source && (
@@ -433,7 +435,8 @@ export function HomePage() {
                                     )}
                                   </div>
                                 </div>
-                                {imageUrl ? (
+                                <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 shrink-0" />
+                                {/* {imageUrl ? (
                                   <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
                                     <Image
                                       src={imageUrl}
@@ -444,7 +447,7 @@ export function HomePage() {
                                   </div>
                                 ) : (
                                   <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 shrink-0" />
-                                )}
+                                )} */}
                               </div>
                             </div>
                           </Link>
@@ -459,15 +462,15 @@ export function HomePage() {
               <div className="mt-8">
                 <div className="flex items-center gap-2 mb-4">
                   <MessageSquare className="w-6 h-6 text-green-500" />
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h2 className="text-lg font-semibold text-gray-900">
                     Everything You Need To Know About AskGeoPolitics
-                  </h3>
+                  </h2>
                 </div>
                 <div className="border border-gray-200 rounded-lg overflow-hidden">
                   <div className="border-l-4 border-indigo-600 p-4">
-                    <h4 className="font-semibold text-gray-900 mb-2">
+                    <h3 className="font-semibold text-gray-900 mb-2">
                       What is AskGeoPolitics and how does it work?
-                    </h4>
+                    </h3>
                     <p className="text-gray-600 text-[14px]">
                       AskGeoPolitics is a platform that breaks down complex global news stories into
                       clear, digestible questions. We help you understand what&apos;s at stake,
@@ -475,9 +478,9 @@ export function HomePage() {
                     </p>
                   </div>
                   <div className="border-l-4 border-indigo-600 p-4 border-t border-gray-200">
-                    <h4 className="font-semibold text-gray-900 mb-2">
+                    <h3 className="font-semibold text-gray-900 mb-2">
                       How are stories selected and verified?
-                    </h4>
+                    </h3>
                     <p className="text-gray-600 text-[14px]">
                       Our editorial team curates stories from multiple reliable sources worldwide.
                       We focus on geopolitical events that have significant impact and present them
@@ -485,9 +488,9 @@ export function HomePage() {
                     </p>
                   </div>
                   <div className="border-l-4 border-indigo-600 p-4 border-t border-gray-200">
-                    <h4 className="font-semibold text-gray-900 mb-2">
+                    <h3 className="font-semibold text-gray-900 mb-2">
                       Can I participate in polls and discussions?
-                    </h4>
+                    </h3>
                     <p className="text-gray-600 text-[14px]">
                       Yes! Our polls allow you to share your perspective on current geopolitical
                       issues. Your vote contributes to understanding public opinion on important
@@ -495,9 +498,9 @@ export function HomePage() {
                     </p>
                   </div>
                   <div className="border-l-4 border-indigo-600 p-4 border-t border-gray-200">
-                    <h4 className="font-semibold text-gray-900 mb-2">
+                    <h3 className="font-semibold text-gray-900 mb-2">
                       How can I stay updated with the latest news?
-                    </h4>
+                    </h3>
                     <p className="text-gray-600 text-[14px]">
                       Subscribe to our newsletter using the form above to receive daily or weekly
                       updates on the most important geopolitical stories. You can also follow
