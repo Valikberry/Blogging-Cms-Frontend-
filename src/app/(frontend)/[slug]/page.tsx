@@ -236,7 +236,7 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
     slug,
   })
 
-  const baseMeta = generateMeta({ doc: page })
+  const baseMeta = await generateMeta({ doc: page })
   const canonicalUrl = `${siteUrl}/${slug}/`
 
   return {
