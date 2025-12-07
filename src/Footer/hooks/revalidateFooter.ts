@@ -6,8 +6,8 @@ export const revalidateFooter: GlobalAfterChangeHook = ({ doc, req: { payload, c
   if (!context.disableRevalidate) {
     payload.logger.info(`Revalidating footer`)
 
-    revalidateTag('global_footer_en')
-    revalidateTag('global_footer_fr')
+    revalidateTag('global_footer_en', { expire: 0 })
+    revalidateTag('global_footer_fr', { expire: 0 })
   }
 
   return doc
