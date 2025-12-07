@@ -31,14 +31,31 @@ const nextConfig = {
   },
 
   // Your existing webpack config (keep this)
-  webpack: (webpackConfig) => {
+  webpack: (webpackConfig, { isServer }) => {
     webpackConfig.resolve.extensionAlias = {
       '.cjs': ['.cts', '.cjs'],
       '.js': ['.ts', '.tsx', '.js', '.jsx'],
       '.mjs': ['.mts', '.mjs'],
     }
+
+    // Fix for pino/thread-stream in serverless environments
+    if (isServer) {
+      webpackConfig.externals = webpackConfig.externals || []
+      webpackConfig.externals.push({
+        'thread-stream': 'commonjs thread-stream',
+        'pino-worker': 'commonjs pino-worker',
+        'pino-pretty': 'commonjs pino-pretty',
+      })
+    }
+
     return webpackConfig
   },
+
+  // Transpile payload packages
+  transpilePackages: ['payload', '@payloadcms/next', '@payloadcms/ui'],
+
+  // Server external packages (Node.js modules that should not be bundled)
+  serverExternalPackages: ['pino', 'pino-pretty', 'thread-stream'],
 
   reactStrictMode: true,
   redirects,
