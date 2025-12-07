@@ -118,7 +118,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, countries = []
               {data.logo?.image && typeof data.logo.image !== 'string' && (
                 <Image
                   src={data.logo.image.url || ''}
-                  alt={data.logo.image.alt || 'Logo'}
+                  alt={data.logo.image.alt || 'AskGeopolitics logo'}
                   width={30}
                   height={30}
                   className="object-contain rounded-full"

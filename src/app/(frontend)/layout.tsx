@@ -124,7 +124,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           name="google-site-verification"
           content="il2Q98Bvcbun_uDG-OAfu8HVTlCqmkWSe7avgx454Ls"
         />
-
+        <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
         {/* ✅ Organization Schema */}
         <script
           type="application/ld+json"
@@ -157,7 +157,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <Header />
           <div className="zoom-content">
             <main>
-              <div className="container mx-auto max-w-3xl py-4 px-4 sm:px-6 lg:px-8">{children}</div>
+              <div className="container mx-auto max-w-3xl py-4 px-4 sm:px-6 lg:px-8">
+                {children}
+              </div>
             </main>
             <Footer />
           </div>
