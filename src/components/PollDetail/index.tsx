@@ -225,19 +225,25 @@ function ShareCard({
   votedOption?: string | null
 }) {
   const colors = ['#6366f1', '#a3e635', '#f97316', '#ec4899', '#8b5cf6', '#14b8a6']
-  const size = 180
-  const strokeWidth = 28
+  const size = 200
+  const strokeWidth = 32
+  const radius = (size - strokeWidth) / 2
+  const circumference = 2 * Math.PI * radius
+  const centerSize = size - strokeWidth * 2 - 8
 
-  // Calculate segments for manual rendering
-  let currentPercent = 0
+  // Calculate stroke dasharray for each segment
+  let cumulativePercent = 0
   const segments = results.map((option, index) => {
-    const segment = {
-      startPercent: currentPercent,
-      endPercent: currentPercent + option.percentage,
+    const percent = option.percentage || 0
+    const dashLength = (percent / 100) * circumference
+    const dashOffset = circumference - (cumulativePercent / 100) * circumference
+    cumulativePercent += percent
+    return {
       color: colors[index % colors.length],
+      dashArray: `${dashLength} ${circumference - dashLength}`,
+      dashOffset: dashOffset,
+      percent,
     }
-    currentPercent += option.percentage
-    return segment
   })
 
   return (
@@ -265,7 +271,7 @@ function ShareCard({
 
       {/* Chart and Legend Container */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '32px' }}>
-        {/* Donut Chart with Image - using multiple overlapping circles */}
+        {/* Donut Chart - using div-based approach for better html2canvas compatibility */}
         <div
           style={{
             position: 'relative',
@@ -273,44 +279,67 @@ function ShareCard({
             height: `${size}px`,
           }}
         >
-          {/* Colored segments as pie slices */}
-          {segments.map((segment, index) => {
-            const startAngle = (segment.startPercent / 100) * 360 - 90
-            const endAngle = (segment.endPercent / 100) * 360 - 90
-            const largeArc = endAngle - startAngle > 180 ? 1 : 0
-            const radius = size / 2
-            const startX = radius + radius * Math.cos((startAngle * Math.PI) / 180)
-            const startY = radius + radius * Math.sin((startAngle * Math.PI) / 180)
-            const endX = radius + radius * Math.cos((endAngle * Math.PI) / 180)
-            const endY = radius + radius * Math.sin((endAngle * Math.PI) / 180)
-
-            return (
-              <svg
+          {/* SVG Donut Ring */}
+          <svg
+            width={size}
+            height={size}
+            style={{
+              transform: 'rotate(-90deg)',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+            }}
+          >
+            {/* Background circle */}
+            <circle
+              cx={size / 2}
+              cy={size / 2}
+              r={radius}
+              fill="none"
+              stroke="#e5e7eb"
+              strokeWidth={strokeWidth}
+            />
+            {/* Colored segments - render in reverse order so first segment is on top */}
+            {[...segments].reverse().map((segment, index) => (
+              <circle
                 key={index}
-                width={size}
-                height={size}
-                style={{ position: 'absolute', top: 0, left: 0 }}
-              >
-                <path
-                  d={`M ${radius} ${radius} L ${startX} ${startY} A ${radius} ${radius} 0 ${largeArc} 1 ${endX} ${endY} Z`}
-                  fill={segment.color}
-                />
-              </svg>
-            )
-          })}
+                cx={size / 2}
+                cy={size / 2}
+                r={radius}
+                fill="none"
+                stroke={segment.color}
+                strokeWidth={strokeWidth}
+                strokeDasharray={segment.dashArray}
+                strokeDashoffset={segment.dashOffset}
+                strokeLinecap="butt"
+              />
+            ))}
+          </svg>
 
-          {/* Center circle (white ring + image/hole) */}
+          {/* White border ring */}
           <div
             style={{
               position: 'absolute',
-              top: `${strokeWidth}px`,
-              left: `${strokeWidth}px`,
-              width: `${size - strokeWidth * 2}px`,
-              height: `${size - strokeWidth * 2}px`,
+              top: `${(size - centerSize - 8) / 2}px`,
+              left: `${(size - centerSize - 8) / 2}px`,
+              width: `${centerSize + 8}px`,
+              height: `${centerSize + 8}px`,
+              borderRadius: '50%',
+              backgroundColor: 'white',
+            }}
+          />
+
+          {/* Center image container */}
+          <div
+            style={{
+              position: 'absolute',
+              top: `${(size - centerSize) / 2}px`,
+              left: `${(size - centerSize) / 2}px`,
+              width: `${centerSize}px`,
+              height: `${centerSize}px`,
               borderRadius: '50%',
               backgroundColor: '#f3f4f6',
               overflow: 'hidden',
-              border: '4px solid white',
             }}
           >
             {heroImageUrl && (

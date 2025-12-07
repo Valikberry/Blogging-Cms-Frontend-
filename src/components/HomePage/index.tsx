@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { FileText, BarChart3, Mail, Play, MessageSquare, ChevronRight } from 'lucide-react'
+import { FileText, BarChart3, Mail, Play, MessageSquare, ChevronRight, Send, Loader2 } from 'lucide-react'
 
 interface Post {
   id: string
@@ -28,17 +28,6 @@ interface Post {
   } | null
 }
 
-interface Poll {
-  id: string
-  question: string
-  slug: string
-  heroImage?: {
-    url?: string | null
-    alt?: string | null
-  } | null
-  totalVotes: number
-}
-
 interface Country {
   id: string
   name: string
@@ -52,7 +41,6 @@ interface CountrySection {
   country: Country
   posts: Post[]
   hotPosts: Post[]
-  polls: Poll[]
 }
 
 function getVideoThumbnail(embedUrl: string): string | null {
@@ -78,7 +66,6 @@ export function HomePage() {
   const [messageType, setMessageType] = useState<'success' | 'error'>('success')
   const [countrySections, setCountrySections] = useState<CountrySection[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<Record<string, 'news' | 'polls'>>({})
 
   const fetchData = useCallback(async () => {
     setIsLoading(true)
@@ -111,27 +98,15 @@ export function HomePage() {
           )
           const postsData = await postsRes.json()
 
-          // Fetch polls for this country
-          const pollsRes = await fetch(`/api/polls-list?countryId=${country.id}&limit=4`)
-          const pollsData = await pollsRes.json()
-
           return {
             country,
             posts: postsData.posts || [],
             hotPosts: hotPostsData.posts || [],
-            polls: pollsData.polls || [],
           }
         }),
       )
 
       setCountrySections(sections)
-
-      // Initialize active tabs
-      const tabs: Record<string, 'news' | 'polls'> = {}
-      sections.forEach((section) => {
-        tabs[section.country.id] = 'news'
-      })
-      setActiveTab(tabs)
     } catch (error) {
       console.error('Error fetching data:', error)
     } finally {
@@ -189,12 +164,12 @@ export function HomePage() {
   return (
     <div className="bg-white py-2">
       <h1 className="text-gray-900 text-xl sm:text-[22px] font-bold mb-2">
-        AskGeopolitics — Politics explained through questions and polls
+        Politics explained through questions and polls
       </h1>
       {/* Tagline */}
       <p className="text-gray-500 text-lg sm:text-base">
-        AskGeopolitics breaks big global stories into clear questions that reveal what&apos;s at
-        stake, who&apos;s involved, and what could happen next.
+        AskGeopolitics turns big geopolitical stories into unbiased political questions and quick
+        polls—so you can see the facts and where people stand.
       </p>
       {/* Subscribe Form */}
       <div className="py-6">
@@ -210,10 +185,13 @@ export function HomePage() {
           <button
             type="submit"
             disabled={isSubscribing}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-base font-medium hover:bg-indigo-700 transition-colors whitespace-nowrap"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 text-white rounded-lg text-base font-medium hover:bg-indigo-700 transition-colors whitespace-nowrap"
           >
-            <Mail className="w-5 h-5" />
-            {isSubscribing ? 'Subscribing...' : 'Subscribe'}
+            {isSubscribing ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Send className="w-5 h-5" />
+            )}
           </button>
         </form>
         {subscribeMessage && (
@@ -248,45 +226,25 @@ export function HomePage() {
                 <h2>{section.country.name}</h2>
               </Link>
               <div className="flex gap-3 sm:gap-8 min-w-max">
-                <button
-                  onClick={() =>
-                    setActiveTab((prev) => ({ ...prev, [section.country.id]: 'news' }))
-                  }
-                  className={`flex items-center gap-1.5 pb-3 text-base sm:text-base font-medium transition-colors relative whitespace-nowrap ${
-                    activeTab[section.country.id] === 'news'
-                      ? 'text-indigo-600'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
+                <Link
+                  href={`/${section.country.slug}`}
+                  className="flex items-center gap-1.5 pb-3 text-base sm:text-base font-medium transition-colors relative whitespace-nowrap text-gray-600 hover:text-gray-900"
                 >
                   <FileText className="w-4 h-4 sm:w-4 sm:h-4" />
                   <h3>News</h3>
-                  {activeTab[section.country.id] === 'news' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600" />
-                  )}
-                </button>
-                <button
-                  onClick={() =>
-                    setActiveTab((prev) => ({ ...prev, [section.country.id]: 'polls' }))
-                  }
-                  className={`flex items-center gap-1.5 pb-3 text-base sm:text-base font-medium transition-colors relative whitespace-nowrap ${
-                    activeTab[section.country.id] === 'polls'
-                      ? 'text-indigo-600'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
+                </Link>
+                <Link
+                  href={`/${section.country.slug}?tab=polls`}
+                  className="flex items-center gap-1.5 pb-3 text-base sm:text-base font-medium transition-colors relative whitespace-nowrap text-gray-600 hover:text-gray-900"
                 >
                   <BarChart3 className="w-4 h-4 sm:w-4 sm:h-4" />
                   <h3>Polls</h3>
-                  {activeTab[section.country.id] === 'polls' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600" />
-                  )}
-                </button>
+                </Link>
               </div>
             </nav>
           </div>
 
-          {activeTab[section.country.id] === 'news' ? (
-            <>
-              {/* Hot Stories - Horizontal Scroll */}
+          {/* Hot Stories - Horizontal Scroll */}
               {section.hotPosts.length > 0 && (
                 <div className="mb-1">
                   <div className="overflow-x-auto scrollbar-hide -mx-1 px-1">
@@ -407,7 +365,6 @@ export function HomePage() {
                       const countrySlug = post.country?.slug
                         ? post.country.slug.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()
                         : section.country.slug
-                      const imageUrl = post.heroImage?.url
 
                       return (
                         <div
@@ -458,107 +415,122 @@ export function HomePage() {
                 </div>
               </div>
 
-              {/* Everything You Need To Know Section */}
+              {/* Frequently Asked Questions Section */}
               <div className="mt-8">
                 <div className="flex items-center gap-2 mb-4">
                   <MessageSquare className="w-6 h-6 text-green-500" />
                   <h2 className="text-lg font-semibold text-gray-900">
-                    Everything You Need To Know About AskGeoPolitics
+                    Frequently Asked Questions About AskGeopolitics
                   </h2>
                 </div>
                 <div className="border border-gray-200 rounded-lg overflow-hidden">
                   <div className="border-l-4 border-indigo-600 p-4">
                     <h3 className="font-semibold text-gray-900 mb-2">
-                      What is AskGeoPolitics and how does it work?
+                      What does AskGeopolitics do?
                     </h3>
                     <p className="text-gray-600 text-[14px]">
-                      AskGeoPolitics is a platform that breaks down complex global news stories into
-                      clear, digestible questions. We help you understand what&apos;s at stake,
-                      who&apos;s involved, and what could happen next in world events.
+                      AskGeopolitics turns major political moments and viral news stories into
+                      simple, unbiased questions and quick polls. We also share short explainers so
+                      you can understand what happened — and see how people react.
                     </p>
                   </div>
                   <div className="border-l-4 border-indigo-600 p-4 border-t border-gray-200">
                     <h3 className="font-semibold text-gray-900 mb-2">
-                      How are stories selected and verified?
+                      Is AskGeopolitics a political party or campaign tool?
                     </h3>
                     <p className="text-gray-600 text-[14px]">
-                      Our editorial team curates stories from multiple reliable sources worldwide.
-                      We focus on geopolitical events that have significant impact and present them
-                      in an unbiased, question-based format to encourage critical thinking.
+                      No. AskGeopolitics is not a political party, campaign tool, or advocacy site.
+                      It&apos;s a fun, open platform where people can read stories, ask questions,
+                      and vote in polls without being pushed toward any political side.
+                    </p>
+                  </div>
+                  {/* <div className="border-l-4 border-indigo-600 p-4 border-t border-gray-200">
+                    <h3 className="font-semibold text-gray-900 mb-2">
+                      Is AskGeopolitics unbiased?
+                    </h3>
+                    <p className="text-gray-600 text-[14px]">
+                      Yes. Every question is written to be neutral, factual, and judgment-free. Our
+                      goal is to help people think, react, and explore, not tell them who to support.
+                    </p>
+                  </div> */}
+                  {/* <div className="border-l-4 border-indigo-600 p-4 border-t border-gray-200">
+                    <h3 className="font-semibold text-gray-900 mb-2">
+                      Where do the questions come from?
+                    </h3>
+                    <p className="text-gray-600 text-[14px]">
+                      Our questions come from verified news events, public statements, and — most
+                      importantly — the community itself. People submit topics or viral moments they
+                      want turned into simple political questions, and we create polls from them.
+                    </p>
+                  </div> */}
+                  <div className="border-l-4 border-indigo-600 p-4 border-t border-gray-200">
+                    <h3 className="font-semibold text-gray-900 mb-2">
+                      Does AskGeopolitics take controversial events and turn them into polls?
+                    </h3>
+                    <p className="text-gray-600 text-[14px]">
+                      Yes — in a responsible, fact-based way. We take real controversial moments,
+                      break them down into simple facts, and then turn them into neutral questions
+                      so readers can vote and discuss freely.
+                    </p>
+                  </div>
+                  {/* <div className="border-l-4 border-indigo-600 p-4 border-t border-gray-200">
+                    <h3 className="font-semibold text-gray-900 mb-2">
+                      Is this site just for serious political analysis?
+                    </h3>
+                    <p className="text-gray-600 text-[14px]">
+                      Not at all. AskGeopolitics is also a fun site — created for curiosity,
+                      conversation, and free speech. We mix real political stories with light,
+                      entertaining polls so people can enjoy politics without the stress.
+                    </p>
+                  </div> */}
+                  <div className="border-l-4 border-indigo-600 p-4 border-t border-gray-200">
+                    <h3 className="font-semibold text-gray-900 mb-2">
+                      Why use questions instead of long political articles?
+                    </h3>
+                    <p className="text-gray-600 text-[14px]">
+                      Because questions are quick, simple, engaging, and easy to share. You get the
+                      core idea instantly and can jump straight into the poll.
                     </p>
                   </div>
                   <div className="border-l-4 border-indigo-600 p-4 border-t border-gray-200">
                     <h3 className="font-semibold text-gray-900 mb-2">
-                      Can I participate in polls and discussions?
+                      Who can participate in the polls?
                     </h3>
                     <p className="text-gray-600 text-[14px]">
-                      Yes! Our polls allow you to share your perspective on current geopolitical
-                      issues. Your vote contributes to understanding public opinion on important
-                      global matters.
+                      Anyone. Polls are open to people everywhere — different countries, ages,
+                      backgrounds, and viewpoints. The goal is to create a global mix of opinions.
                     </p>
                   </div>
                   <div className="border-l-4 border-indigo-600 p-4 border-t border-gray-200">
                     <h3 className="font-semibold text-gray-900 mb-2">
-                      How can I stay updated with the latest news?
+                      Are the polls scientific?
                     </h3>
                     <p className="text-gray-600 text-[14px]">
-                      Subscribe to our newsletter using the form above to receive daily or weekly
-                      updates on the most important geopolitical stories. You can also follow
-                      specific countries or topics that interest you.
+                      No. They&apos;re informal, public polls meant for insight and discussion — not
+                      official statistics.
+                    </p>
+                  </div>
+                  <div className="border-l-4 border-indigo-600 p-4 border-t border-gray-200">
+                    <h3 className="font-semibold text-gray-900 mb-2">
+                      What makes AskGeopolitics different from regular political sites?
+                    </h3>
+                    <p className="text-gray-600 text-[14px]">
+                      We don&apos;t lecture. We don&apos;t pick sides. We don&apos;t tell you
+                      who&apos;s right. We simply turn politics into fun, fast, fact-based questions
+                      and let you decide what you think.
+                    </p>
+                  </div>
+                  <div className="border-l-4 border-indigo-600 p-4 border-t border-gray-200">
+                    <h3 className="font-semibold text-gray-900 mb-2">
+                      Can users suggest their own questions or topics?
+                    </h3>
+                    <p className="text-gray-600 text-[14px]">
+                      Yes! You can send us names, events, or political moments you want turned into
+                      polls — and we&apos;ll create them in our neutral AskGeopolitics style.
                     </p>
                   </div>
                 </div>
               </div>
-            </>
-          ) : (
-            /* Polls - Horizontal Scroll */
-            <div className="mb-1">
-              {section.polls.length === 0 ? (
-                <div className="text-center py-8 text-gray-500 text-[14px]">
-                  No polls available for this country.
-                </div>
-              ) : (
-                <div className="overflow-x-auto scrollbar-hide -mx-1 px-1">
-                  <div className="flex gap-3 pb-2">
-                    {section.polls.map((poll) => {
-                      const imageUrl = poll.heroImage?.url
-                      const pollSlug = poll.slug || poll.id
-
-                      return (
-                        <Link
-                          key={poll.id}
-                          href={`/${section.country.slug}/poll/${pollSlug}`}
-                          className="flex-shrink-0 w-[143px] bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
-                        >
-                          {/* Image */}
-                          <div className="relative w-full h-[90px] bg-gray-100">
-                            {imageUrl ? (
-                              <Image
-                                src={imageUrl}
-                                alt={poll.heroImage?.alt || poll.question}
-                                fill
-                                className="object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <div className="w-12 h-12 border-2 border-gray-300 rounded flex items-center justify-center">
-                                  <BarChart3 className="w-6 h-6 text-gray-400" />
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                          {/* Content */}
-                          <div className="p-1">
-                            <p className="text-gray-600 text-sm line-clamp-2">{poll.question}</p>
-                          </div>
-                        </Link>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
         </div>
       ))}
     </div>

@@ -4,6 +4,7 @@ import { getPayload } from 'payload'
 import { cache } from 'react'
 import { notFound } from 'next/navigation'
 import { PollDetail } from '@/components/PollDetail'
+import { getServerSideURL } from '@/utilities/getURL'
 
 export const revalidate = 60
 
@@ -147,8 +148,9 @@ export default async function PollPage({ params: paramsPromise }: Args) {
 }
 
 export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
-  const { pollSlug } = await paramsPromise
+  const { pollSlug, slug: countrySlug } = await paramsPromise
   const poll = await queryPollBySlugOrId(pollSlug)
+  const siteUrl = getServerSideURL()
 
   if (!poll) {
     return {
@@ -157,13 +159,18 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
   }
 
   const heroImage = typeof poll.heroImage === 'object' ? poll.heroImage : null
+  const canonicalUrl = `${siteUrl}/${countrySlug}/poll/${pollSlug}`
 
   return {
     title: `${poll.question} | AskGeopolitics Poll`,
     description: poll.description || `Vote on: ${poll.question}`,
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
       title: `${poll.question} | AskGeopolitics Poll`,
       description: poll.description || `Vote on: ${poll.question}`,
+      url: canonicalUrl,
       images: heroImage?.url ? [{ url: heroImage.url }] : [],
     },
   }

@@ -10,6 +10,7 @@ import { homeStatic } from '@/endpoints/seed/home-static'
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { RenderHero } from '@/heros/RenderHero'
 import { generateMeta } from '@/utilities/generateMeta'
+import { getServerSideURL } from '@/utilities/getURL'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 import { HomeTemplate } from '@/components/HomeContent'
@@ -194,14 +195,22 @@ export default async function Page({ params: paramsPromise }: Args) {
 
 export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
   const { slug = 'home' } = await paramsPromise
+  const siteUrl = getServerSideURL()
 
   // Check if it's a continent first (using cached query)
   const continent = await queryContinentBySlug(slug)
 
   if (continent) {
+    const canonicalUrl = `${siteUrl}/${slug}/`
     return {
       title: continent.name,
       description: `Content from ${continent.name}`,
+      alternates: {
+        canonical: canonicalUrl,
+      },
+      openGraph: {
+        url: canonicalUrl,
+      },
     }
   }
 
@@ -209,9 +218,16 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
   const country = await queryCountryBySlug(slug)
 
   if (country) {
+    const canonicalUrl = `${siteUrl}/${slug}/`
     return {
       title: country.name,
       description: `Content from ${country.name}`,
+      alternates: {
+        canonical: canonicalUrl,
+      },
+      openGraph: {
+        url: canonicalUrl,
+      },
     }
   }
 
@@ -220,7 +236,19 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
     slug,
   })
 
-  return generateMeta({ doc: page })
+  const baseMeta = generateMeta({ doc: page })
+  const canonicalUrl = `${siteUrl}/${slug}/`
+
+  return {
+    ...baseMeta,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      ...baseMeta.openGraph,
+      url: canonicalUrl,
+    },
+  }
 }
 
 const queryPageBySlug = cache(async ({ slug }: { slug: string }) => {
