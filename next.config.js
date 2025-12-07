@@ -38,34 +38,44 @@ const nextConfig = {
       '.mjs': ['.mts', '.mjs'],
     }
 
-    // Fix for pino/thread-stream in serverless environments
-    if (isServer) {
-      webpackConfig.externals = webpackConfig.externals || []
-      webpackConfig.externals.push({
-        'thread-stream': 'commonjs thread-stream',
-        'pino-worker': 'commonjs pino-worker',
-        'pino-pretty': 'commonjs pino-pretty',
-      })
+    // Ignore test files in node_modules
+    webpackConfig.module = webpackConfig.module || {}
+    webpackConfig.module.rules = webpackConfig.module.rules || []
+    webpackConfig.module.rules.push({
+      test: /[\\/]node_modules[\\/](thread-stream|pino)[\\/].*\.(test|spec)\.(js|ts)$/,
+      use: 'null-loader',
+    })
+
+    // Also ignore the test directory entirely
+    webpackConfig.resolve.alias = {
+      ...webpackConfig.resolve.alias,
+      'thread-stream/test': false,
+      'pino/test': false,
     }
 
     return webpackConfig
   },
 
-  // Transpile payload packages
-  transpilePackages: ['payload', '@payloadcms/next', '@payloadcms/ui'],
-
   // Server external packages (Node.js modules that should not be bundled)
-  serverExternalPackages: ['pino', 'pino-pretty', 'thread-stream'],
+  serverExternalPackages: [
+    'pino',
+    'pino-pretty',
+    'thread-stream',
+    'pino-worker',
+    'sonic-boom',
+    'real-require',
+    'on-exit-leak-free',
+  ],
 
   reactStrictMode: true,
   redirects,
 
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-select'],
-
-    // 🔥<<< ADD THIS LINE TO FIX THE BUILD
-    turbo: false,
   },
+
+  // Empty turbopack config to silence warning (we use --webpack flag for build)
+  turbopack: {},
 }
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })
