@@ -4,7 +4,15 @@ import React, { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
-import { Search, FileText, BookOpen, BarChart3, ChevronLeft, ChevronRight } from 'lucide-react'
+import {
+  Search,
+  FileText,
+  BookOpen,
+  BarChart3,
+  ChevronLeft,
+  ChevronRight,
+  MessageSquare,
+} from 'lucide-react'
 
 interface Post {
   id: string
@@ -171,7 +179,6 @@ export function CountryPage({ country }: CountryPageProps) {
     }
     return 'GeoPolitics Through Questions'
   }
-
   return (
     <div className="bg-white">
       {/* Breadcrumb */}
@@ -180,17 +187,17 @@ export function CountryPage({ country }: CountryPageProps) {
           Home
         </Link>
         <ChevronRight className="w-4 h-4" />
-        <span className="text-indigo-600"> {country.name}</span>
+        <span className="text-indigo-600"> </span>
       </nav>
       {/* Page Title */}
       <div className="text-center mb-6">
         <h1 className="text-gray-900 text-2xl sm:text-[20px] font-bold mb-2">
-          {getTitle()}
+          {`${country.name} politics explained through questions and polls`}
           <span className="text-indigo-600">?</span>
         </h1>
         <p className="text-gray-600 text-lg sm:text-base">
-          AskGeopolitics breaks big global stories into clear questions that reveal what&apos;s at
-          stake, who&apos;s involved, and what could happen next.
+          AskGeopolitics turns big geopolitical stories into unbiased political questions and quick
+          polls,so you can see the facts and where people stand.
         </p>
       </div>
 
@@ -250,20 +257,6 @@ export function CountryPage({ country }: CountryPageProps) {
             <h3>Polls</h3>
           </button>
         </div>
-
-        {/* Country Badge */}
-        <div className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-1.5 rounded-lg">
-          {country.flag?.url && (
-            <Image
-              src={country.flag.url}
-              alt={`${country.name} flag`}
-              width={24}
-              height={16}
-              className="object-cover rounded-sm"
-            />
-          )}
-          <h2 className="font-medium text-[14px]">{country.name}</h2>
-        </div>
       </div>
 
       {/* Content */}
@@ -280,8 +273,8 @@ export function CountryPage({ country }: CountryPageProps) {
               No polls available for this country.
             </div>
           ) : (
-            <div className="overflow-x-auto scrollbar-hide -mx-1 px-1">
-              <div className="flex gap-3 pb-2 flex-wrap">
+            <div className="overflow-x-auto scrollbar-hide  px-1">
+              <div className="flex gap-5 pb-2 flex-wrap">
                 {polls.map((poll) => {
                   const imageUrl = poll.heroImage?.url
                   const pollSlug = poll.slug || poll.id
@@ -443,6 +436,115 @@ export function CountryPage({ country }: CountryPageProps) {
           </button>
         </div>
       )}
+      <div className="mt-8">
+        <div className="flex items-center gap-2 mb-4">
+          <MessageSquare className="w-6 h-6 text-green-500" />
+          <h2 className="text-lg font-semibold text-gray-900">
+            Frequently Asked Questions About AskGeopolitics
+          </h2>
+        </div>
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
+          <div className="border-l-4 border-indigo-600 p-4">
+            <h3 className="font-semibold text-gray-900 mb-2">What does AskGeopolitics do?</h3>
+            <p className="text-gray-600 text-[14px]">
+              AskGeopolitics turns major political moments and viral news stories into simple,
+              unbiased questions and quick polls. We also share short explainers so you can
+              understand what happened — and see how people react.
+            </p>
+          </div>
+          <div className="border-l-4 border-indigo-600 p-4 border-t border-gray-200">
+            <h3 className="font-semibold text-gray-900 mb-2">
+              Is AskGeopolitics a political party or campaign tool?
+            </h3>
+            <p className="text-gray-600 text-[14px]">
+              No. AskGeopolitics is not a political party, campaign tool, or advocacy site.
+              It&apos;s a fun, open platform where people can read stories, ask questions, and vote
+              in polls without being pushed toward any political side.
+            </p>
+          </div>
+          {/* <div className="border-l-4 border-indigo-600 p-4 border-t border-gray-200">
+                    <h3 className="font-semibold text-gray-900 mb-2">
+                      Is AskGeopolitics unbiased?
+                    </h3>
+                    <p className="text-gray-600 text-[14px]">
+                      Yes. Every question is written to be neutral, factual, and judgment-free. Our
+                      goal is to help people think, react, and explore, not tell them who to support.
+                    </p>
+                  </div> */}
+          {/* <div className="border-l-4 border-indigo-600 p-4 border-t border-gray-200">
+                    <h3 className="font-semibold text-gray-900 mb-2">
+                      Where do the questions come from?
+                    </h3>
+                    <p className="text-gray-600 text-[14px]">
+                      Our questions come from verified news events, public statements, and — most
+                      importantly — the community itself. People submit topics or viral moments they
+                      want turned into simple political questions, and we create polls from them.
+                    </p>
+                  </div> */}
+          <div className="border-l-4 border-indigo-600 p-4 border-t border-gray-200">
+            <h3 className="font-semibold text-gray-900 mb-2">
+              Does AskGeopolitics take controversial events and turn them into polls?
+            </h3>
+            <p className="text-gray-600 text-[14px]">
+              Yes — in a responsible, fact-based way. We take real controversial moments, break them
+              down into simple facts, and then turn them into neutral questions so readers can vote
+              and discuss freely.
+            </p>
+          </div>
+          {/* <div className="border-l-4 border-indigo-600 p-4 border-t border-gray-200">
+                    <h3 className="font-semibold text-gray-900 mb-2">
+                      Is this site just for serious political analysis?
+                    </h3>
+                    <p className="text-gray-600 text-[14px]">
+                      Not at all. AskGeopolitics is also a fun site — created for curiosity,
+                      conversation, and free speech. We mix real political stories with light,
+                      entertaining polls so people can enjoy politics without the stress.
+                    </p>
+                  </div> */}
+          <div className="border-l-4 border-indigo-600 p-4 border-t border-gray-200">
+            <h3 className="font-semibold text-gray-900 mb-2">
+              Why use questions instead of long political articles?
+            </h3>
+            <p className="text-gray-600 text-[14px]">
+              Because questions are quick, simple, engaging, and easy to share. You get the core
+              idea instantly and can jump straight into the poll.
+            </p>
+          </div>
+          <div className="border-l-4 border-indigo-600 p-4 border-t border-gray-200">
+            <h3 className="font-semibold text-gray-900 mb-2">Who can participate in the polls?</h3>
+            <p className="text-gray-600 text-[14px]">
+              Anyone. Polls are open to people everywhere — different countries, ages, backgrounds,
+              and viewpoints. The goal is to create a global mix of opinions.
+            </p>
+          </div>
+          <div className="border-l-4 border-indigo-600 p-4 border-t border-gray-200">
+            <h3 className="font-semibold text-gray-900 mb-2">Are the polls scientific?</h3>
+            <p className="text-gray-600 text-[14px]">
+              No. They&apos;re informal, public polls meant for insight and discussion — not
+              official statistics.
+            </p>
+          </div>
+          <div className="border-l-4 border-indigo-600 p-4 border-t border-gray-200">
+            <h3 className="font-semibold text-gray-900 mb-2">
+              What makes AskGeopolitics different from regular political sites?
+            </h3>
+            <p className="text-gray-600 text-[14px]">
+              We don&apos;t lecture. We don&apos;t pick sides. We don&apos;t tell you who&apos;s
+              right. We simply turn politics into fun, fast, fact-based questions and let you decide
+              what you think.
+            </p>
+          </div>
+          <div className="border-l-4 border-indigo-600 p-4 border-t border-gray-200">
+            <h3 className="font-semibold text-gray-900 mb-2">
+              Can users suggest their own questions or topics?
+            </h3>
+            <p className="text-gray-600 text-[14px]">
+              Yes! You can send us names, events, or political moments you want turned into polls —
+              and we&apos;ll create them in our neutral AskGeopolitics style.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
