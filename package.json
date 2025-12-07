@@ -5,7 +5,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
+    "build": "cross-env NODE_OPTIONS=--no-deprecation next build --webpack",
     "postbuild": "next-sitemap --config next-sitemap.config.cjs",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "dev:prod": "cross-env NODE_OPTIONS=--no-deprecation rm -rf .next && pnpm build && pnpm start",
@@ -73,6 +73,7 @@
     "eslint": "^9.16.0",
     "eslint-config-next": "15.4.4",
     "jsdom": "26.1.0",
+    "null-loader": "^4.0.1",
     "playwright": "1.54.1",
     "playwright-core": "1.54.1",
     "postcss": "^8.4.38",
