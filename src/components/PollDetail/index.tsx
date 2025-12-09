@@ -629,10 +629,10 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
         <Link href="/" className="hover:text-gray-700">
           Home
         </Link>
-        <ChevronRight className="w-4 h-4" />
+        {/* <ChevronRight className="w-4 h-4" />
         <Link href={`/${countrySlug}`} className="hover:text-gray-700">
           {countrySlug}
-        </Link>
+        </Link> */}
         <ChevronRight className="w-4 h-4" />
         <span className="text-indigo-600">Poll</span>
       </nav>

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Mail, ChevronRight, ChevronLeft, Sparkles } from 'lucide-react'
+import { Mail, ChevronRight, ChevronLeft, Sparkles, Loader2, Send } from 'lucide-react'
 
 interface Post {
   id: string
@@ -176,13 +176,17 @@ export function Subscribe() {
                 required
                 className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
               />
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="px-6 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed whitespace-nowrap"
-              >
-                {isSubmitting ? 'Subscribing...' : 'Subscribe'}
-              </button>
+             <button
+            type="submit"
+            disabled={isSubmitting}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 text-white rounded-lg text-base font-medium hover:bg-indigo-700 transition-colors whitespace-nowrap"
+          >
+            {isSubmitting ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Send className="w-5 h-5" />
+            )}
+          </button>
             </div>
 
             {/* Message */}

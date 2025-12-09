@@ -22,6 +22,8 @@ import {
   Globe,
   LinkIcon,
   X,
+  Loader2,
+  Send,
 } from 'lucide-react'
 
 interface PostDetailProps {
@@ -374,20 +376,17 @@ export function PostDetail({ post }: PostDetailProps) {
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
-                <button
-                  type="submit"
-                  disabled={isSubscribing}
-                  className="w-full bg-indigo-600 text-white px-6 py-3 rounded-md font-medium hover:bg-indigo-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {isSubscribing ? (
-                    <>
-                      <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                      Subscribing...
-                    </>
-                  ) : (
-                    'Subscribe'
-                  )}
-                </button>
+              <button
+            type="submit"
+            disabled={isSubscribing}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 text-white rounded-lg text-base font-medium hover:bg-indigo-700 transition-colors whitespace-nowrap"
+          >
+            {isSubscribing ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Send className="w-5 h-5" />
+            )}
+          </button>
               </form>
               {subscribeMessage && (
                 <p

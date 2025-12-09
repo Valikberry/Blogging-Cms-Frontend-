@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { FileText, BarChart3, Mail, Play, MessageSquare, ChevronRight, Send, Loader2 } from 'lucide-react'
+import { FileText, BarChart3, Mail, MessageSquare, ChevronRight, Send, Loader2 } from 'lucide-react'
 
 interface Post {
   id: string
@@ -28,6 +28,24 @@ interface Post {
   } | null
 }
 
+interface Poll {
+  id: string
+  question: string
+  slug: string
+  description?: string | null
+  publishedAt: string
+  totalVotes: number
+  heroImage?: {
+    url?: string | null
+    alt?: string | null
+  } | null
+  country?: {
+    id: string
+    name: string
+    slug: string
+  } | null
+}
+
 interface Country {
   id: string
   name: string
@@ -40,23 +58,7 @@ interface Country {
 interface CountrySection {
   country: Country
   posts: Post[]
-  hotPosts: Post[]
-}
-
-function getVideoThumbnail(embedUrl: string): string | null {
-  // YouTube
-  const youtubeMatch = embedUrl.match(/youtube\.com\/embed\/([^?]+)/)
-  if (youtubeMatch) {
-    return `https://img.youtube.com/vi/${youtubeMatch[1]}/maxresdefault.jpg`
-  }
-
-  // Vimeo - Note: Vimeo thumbnails require API call, so we'll handle it differently
-  const vimeoMatch = embedUrl.match(/player\.vimeo\.com\/video\/(\d+)/)
-  if (vimeoMatch) {
-    return null
-  }
-
-  return null
+  polls: Poll[]
 }
 
 export function HomePage() {
@@ -86,11 +88,11 @@ export function HomePage() {
       // Fetch posts and polls for each country
       const sections: CountrySection[] = await Promise.all(
         countries.slice(0, 5).map(async (country) => {
-          // Fetch hot posts for the horizontal scroll section
-          const hotPostsRes = await fetch(
-            `/api/posts/paginated?countryId=${country.id}&limit=20&dateFormat=short&filter=hot`,
+          // Fetch polls for the horizontal scroll section
+          const pollsRes = await fetch(
+            `/api/polls-list?countryId=${country.id}&limit=10`,
           )
-          const hotPostsData = await hotPostsRes.json()
+          const pollsData = await pollsRes.json()
 
           // Fetch regular posts for trendy topics
           const postsRes = await fetch(
@@ -101,7 +103,7 @@ export function HomePage() {
           return {
             country,
             posts: postsData.posts || [],
-            hotPosts: hotPostsData.posts || [],
+            polls: pollsData.polls || [],
           }
         }),
       )
@@ -244,100 +246,47 @@ export function HomePage() {
             </nav>
           </div>
 
-          {/* Hot Stories - Horizontal Scroll */}
-              {section.hotPosts.length > 0 && (
+          {/* Polls - Horizontal Scroll */}
+              {section.polls.length > 0 && (
                 <div className="mb-1">
                   <div className="overflow-x-auto scrollbar-hide -mx-1 px-1">
                     <div className="flex gap-3 pb-2">
-                      {section.hotPosts.map((post) => {
-                        const hasVideo = post.videoEmbed?.enabled && post.videoEmbed?.embedUrl
-                        const videoThumbnail =
-                          hasVideo && post.videoEmbed?.embedUrl
-                            ? getVideoThumbnail(post.videoEmbed.embedUrl)
-                            : null
-                        const imageUrl = post.heroImage?.url || null
-                        const imageAlt = post.heroImage?.alt || post.title
-                        const countrySlug = post.country?.slug
-                          ? post.country.slug.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()
+                      {section.polls.slice(0, 10).map((poll) => {
+                        const imageUrl = poll.heroImage?.url || null
+                        const imageAlt = poll.heroImage?.alt || poll.question
+                        const countrySlug = poll.country?.slug
+                          ? poll.country.slug.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()
                           : section.country.slug
-
-                        // Prioritize video thumbnail, then hero image, then fallback
-                        const displayImageUrl = videoThumbnail || imageUrl
 
                         return (
                           <Link
-                            key={post.id}
-                            href={`/${countrySlug}/${post.slug}`}
+                            key={poll.id}
+                            href={`/${countrySlug}/poll/${poll.slug || poll.id}`}
                             className="flex-shrink-0 w-[143px] bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
                           >
-                            {/* Image/Video Thumbnail */}
+                            {/* Image */}
                             <div className="relative w-full h-[90px] bg-gray-100">
-                              {displayImageUrl ? (
-                                <>
-                                  {videoThumbnail ? (
-                                    // Use regular img tag for YouTube thumbnails
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    <img
-                                      src={displayImageUrl}
-                                      alt={imageAlt || post.title}
-                                      className="absolute inset-0 w-full h-full object-cover"
-                                    />
-                                  ) : (
-                                    // Use Next.js Image for hero images
-                                    <Image
-                                      src={displayImageUrl}
-                                      alt={imageAlt || post.title}
-                                      fill
-                                      className="object-cover"
-                                    />
-                                  )}
-                                  {/* Play button overlay for videos */}
-                                  {hasVideo && (
-                                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
-                                      <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg">
-                                        <Play
-                                          className="w-5 h-5 text-indigo-600 ml-0.5"
-                                          fill="currentColor"
-                                        />
-                                      </div>
-                                    </div>
-                                  )}
-                                </>
-                              ) : hasVideo ? (
-                                // Video without thumbnail (e.g., Vimeo)
-                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600">
-                                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
-                                    <Play
-                                      className="w-6 h-6 text-indigo-600 ml-0.5"
-                                      fill="currentColor"
-                                    />
-                                  </div>
-                                </div>
+                              {imageUrl ? (
+                                <Image
+                                  src={imageUrl}
+                                  alt={imageAlt || poll.question}
+                                  fill
+                                  className="object-cover"
+                                />
                               ) : (
-                                // No image or video
-                                <div className="w-full h-full flex items-center justify-center">
-                                  <div className="w-12 h-12 border-2 border-gray-300 rounded flex items-center justify-center">
-                                    <svg
-                                      className="w-6 h-6 text-gray-400"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      viewBox="0 0 24 24"
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                      />
-                                    </svg>
-                                  </div>
+                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600">
+                                  <BarChart3 className="w-8 h-8 text-white" />
                                 </div>
                               )}
+                              {/* Vote count badge */}
+                              <div className="absolute bottom-1 right-1 bg-black bg-opacity-60 text-white text-xs px-1.5 py-0.5 rounded">
+                                {poll.totalVotes} votes
+                              </div>
                             </div>
                             {/* Content */}
                             <div className="p-1">
                               <p className="text-gray-600 text-sm line-clamp-2">
-                                {post.excerpt || post.title}
+                                {poll.question}
                               </p>
                             </div>
                           </Link>
