@@ -158,8 +158,9 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
     }
   }
 
-  const heroImage = typeof poll.heroImage === 'object' ? poll.heroImage : null
   const canonicalUrl = `${siteUrl}/${countrySlug}/poll/${pollSlug}`
+  // Use dynamic OG image that shows poll results
+  const ogImageUrl = `${siteUrl}/api/og/poll?id=${pollSlug}`
 
   return {
     title: `${poll.question} | AskGeopolitics Poll`,
@@ -171,7 +172,13 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
       title: `${poll.question} | AskGeopolitics Poll`,
       description: poll.description || `Vote on: ${poll.question}`,
       url: canonicalUrl,
-      images: heroImage?.url ? [{ url: heroImage.url }] : [],
+      images: [{ url: ogImageUrl, width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${poll.question} | AskGeopolitics Poll`,
+      description: poll.description || `Vote on: ${poll.question}`,
+      images: [ogImageUrl],
     },
   }
 }
