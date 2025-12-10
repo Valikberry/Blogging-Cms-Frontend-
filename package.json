@@ -20,7 +20,7 @@
     "test": "pnpm run test:int && pnpm run test:e2e",
     "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" pnpm exec playwright test --config=playwright.config.ts",
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts",
-    "migrate:media": "node scripts/migrate-media-to-local.mjs --blob-api"
+    "migrate-media": "node scripts/migrate-media-to-local.mjs --blob-api"
   },
   "dependencies": {
     "@payloadcms/admin-bar": "3.60.0",
