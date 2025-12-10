@@ -36,7 +36,7 @@ export const Media: CollectionConfig = {
     },
   ],
   upload: {
-    // Files are now stored in Vercel Blob storage (configured in payload.config.ts)
+    staticDir: 'public/media',
     adminThumbnail: 'thumbnail',
     focalPoint: true,
     imageSizes: [
