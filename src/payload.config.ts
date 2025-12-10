@@ -1,5 +1,4 @@
 // storage-adapter-import-placeholder
-import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 
 import sharp from 'sharp' // sharp-import
@@ -77,13 +76,7 @@ export default buildConfig({
   plugins: [
     ...plugins,
     // storage-adapter-placeholder
-    vercelBlobStorage({
-      enabled: true,
-      collections: {
-        media: true,
-      },
-      token: process.env.media_READ_WRITE_TOKEN || '',
-    }),
+    // Local storage is used by default - no adapter needed
   ],
   secret: process.env.PAYLOAD_SECRET,
   sharp,
