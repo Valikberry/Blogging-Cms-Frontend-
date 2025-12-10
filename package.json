@@ -19,7 +19,8 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "test": "pnpm run test:int && pnpm run test:e2e",
     "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" pnpm exec playwright test --config=playwright.config.ts",
-    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
+    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts",
+    "migrate:media": "node scripts/migrate-media-to-local.mjs --blob-api"
   },
   "dependencies": {
     "@payloadcms/admin-bar": "3.60.0",
@@ -74,6 +75,7 @@
     "eslint": "^9.16.0",
     "eslint-config-next": "15.4.4",
     "jsdom": "26.1.0",
+    "mongodb": "^7.0.0",
     "null-loader": "^4.0.1",
     "playwright": "1.54.1",
     "playwright-core": "1.54.1",
