@@ -62,7 +62,7 @@ export function CountryPage({ country }: CountryPageProps) {
     if (tab === 'polls' || tab === 'stories' || tab === 'news') {
       return tab
     }
-    return 'news'
+    return 'polls'
   })
   const [posts, setPosts] = useState<Post[]>([])
   const [polls, setPolls] = useState<Poll[]>([])

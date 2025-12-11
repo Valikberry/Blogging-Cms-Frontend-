@@ -161,7 +161,9 @@ export function Subscribe() {
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Subscribe To Updates!</h1>
             <p className="text-gray-600">
-              Get the latest Geopolitics content delivered straight<br />to your inbox.
+              Get the latest Geopolitics content delivered straight
+              <br />
+              to your inbox.
             </p>
           </div>
 
@@ -176,22 +178,24 @@ export function Subscribe() {
                 required
                 className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
               />
-             <button
-            type="submit"
-            disabled={isSubmitting}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 text-white rounded-lg text-base font-medium hover:bg-indigo-700 transition-colors whitespace-nowrap"
-          >
-            {isSubmitting ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <Send className="w-5 h-5" />
-            )}
-          </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 text-white rounded-lg text-base font-medium hover:bg-indigo-700 transition-colors whitespace-nowrap"
+              >
+                {isSubmitting ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Send className="w-5 h-5" />
+                )}
+              </button>
             </div>
 
             {/* Message */}
             {message && (
-              <p className={`mt-2 text-sm ${messageType === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+              <p
+                className={`mt-2 text-sm ${messageType === 'success' ? 'text-green-600' : 'text-red-600'}`}
+              >
                 {message}
               </p>
             )}
@@ -216,7 +220,8 @@ export function Subscribe() {
           </div>
           <div className="space-y-3 text-[14px] text-gray-700">
             <p>
-              AskGeopolitics is intended to educate and inform, not provoke political or social conflict. We are not responsible for actions taken by readers.
+              AskGeopolitics is intended to educate and inform, not provoke political or social
+              conflict. We are not responsible for actions taken by readers.
             </p>
             <p>
               For corrections, contact{' '}
@@ -253,33 +258,43 @@ export function Subscribe() {
                   const imageUrl = post.heroImage?.url
 
                   return (
-                    <Link
-                      key={post.id}
-                      href={countrySlug ? `/${countrySlug}/${post.slug}` : `/${post.slug}`}
-                      className={`flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors ${
-                        index > 0 ? 'border-t border-gray-200' : ''
-                      }`}
-                    >
-                      <span className="text-indigo-600 font-medium text-sm whitespace-nowrap min-w-[50px]">
-                        {post.publishedAt}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-gray-900 text-sm line-clamp-1 font-medium">{post.title}</p>
-                        {post.source && (
-                          <p className="text-xs text-gray-500 mt-1">From {post.source}</p>
-                        )}
-                      </div>
-                      {imageUrl && (
-                        <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
-                          <Image
-                            src={imageUrl}
-                            alt={post.heroImage?.alt || post.title}
-                            fill
-                            className="object-cover"
-                          />
+                    <div key={post.id} className={index > 0 ? 'border-t border-gray-200 py-1' : ''}>
+                      <Link
+                        href={`/${countrySlug}/${post.slug}`}
+                        className="block hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="px-3 sm:px-6 py-1">
+                          <div className="flex items-center justify-between gap-2 sm:gap-4">
+                            <div className="flex gap-2 sm:gap-4 items-start flex-1 min-w-0">
+                              <span className="text-indigo-600  text-sm sm:text-sm shrink-0 pt-0.5">
+                                {post.publishedAt}
+                              </span>
+                              <div className="flex-1 min-w-0">
+                                <h3 className="text-gray-900 font-medium text-base sm:text-base leading-snug truncate">
+                                  {post.title}
+                                </h3>
+                                {post.source && (
+                                  <p className="text-sm text-gray-500 mt-1">From {post.source}</p>
+                                )}
+                              </div>
+                            </div>
+                            <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 shrink-0" />
+                            {/* {imageUrl ? (
+                                  <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                                    <Image
+                                      src={imageUrl}
+                                      alt={post.heroImage?.alt || post.title}
+                                      fill
+                                      className="object-cover"
+                                    />
+                                  </div>
+                                ) : (
+                                  <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 shrink-0" />
+                                )} */}
+                          </div>
                         </div>
-                      )}
-                    </Link>
+                      </Link>
+                    </div>
                   )
                 })}
               </div>
@@ -310,7 +325,10 @@ export function Subscribe() {
               {/* Page numbers */}
               {getPageNumbers().map((page, index) =>
                 page === '...' ? (
-                  <span key={`ellipsis-${index}`} className="w-8 h-8 flex items-center justify-center text-gray-500">
+                  <span
+                    key={`ellipsis-${index}`}
+                    className="w-8 h-8 flex items-center justify-center text-gray-500"
+                  >
                     ...
                   </span>
                 ) : (
@@ -325,7 +343,7 @@ export function Subscribe() {
                   >
                     {page}
                   </button>
-                )
+                ),
               )}
 
               {/* Next */}

@@ -96,7 +96,7 @@ export function HomePage() {
 
           // Fetch regular posts for trendy topics
           const postsRes = await fetch(
-            `/api/posts/paginated?countryId=${country.id}&limit=5&dateFormat=short`,
+            `/api/posts/paginated?countryId=${country.id}&limit=10&dateFormat=short`,
           )
           const postsData = await postsRes.json()
 

@@ -130,61 +130,67 @@ export function AboutUs({ data: _data }: { data: AboutUsData }) {
         </nav>
 
         {/* Page Title */}
-        <h1 className="text-2xl font-bold text-gray-900 mb-4 border-b border-[#6D4AF9] pb-2">About Us</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-4 border-b border-[#6D4AF9] pb-2">
+          About Us
+        </h1>
 
         {/* Intro Text */}
-        <p className="text-gray-700 mb-6 text-[15px]">
-          At AskGeopolitics, we believe the world makes more sense when the right questions are
-          asked.
+        <p className="text-gray-700 mb-4 text-[15px]">
+          AskGeopolitics simplifies politics. We turn major political events into fun, clear
+          questions and quick polls—so you can see the facts fast. Smart, simple, and made for
+          people who want the world explained in seconds.
         </p>
 
-        {/* Main Description */}
-        <div className="space-y-4 text-gray-700 mb-6 text-[15px]">
-          <p>
-            <strong className="text-gray-900">AskGeopolitics</strong> is the{' '}
-            <span className="underline decoration-1 underline-offset-2">
-              quick guide to understanding today&apos;s most important political and geopolitical
-              events in 10 seconds.
-            </span>{' '}
-            We break major news into{' '}
-            <span className="underline decoration-1 underline-offset-2">
-              clear, simple question-and-answer explainers
-            </span>{' '}
-            that help readers grasp what matters in seconds.
+        {/* Site Managers */}
+        <p className="text-gray-700 mb-4 text-[15px]">
+          Alongside Q&A explainers,<u> we also turn key stories into simple voting polls</u> where
+          readers can instantly agree, disagree, or share their stance. This allows our audience to
+          engage with important issues in a fast, structured, and meaningful way.
+        </p>
+        <p className="text-gray-700 mb-4 text-[15px]">
+          Founded by{' '}
+          <b className="text-root">
+            geopolitical enthusiasts and technologists Valentine and Christine,
+          </b>
+          <br></br>
+          <b>AskGeopolitics</b> uses custom LLM tools to extract essential questions and answers
+          from trusted sources. This supports our mission to deliver news that is{' '}
+          <span className="text-root">fast, structured, and easy to understand.</span>
+        </p>
+        <p className="text-gray-700 mb-4 text-[15px]">
+          We are a conservative-leaning news website, but our explainers aim to remain factual,
+          neutral, and free of personal opinion.
+        </p>
+        {/* Our Goal Section */}
+        <div className="mb-6">
+          <p className="font-semibold  mb-2 text-lg">Our Goal:</p>
+          <p >
+            Deliver the most important political news in a format people can understand in under 10
+            seconds.
           </p>
+        </div>
 
-          <p>
-            Alongside Q&A explainers,{' '}
-            <span className="underline decoration-1 underline-offset-2">
-              we also turn key stories into simple voting polls
-            </span>{' '}
-            where readers can instantly agree, disagree, or share their stance. This allows our
-            audience to engage with important issues in a fast, structured, and meaningful way.
-          </p>
-
-          <p>
-            Founded by{' '}
-            <span className="text-indigo-600 underline decoration-1 underline-offset-2">
-              geopolitical enthusiasts and technologists Valentine and Christine
-            </span>
-            , <strong className="text-gray-900">AskGeopolitics</strong> uses custom LLM tools to
-            extract essential questions and answers from trusted sources. This supports our mission
-            to deliver news that is{' '}
-            <span className="underline decoration-1 underline-offset-2">
-              fast, structured, and easy to understand.
-            </span>
-          </p>
-
-          <p>
-            We are a conservative-leaning news website, but our explainers aim to remain factual,
-            neutral, and free of personal opinion.
-          </p>
-
-          <div className="mt-4">
-            <p className="font-semibold text-gray-900">Our Goal:</p>
+        {/* Disclaimer Box */}
+        <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-6">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="w-5 h-5 text-indigo-600" />
+            <h3 className="font-semibold text-indigo-600">Disclaimer</h3>
+          </div>
+          <div className="space-y-3 text-sm text-gray-700">
             <p>
-              Deliver the most important political news in a format people can understand in under
-              10 seconds.
+              <strong className="text-gray-900">AskGeopolitics</strong> is intended to educate and
+              inform, not provoke political or social conflict. We are not responsible for actions
+              taken by readers.
+            </p>
+            <p>
+              For corrections, contact{' '}
+              <a href="mailto:editor@askgeopolitics.com" className="text-gray-900">
+                editor@askgeopolitics.com
+              </a>{' '}
+              and we will fix any verified factual errors promptly.
+            </p>
+            <p className="font-medium text-gray-900">
+              AskGeopolitics is owned by Keka Marketing Media LLC.
             </p>
           </div>
         </div>
@@ -202,34 +208,21 @@ export function AboutUs({ data: _data }: { data: AboutUsData }) {
           <div className="border border-indigo-300 rounded-md p-4 flex items-center justify-between gap-4 relative">
             <p className="text-gray-700 text-sm">
               Have a tip or story idea? Email us. Or to keep it anonymous,{' '}
-              <span className="underline cursor-pointer">click here.</span>
+              <Link href="#" className="underline">
+                click here.
+              </Link>
             </p>
 
-            <button className="p-2 border border-gray-200 rounded-lg hover:bg-gray-100 transition">
-              <Mail className="w-5 h-5 text-gray-500" />
-            </button>
-          </div>
-        </div>
-
-        {/* Disclaimer Box */}
-        <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-8">
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-5 h-5 text-indigo-600" />
-            <h3 className="font-semibold text-gray-900">Disclaimer</h3>
-          </div>
-          <div className="space-y-3 text-sm text-gray-700">
-            <p>
-              AskGeopolitics is intended to educate and inform, not provoke political or social
-              conflict. We are not responsible for actions taken by readers.
-            </p>
-            <p>
-              For corrections, contact{' '}
-              <a href="mailto:editor@askgeopolitics.com" className="text-indigo-600 underline">
-                editor@askgeopolitics.com
-              </a>{' '}
-              and we will fix any factual errors promptly.
-            </p>
-            <p>AskGeopolitics is owned by Keka Marketing Media LLC.</p>
+            {/* Illustration */}
+            <div className="flex-shrink-0">
+              <Image
+                src="/images/tips.png"
+                alt="Tips illustration"
+                width={80}
+                height={50}
+                className="object-contain"
+              />
+            </div>
           </div>
         </div>
 
@@ -257,33 +250,43 @@ export function AboutUs({ data: _data }: { data: AboutUsData }) {
                   const imageUrl = post.heroImage?.url
 
                   return (
-                    <Link
-                      key={post.id}
-                      href={countrySlug ? `/${countrySlug}/${post.slug}` : `/${post.slug}`}
-                      className={`flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors ${
-                        index > 0 ? 'border-t border-gray-200' : ''
-                      }`}
-                    >
-                      <span className="text-indigo-600 font-medium text-sm whitespace-nowrap min-w-[50px]">
-                        {post.publishedAt}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-gray-900 text-sm line-clamp-2">{post.title}</p>
-                        {post.source && (
-                          <p className="text-xs text-gray-500 mt-1">From {post.source}</p>
-                        )}
-                      </div>
-                      {imageUrl && (
-                        <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
-                          <Image
-                            src={imageUrl}
-                            alt={post.heroImage?.alt || post.title}
-                            fill
-                            className="object-cover"
-                          />
+                    <div key={post.id} className={index > 0 ? 'border-t border-gray-200 py-1' : ''}>
+                      <Link
+                        href={`/${countrySlug}/${post.slug}`}
+                        className="block hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="px-3 sm:px-6 py-1">
+                          <div className="flex items-center justify-between gap-2 sm:gap-4">
+                            <div className="flex gap-2 sm:gap-4 items-start flex-1 min-w-0">
+                              <span className="text-indigo-600  text-sm sm:text-sm shrink-0 pt-0.5">
+                                {post.publishedAt}
+                              </span>
+                              <div className="flex-1 min-w-0">
+                                <h3 className="text-gray-900 font-medium text-base sm:text-base leading-snug truncate">
+                                  {post.title}
+                                </h3>
+                                {post.source && (
+                                  <p className="text-sm text-gray-500 mt-1">From {post.source}</p>
+                                )}
+                              </div>
+                            </div>
+                            <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 shrink-0" />
+                            {/* {imageUrl ? (
+                                  <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                                    <Image
+                                      src={imageUrl}
+                                      alt={post.heroImage?.alt || post.title}
+                                      fill
+                                      className="object-cover"
+                                    />
+                                  </div>
+                                ) : (
+                                  <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 shrink-0" />
+                                )} */}
+                          </div>
                         </div>
-                      )}
-                    </Link>
+                      </Link>
+                    </div>
                   )
                 })}
               </div>
@@ -354,109 +357,6 @@ export function AboutUs({ data: _data }: { data: AboutUsData }) {
               </button>
             </div>
           )}
-        </div>
-
-        {/* Masthead Section */}
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8">Masthead</h2>
-
-          <div className="space-y-6">
-            {/* Strategist & Business Manager */}
-            <div>
-              <p className="text-gray-700">
-                <span className="font-medium">Strategist & Business Manager</span> –{' '}
-                <span className="text-indigo-600">Valentine Sunday</span>
-              </p>
-              <p className="text-sm text-gray-600 mt-1">
-                Oversees strategy, content direction, and growth; passionate about politics and
-                delivering clear information to readers.
-              </p>
-            </div>
-
-            {/* Technical Manager */}
-            <div>
-              <p className="text-gray-700">
-                <span className="font-medium">Technical Manager</span> –{' '}
-                <span className="text-indigo-600">Christine Ingabire</span>
-              </p>
-              <p className="text-sm text-gray-600 mt-1">
-                Leads platform development and creates the tools that power AskGeopolitics.
-              </p>
-            </div>
-
-            {/* Editor-in-Chief */}
-            <div>
-              <p className="text-gray-700">
-                <span className="font-medium">Editor-in-Chief</span> – Roman Vitalik{' '}
-                <a href="mailto:Roman@AskGeopolitics.com" className="text-indigo-600">
-                  (Roman@AskGeopolitics.com)
-                </a>
-              </p>
-              <p className="text-sm text-gray-600 mt-1">
-                Ensures accuracy, clarity, and editorial standards across all published content.
-              </p>
-            </div>
-
-            {/* Researcher */}
-            <div>
-              <p className="text-gray-700">
-                <span className="font-medium">Researcher</span> – Rachel Vitalik{' '}
-                <a href="mailto:rachel@themarysue.com" className="text-indigo-600">
-                  (rachel@themarysue.com)
-                </a>
-              </p>
-              <p className="text-sm text-gray-600 mt-1">
-                Conducts research, verifies sources, and supports content preparation.
-              </p>
-            </div>
-
-            {/* Publisher 1 */}
-            <div>
-              <p className="text-gray-700">
-                <span className="font-medium">Publisher</span> –{' '}
-                <span className="text-indigo-600">Fatima S.</span>
-              </p>
-              <p className="text-sm text-gray-600 mt-1">
-                Manages publishing workflows and oversees the release of new content
-              </p>
-            </div>
-
-            {/* Publisher 2 */}
-            <div>
-              <p className="text-gray-700">
-                <span className="font-medium">Publisher</span> – Merron Woodluck{' '}
-                <a href="mailto:rachel@themarysue.com" className="text-indigo-600">
-                  (rachel@themarysue.com)
-                </a>
-              </p>
-              <p className="text-sm text-gray-600 mt-1">
-                Coordinates content distribution and maintains publishing consistency.
-              </p>
-            </div>
-
-            {/* Social Media Manager */}
-            <div>
-              <p className="text-gray-700">
-                <span className="font-medium">Social Media Manager</span> –{' '}
-                <span className="text-indigo-600">Tapiwanshe Sivara</span>
-              </p>
-              <p className="text-sm text-gray-600 mt-1">
-                Creates and manages social media content to engage and grow our audience.
-              </p>
-            </div>
-
-            {/* Site Design */}
-            <div>
-              <p className="text-gray-700">
-                <span className="font-medium">Site Design</span> –{' '}
-                <span className="text-indigo-600">Christine Ingabire</span>
-              </p>
-              <p className="text-sm text-gray-600 mt-1">
-                Responsible for the website&apos;s visual design, user experience, and interface
-                development.
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </div>
