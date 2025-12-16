@@ -63,7 +63,14 @@ export async function GET(req: NextRequest) {
       percentage: totalVotes > 0 ? Math.round(((opt.votes || 0) / totalVotes) * 100) : 0,
     }))
 
-    const colors = ['#6366f1', '#a3e635', '#f97316', '#ec4899', '#8b5cf6', '#14b8a6']
+    // Use green for Yes, red for No, then fallback colors (same as ShareCard)
+    const getColor = (text: string, index: number) => {
+      const lowerText = text.toLowerCase()
+      if (lowerText === 'yes') return '#22c55e'
+      if (lowerText === 'no') return '#ef4444'
+      const fallbackColors = ['#6366f1', '#f97316', '#ec4899', '#8b5cf6', '#14b8a6']
+      return fallbackColors[index % fallbackColors.length]
+    }
 
     // Donut chart dimensions
     const size = 340
@@ -80,7 +87,7 @@ export async function GET(req: NextRequest) {
       const dashOffset = circumference - (cumulativePercent / 100) * circumference
       cumulativePercent += percent
       return {
-        color: colors[index % colors.length],
+        color: getColor(option.text, index),
         dashArray: `${dashLength} ${circumference - dashLength}`,
         dashOffset: dashOffset,
         percent,
@@ -228,7 +235,7 @@ export async function GET(req: NextRequest) {
                         width: '28px',
                         height: '28px',
                         borderRadius: '6px',
-                        backgroundColor: colors[index % colors.length],
+                        backgroundColor: getColor(option.text, index),
                         flexShrink: 0,
                         display: 'flex',
                       }}

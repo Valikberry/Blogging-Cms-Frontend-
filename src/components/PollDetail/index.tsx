@@ -270,65 +270,33 @@ function ShareCard({
 
   return (
     <div
+      className="w-full max-w-[600px] px-4 py-4 sm:px-8 sm:py-6"
       style={{
-        width: '100%',
-        maxWidth: '600px',
-        padding: '24px 32px 28px 32px',
         backgroundColor: isCapturing ? 'white' : '#f2f1f6ff',
         fontFamily: 'Arial, sans-serif',
-        // borderRadius: '12px',
       }}
     >
       {/* Site URL */}
-      <p
-        style={{
-          fontSize: '12px',
-          fontWeight: '600',
-          color: '#6366f1',
-          textAlign: 'center' as const,
-          margin: '0 0 8px 0',
-          textTransform: 'uppercase' as const,
-          letterSpacing: '0.5px',
-        }}
-      >
+      <p className="text-[11px] sm:text-[12px] font-semibold text-indigo-500 text-center mb-2 uppercase tracking-wide">
         ASKGEOPOLITICS.COM
       </p>
 
       {/* Question */}
-      <h1
-        style={{
-          fontSize: '22px',
-          fontWeight: 'bold',
-          color: '#111827',
-          textAlign: 'center' as const,
-          margin: '0 0 24px 0',
-          lineHeight: '1.3',
-        }}
-      >
+      <h1 className="text-[16px] sm:text-[22px] font-bold text-gray-900 text-center mb-4 sm:mb-6 leading-tight">
         {question}
       </h1>
 
       {/* Chart and Legend Container */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '40px' }}>
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-10">
         {/* Donut Chart */}
         <div
-          style={{
-            position: 'relative',
-            width: `${size}px`,
-            height: `${size}px`,
-            flexShrink: 0,
-          }}
+          className="relative flex-shrink-0 w-[140px] h-[140px] sm:w-[180px] sm:h-[180px]"
         >
           {/* SVG Donut Ring */}
           <svg
-            width={size}
-            height={size}
-            style={{
-              transform: 'rotate(-90deg)',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-            }}
+            viewBox={`0 0 ${size} ${size}`}
+            className="w-full h-full absolute top-0 left-0"
+            style={{ transform: 'rotate(-90deg)' }}
           >
             {/* Background circle */}
             <circle
@@ -356,30 +324,25 @@ function ShareCard({
             ))}
           </svg>
 
-          {/* White border ring */}
+          {/* White border ring - percentages based on size */}
           <div
+            className="absolute rounded-full bg-white"
             style={{
-              position: 'absolute',
-              top: `${(size - centerSize - 8) / 2}px`,
-              left: `${(size - centerSize - 8) / 2}px`,
-              width: `${centerSize + 8}px`,
-              height: `${centerSize + 8}px`,
-              borderRadius: '50%',
-              backgroundColor: 'white',
+              top: `${((size - centerSize - 8) / 2 / size) * 100}%`,
+              left: `${((size - centerSize - 8) / 2 / size) * 100}%`,
+              width: `${((centerSize + 8) / size) * 100}%`,
+              height: `${((centerSize + 8) / size) * 100}%`,
             }}
           />
 
           {/* Center image container */}
           <div
+            className="absolute rounded-full bg-gray-100 overflow-hidden"
             style={{
-              position: 'absolute',
-              top: `${(size - centerSize) / 2}px`,
-              left: `${(size - centerSize) / 2}px`,
-              width: `${centerSize}px`,
-              height: `${centerSize}px`,
-              borderRadius: '50%',
-              backgroundColor: '#f3f4f6',
-              overflow: 'hidden',
+              top: `${((size - centerSize) / 2 / size) * 100}%`,
+              left: `${((size - centerSize) / 2 / size) * 100}%`,
+              width: `${(centerSize / size) * 100}%`,
+              height: `${(centerSize / size) * 100}%`,
             }}
           >
             {heroImageUrl && (
@@ -388,31 +351,24 @@ function ShareCard({
                 src={heroImageUrl}
                 alt=""
                 crossOrigin="anonymous"
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                className="w-full h-full object-cover"
               />
             )}
           </div>
         </div>
 
         {/* Legend */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div className="flex flex-col gap-2 sm:gap-4">
           {results.map((option, index) => (
-            <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div key={index} className="flex items-center gap-2 sm:gap-3">
               <div
-                style={{
-                  width: '20px',
-                  height: '20px',
-                  borderRadius: '4px',
-                  backgroundColor: getColor(option.text, index),
-                  flexShrink: 0,
-                }}
+                className="w-4 h-4 sm:w-5 sm:h-5 rounded flex-shrink-0"
+                style={{ backgroundColor: getColor(option.text, index) }}
               />
-              <span
-                style={{ fontSize: '16px', fontWeight: '500', color: '#374151', minWidth: '36px' }}
-              >
+              <span className="text-[13px] sm:text-[16px] font-medium text-gray-700 min-w-[30px] sm:min-w-[36px]">
                 {option.text}
               </span>
-              <span style={{ fontSize: '15px', color: '#6b7280' }}>
+              <span className="text-[12px] sm:text-[15px] text-gray-500">
                 {option.votes} votes {option.percentage}%
               </span>
             </div>
@@ -420,14 +376,7 @@ function ShareCard({
 
           {/* Voted Message - inside legend area */}
           {votedOption && (
-            <p
-              style={{
-                fontSize: '15px',
-                fontWeight: '500',
-                color: '#374151',
-                margin: '8px 0 0 0',
-              }}
-            >
+            <p className="text-[13px] sm:text-[15px] font-medium text-gray-700 mt-1 sm:mt-2">
               I voted {votedOption}. What about you?
             </p>
           )}
@@ -802,28 +751,28 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <FacebookIcon />
-                <span className="text-[14px] font-medium">Facebook</span>
+                <span className="text-[14px] font-medium hidden sm:inline">Facebook</span>
               </button>
               <button
                 onClick={() => captureAndShare('whatsapp')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
               >
                 <WhatsAppIcon />
-                <span className="text-[14px] font-medium">Whatsapp</span>
+                <span className="text-[14px] font-medium hidden sm:inline">Whatsapp</span>
               </button>
               <button
                 onClick={() => captureAndShare('twitter')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
               >
                 <XTwitterIcon />
-                <span className="text-[14px] font-medium">Twitter</span>
+                <span className="text-[14px] font-medium hidden sm:inline">Twitter</span>
               </button>
               <button
                 onClick={() => captureAndShare('linkedin')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors"
               >
                 <LinkedInIcon />
-                <span className="text-[14px] font-medium">Linkedin</span>
+                <span className="text-[14px] font-medium hidden sm:inline">Linkedin</span>
               </button>
             </div>
           </div>
@@ -1013,28 +962,28 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <FacebookIcon />
-                <span className="text-[14px] font-medium">Facebook</span>
+                <span className="text-[14px] font-medium hidden sm:inline">Facebook</span>
               </button>
               <button
                 onClick={() => captureAndShare('whatsapp')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
               >
                 <WhatsAppIcon />
-                <span className="text-[14px] font-medium">Whatsapp</span>
+                <span className="text-[14px] font-medium hidden sm:inline">Whatsapp</span>
               </button>
               <button
                 onClick={() => captureAndShare('twitter')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
               >
                 <XTwitterIcon />
-                <span className="text-[14px] font-medium">Twitter</span>
+                <span className="text-[14px] font-medium hidden sm:inline">Twitter</span>
               </button>
               <button
                 onClick={() => captureAndShare('linkedin')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors"
               >
                 <LinkedInIcon />
-                <span className="text-[14px] font-medium">Linkedin</span>
+                <span className="text-[14px] font-medium hidden sm:inline">Linkedin</span>
               </button>
             </div>
           </div>
