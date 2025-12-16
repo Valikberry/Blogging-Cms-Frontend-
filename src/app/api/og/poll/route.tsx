@@ -63,11 +63,11 @@ export async function GET(req: NextRequest) {
       percentage: totalVotes > 0 ? Math.round(((opt.votes || 0) / totalVotes) * 100) : 0,
     }))
 
-    // Use green for Yes, red for No, then fallback colors (same as ShareCard)
+    // Use lime green for Yes, red for No, then fallback colors (same as ShareCard)
     const getColor = (text: string, index: number) => {
       const lowerText = text.toLowerCase()
-      if (lowerText === 'yes') return '#22c55e'
-      if (lowerText === 'no') return '#ef4444'
+      if (lowerText === 'yes') return '#84cc16' // lime-500
+      if (lowerText === 'no') return '#ef4444' // red-500
       const fallbackColors = ['#6366f1', '#f97316', '#ec4899', '#8b5cf6', '#14b8a6']
       return fallbackColors[index % fallbackColors.length]
     }
@@ -103,42 +103,57 @@ export async function GET(req: NextRequest) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: '#e5e7eb',
-            padding: '20px',
+            backgroundColor: '#e8e8ed',
+            padding: '24px',
           }}
         >
           {/* Card container */}
           <div
             style={{
-              width: '1160px',
-              height: '590px',
+              width: '1152px',
+              height: '582px',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              backgroundColor: '#f3f4f6',
-              borderRadius: '24px',
-              padding: '40px 50px',
+              backgroundColor: 'white',
+              borderRadius: '20px',
+              padding: '32px 48px',
             }}
           >
+            {/* Site header */}
+            <div
+              style={{
+                fontSize: '16px',
+                fontWeight: 'bold',
+                color: '#6366f1',
+                textAlign: 'center',
+                marginBottom: '4px',
+                display: 'flex',
+                textTransform: 'uppercase',
+                letterSpacing: '1px',
+              }}
+            >
+              ASKGEOPOLITICS.COM
+            </div>
+
             {/* Question */}
             <div
               style={{
                 fontSize: '36px',
                 fontWeight: 'bold',
-                color: '#1f2937',
+                color: '#000000',
                 textAlign: 'center',
-                marginBottom: '30px',
-                maxWidth: '1000px',
-                lineHeight: 1.3,
+                marginBottom: '32px',
+                maxWidth: '900px',
+                lineHeight: 1.25,
                 display: 'flex',
-                letterSpacing: '1px',
               }}
             >
               {poll.question}
             </div>
 
             {/* Chart and Legend Container */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '80px', flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '64px', flex: 1 }}>
               {/* Donut Chart */}
               <div
                 style={{
@@ -163,7 +178,7 @@ export async function GET(req: NextRequest) {
                     cy={size / 2}
                     r={radius}
                     fill="none"
-                    stroke="#e5e7eb"
+                    stroke="#d1d5db"
                     stroke-width={strokeWidth}
                   />
                   {/* Colored segments - render in reverse order */}
@@ -186,10 +201,10 @@ export async function GET(req: NextRequest) {
                 <div
                   style={{
                     position: 'absolute',
-                    top: `${(size - centerSize - 16) / 2}px`,
-                    left: `${(size - centerSize - 16) / 2}px`,
-                    width: `${centerSize + 16}px`,
-                    height: `${centerSize + 16}px`,
+                    top: `${(size - centerSize - 20) / 2}px`,
+                    left: `${(size - centerSize - 20) / 2}px`,
+                    width: `${centerSize + 20}px`,
+                    height: `${centerSize + 20}px`,
                     borderRadius: '50%',
                     backgroundColor: 'white',
                     display: 'flex',
@@ -205,7 +220,7 @@ export async function GET(req: NextRequest) {
                     width: `${centerSize}px`,
                     height: `${centerSize}px`,
                     borderRadius: '50%',
-                    backgroundColor: '#f3f4f6',
+                    backgroundColor: '#9ca3af',
                     overflow: 'hidden',
                     display: 'flex',
                     alignItems: 'center',
@@ -221,46 +236,47 @@ export async function GET(req: NextRequest) {
                       style={{ objectFit: 'cover', width: '100%', height: '100%' }}
                     />
                   ) : (
-                    <div style={{ fontSize: '32px', color: '#6366f1', display: 'flex' }}>Poll</div>
+                    <div style={{ fontSize: '32px', color: 'white', display: 'flex' }}>Poll</div>
                   )}
                 </div>
               </div>
 
               {/* Legend */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 {results.map((option: any, index: number) => (
-                  <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                  <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <div
                       style={{
-                        width: '28px',
-                        height: '28px',
-                        borderRadius: '6px',
+                        width: '24px',
+                        height: '24px',
+                        borderRadius: '4px',
                         backgroundColor: getColor(option.text, index),
                         flexShrink: 0,
                         display: 'flex',
                       }}
                     />
-                    <div style={{ fontSize: '32px', color: '#1f2937', display: 'flex', minWidth: '80px' }}>
+                    <div style={{ fontSize: '28px', color: '#000000', display: 'flex', minWidth: '60px', fontWeight: '500' }}>
                       {option.text}
                     </div>
-                    <div style={{ fontSize: '32px', color: '#6b7280', display: 'flex' }}>
+                    <div style={{ fontSize: '26px', color: '#6b7280', display: 'flex' }}>
                       {option.votes} votes {option.percentage}%
                     </div>
                   </div>
                 ))}
-              </div>
-            </div>
 
-            {/* Footer message */}
-            <div
-              style={{
-                display: 'flex',
-                marginTop: '20px',
-                fontSize: '28px',
-                color: '#374151',
-              }}
-            >
-              I voted {results[0]?.text || 'YES'}. What about you?
+                {/* Voted message under legend */}
+                <div
+                  style={{
+                    display: 'flex',
+                    marginTop: '12px',
+                    fontSize: '26px',
+                    color: '#000000',
+                    fontWeight: '500',
+                  }}
+                >
+                  I voted {results[0]?.text || 'Yes'}. What about you?
+                </div>
+              </div>
             </div>
           </div>
         </div>

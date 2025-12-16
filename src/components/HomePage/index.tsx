@@ -299,9 +299,9 @@ export function HomePage() {
 
               {/* Trendy Topics */}
               <div>
-                <div className="inline-flex items-center gap-2 border-b-2 border-indigo-600 pb-1 mb-3">
+                <div className="inline-flex items-center gap-2 border-b-2 border-indigo-600 pb-1 mb-3 py-3">
                   <Mail className="w-6 h-6 text-indigo-600" />
-                  <span className="font-semibold text-xl sm:text-lg text-indigo-600">Trendy Topics</span>
+                             <span className="font-semibold text-lg sm:text-base text-indigo-600">Trendy Topics</span>
                 </div>
 
                 <div className="border border-gray-200 rounded-lg overflow-hidden">

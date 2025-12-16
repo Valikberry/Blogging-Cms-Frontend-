@@ -107,47 +107,58 @@ export default async function PollPage({ params: paramsPromise }: Args) {
     slug: poll.slug || '',
     description: poll.description || null,
     heroImage: heroImage ? { url: heroImage.url || null, alt: heroImage.alt || null } : null,
-    options: poll.options?.map((opt: any) => ({
-      text: opt.text,
-      votes: opt.votes || 0,
-    })) || [],
+    options:
+      poll.options?.map((opt: any) => ({
+        text: opt.text,
+        votes: opt.votes || 0,
+      })) || [],
     totalVotes: poll.totalVotes || 0,
     tags: poll.tags?.map((t: any) => t.tag).filter(Boolean) || [],
     status: poll.status || 'active',
-    country: pollCountry ? {
-      id: pollCountry.id,
-      name: pollCountry.name,
-      slug: pollCountry.slug || '',
-    } : null,
-    thingsToKnow: poll.thingsToKnow ? {
-      title: poll.thingsToKnow.title || null,
-      points: poll.thingsToKnow.points?.map((p: any) => ({ point: p.point })) || null,
-    } : null,
+    country: pollCountry
+      ? {
+          id: pollCountry.id,
+          name: pollCountry.name,
+          slug: pollCountry.slug || '',
+        }
+      : null,
+    thingsToKnow: poll.thingsToKnow
+      ? {
+          title: poll.thingsToKnow.title || null,
+          points: poll.thingsToKnow.points?.map((p: any) => ({ point: p.point })) || null,
+        }
+      : null,
     moreFacts: poll.moreFacts || null,
-    relatedPolls: (poll.relatedPolls?.map((rp: any) => {
-      if (typeof rp !== 'object') return null
-      const rpImage = typeof rp.heroImage === 'object' ? rp.heroImage : null
-      return {
-        id: rp.id,
-        question: rp.question,
-        slug: rp.slug || '',
-        description: rp.description || null,
-        heroImage: rpImage ? { url: rpImage.url || null, alt: rpImage.alt || null } : null,
-      }
-    }).filter((item): item is NonNullable<typeof item> => item !== null)) || [],
-    relatedPosts: (poll.relatedPosts?.map((rp: any) => {
-      if (typeof rp !== 'object') return null
-      const rpImage = typeof rp.heroImage === 'object' ? rp.heroImage : null
-      return {
-        id: rp.id,
-        title: rp.title,
-        slug: rp.slug || '',
-        excerpt: rp.excerpt || null,
-        publishedAt: rp.publishedAt || null,
-        source: rp.source || null,
-        heroImage: rpImage ? { url: rpImage.url || null, alt: rpImage.alt || null } : null,
-      }
-    }).filter((item): item is NonNullable<typeof item> => item !== null)) || [],
+    relatedPolls:
+      poll.relatedPolls
+        ?.map((rp: any) => {
+          if (typeof rp !== 'object') return null
+          const rpImage = typeof rp.heroImage === 'object' ? rp.heroImage : null
+          return {
+            id: rp.id,
+            question: rp.question,
+            slug: rp.slug || '',
+            description: rp.description || null,
+            heroImage: rpImage ? { url: rpImage.url || null, alt: rpImage.alt || null } : null,
+          }
+        })
+        .filter((item): item is NonNullable<typeof item> => item !== null) || [],
+    relatedPosts:
+      poll.relatedPosts
+        ?.map((rp: any) => {
+          if (typeof rp !== 'object') return null
+          const rpImage = typeof rp.heroImage === 'object' ? rp.heroImage : null
+          return {
+            id: rp.id,
+            title: rp.title,
+            slug: rp.slug || '',
+            excerpt: rp.excerpt || null,
+            publishedAt: rp.publishedAt || null,
+            source: rp.source || null,
+            heroImage: rpImage ? { url: rpImage.url || null, alt: rpImage.alt || null } : null,
+          }
+        })
+        .filter((item): item is NonNullable<typeof item> => item !== null) || [],
   }
 
   return <PollDetail poll={pollData} countrySlug={countrySlug} />
@@ -169,20 +180,20 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
   const ogImageUrl = `${siteUrl}/api/og/poll?id=${pollSlug}`
 
   return {
-    title: `${poll.question} | AskGeopolitics Poll`,
+    title: `${poll.question} `,
     description: poll.description || `Vote on: ${poll.question}`,
     alternates: {
       canonical: canonicalUrl,
     },
     openGraph: {
-      title: `${poll.question} | AskGeopolitics Poll`,
+      title: `${poll.question} `,
       description: poll.description || `Vote on: ${poll.question}`,
       url: canonicalUrl,
       images: [{ url: ogImageUrl, width: 1200, height: 630 }],
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${poll.question} | AskGeopolitics Poll`,
+      title: `${poll.question} `,
       description: poll.description || `Vote on: ${poll.question}`,
       images: [ogImageUrl],
     },

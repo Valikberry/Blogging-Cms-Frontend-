@@ -181,7 +181,7 @@ export function CountryPage({ country, initialTab = 'polls' }: CountryPageProps)
           Home
         </Link>
         <ChevronRight className="w-4 h-4" />
-        <span className="text-indigo-600">{country.name} Hub </span>
+        <span className="text-indigo-600">{country.name} </span>
       </nav>
       {/* Search Bar */}
       <div className="mt-6">

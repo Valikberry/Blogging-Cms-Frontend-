@@ -1,9 +1,9 @@
 'use client'
 
-import React, { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ChevronRight, CheckCircle, ListTodo } from 'lucide-react'
+import { ChevronRight, ListTodo } from 'lucide-react'
 
 // Social media icons
 const FacebookIcon = () => (
@@ -91,167 +91,32 @@ function getVisitorId(): string {
   return visitorId
 }
 
-// Star icon for Results header
-const StarIcon = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-  </svg>
-)
-
-// Donut Chart Component with gap at bottom
-function DonutChart({
-  results,
-}: {
-  results: Array<{ text: string; votes: number; percentage: number }>
-}) {
-  const colors = ['#6366f1', '#a3e635', '#f97316', '#ec4899', '#8b5cf6', '#14b8a6']
-  const size = 220
-  const strokeWidth = 45
-  const radius = (size - strokeWidth) / 2
-  const center = size / 2
-
-  // Gap at the bottom - 60 degrees (30 degrees on each side of bottom)
-  const gapDegrees = 60
-  const availableDegrees = 360 - gapDegrees
-  const startAngle = 90 + gapDegrees / 2 // Start from bottom-left
-
-  // Calculate arc path
-  const polarToCartesian = (cx: number, cy: number, r: number, angleDegrees: number) => {
-    const angleRadians = ((angleDegrees - 90) * Math.PI) / 180
-    return {
-      x: cx + r * Math.cos(angleRadians),
-      y: cy + r * Math.sin(angleRadians),
-    }
-  }
-
-  const describeArc = (cx: number, cy: number, r: number, startAngle: number, endAngle: number) => {
-    const start = polarToCartesian(cx, cy, r, endAngle)
-    const end = polarToCartesian(cx, cy, r, startAngle)
-    const largeArcFlag = endAngle - startAngle <= 180 ? 0 : 1
-    return `M ${start.x} ${start.y} A ${r} ${r} 0 ${largeArcFlag} 0 ${end.x} ${end.y}`
-  }
-
-  // Calculate segment angles based on percentages
-  let currentAngle = startAngle
-  const segments = results.map((option, index) => {
-    const segmentDegrees = (option.percentage / 100) * availableDegrees
-    const segment = {
-      startAngle: currentAngle,
-      endAngle: currentAngle + segmentDegrees,
-      percentage: option.percentage,
-      color: colors[index % colors.length],
-      midAngle: currentAngle + segmentDegrees / 2,
-    }
-    currentAngle += segmentDegrees
-    return segment
-  })
-
-  return (
-    <div className="relative" style={{ width: size + 80, height: size + 40 }}>
-      <svg width={size + 80} height={size + 40} className="overflow-visible">
-        <g transform={`translate(40, 20)`}>
-          {/* Background track */}
-          <path
-            d={describeArc(center, center, radius, startAngle, startAngle + availableDegrees)}
-            fill="none"
-            stroke="#e5e7eb"
-            strokeWidth={strokeWidth}
-            strokeLinecap="round"
-          />
-
-          {/* Segments */}
-          {segments.map((segment, index) => (
-            <path
-              key={index}
-              d={describeArc(center, center, radius, segment.startAngle, segment.endAngle - 1)}
-              fill="none"
-              stroke={segment.color}
-              strokeWidth={strokeWidth}
-              strokeLinecap="round"
-              className="transition-all duration-500"
-            />
-          ))}
-
-          {/* Percentage labels with dashed lines */}
-          {segments.map((segment, index) => {
-            const labelRadius = radius + strokeWidth / 2 + 25
-            const labelPos = polarToCartesian(center, center, labelRadius, segment.midAngle)
-            const lineStart = polarToCartesian(
-              center,
-              center,
-              radius + strokeWidth / 2 + 5,
-              segment.midAngle,
-            )
-            const lineEnd = polarToCartesian(
-              center,
-              center,
-              radius + strokeWidth / 2 + 18,
-              segment.midAngle,
-            )
-
-            // Determine if label should be on left or right
-            const isLeftSide = segment.midAngle > 180
-
-            return (
-              <g key={`label-${index}`}>
-                {/* Dashed line */}
-                <line
-                  x1={lineStart.x}
-                  y1={lineStart.y}
-                  x2={lineEnd.x}
-                  y2={lineEnd.y}
-                  stroke="#9ca3af"
-                  strokeWidth="1"
-                  strokeDasharray="3,2"
-                />
-                {/* Percentage text */}
-                <text
-                  x={labelPos.x}
-                  y={labelPos.y}
-                  textAnchor={isLeftSide ? 'end' : 'start'}
-                  dominantBaseline="middle"
-                  className="text-sm font-bold"
-                  fill={segment.color}
-                >
-                  {segment.percentage}%
-                </text>
-              </g>
-            )
-          })}
-        </g>
-      </svg>
-    </div>
-  )
-}
-
 // Share Card Component for social sharing
 function ShareCard({
   question,
   results,
   heroImageUrl,
   votedOption,
-  isCapturing = false,
 }: {
   question: string
   results: Array<{ text: string; votes: number; percentage: number }>
   heroImageUrl?: string | null
   votedOption?: string | null
-  isCapturing?: boolean
 }) {
-  // Use green for Yes, red for No, then fallback colors
+  // Use lime green for Yes, red for No, then fallback colors
   const getColor = (text: string, index: number) => {
     const lowerText = text.toLowerCase()
-    if (lowerText === 'yes') return '#22c55e'
-    if (lowerText === 'no') return '#ef4444'
+    if (lowerText === 'yes') return '#84cc16' // lime-500
+    if (lowerText === 'no') return '#ef4444' // red-500
     const fallbackColors = ['#6366f1', '#f97316', '#ec4899', '#8b5cf6', '#14b8a6']
     return fallbackColors[index % fallbackColors.length]
   }
 
   const size = 180
-  const strokeWidth = 28
+  const strokeWidth = 32
   const radius = (size - strokeWidth) / 2
   const circumference = 2 * Math.PI * radius
-  const centerSize = size - strokeWidth * 2 - 8
+  const centerSize = size - strokeWidth * 2 - 12
 
   // Calculate stroke dasharray for each segment
   let cumulativePercent = 0
@@ -269,29 +134,21 @@ function ShareCard({
   })
 
   return (
-    <div
-      className="w-full max-w-[600px] px-4 py-4 sm:px-8 sm:py-6"
-      style={{
-        backgroundColor: isCapturing ? 'white' : '#f2f1f6ff',
-        fontFamily: 'Arial, sans-serif',
-      }}
-    >
+    <div className="w-full max-w-[600px] px-4 py-5 sm:px-8 sm:py-8 bg-white rounded-xl">
       {/* Site URL */}
-      <p className="text-[11px] sm:text-[12px] font-semibold text-indigo-500 text-center mb-2 uppercase tracking-wide">
+      <p className="text-[11px] sm:text-[13px] font-bold text-indigo-500 text-center mb-1 sm:mb-2 uppercase tracking-wider">
         ASKGEOPOLITICS.COM
       </p>
 
       {/* Question */}
-      <h1 className="text-[16px] sm:text-[22px] font-bold text-gray-900 text-center mb-4 sm:mb-6 leading-tight">
+      <h1 className="text-[18px] sm:text-[24px] font-bold text-gray-900 text-center mb-5 sm:mb-8 leading-snug">
         {question}
       </h1>
 
       {/* Chart and Legend Container */}
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-10">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12">
         {/* Donut Chart */}
-        <div
-          className="relative flex-shrink-0 w-[140px] h-[140px] sm:w-[180px] sm:h-[180px]"
-        >
+        <div className="relative flex-shrink-0 w-[140px] h-[140px] sm:w-[180px] sm:h-[180px]">
           {/* SVG Donut Ring */}
           <svg
             viewBox={`0 0 ${size} ${size}`}
@@ -324,20 +181,20 @@ function ShareCard({
             ))}
           </svg>
 
-          {/* White border ring - percentages based on size */}
+          {/* White border ring */}
           <div
             className="absolute rounded-full bg-white"
             style={{
-              top: `${((size - centerSize - 8) / 2 / size) * 100}%`,
-              left: `${((size - centerSize - 8) / 2 / size) * 100}%`,
-              width: `${((centerSize + 8) / size) * 100}%`,
-              height: `${((centerSize + 8) / size) * 100}%`,
+              top: `${((size - centerSize - 12) / 2 / size) * 100}%`,
+              left: `${((size - centerSize - 12) / 2 / size) * 100}%`,
+              width: `${((centerSize + 12) / size) * 100}%`,
+              height: `${((centerSize + 12) / size) * 100}%`,
             }}
           />
 
           {/* Center image container */}
           <div
-            className="absolute rounded-full bg-gray-100 overflow-hidden"
+            className="absolute rounded-full bg-gray-200 overflow-hidden"
             style={{
               top: `${((size - centerSize) / 2 / size) * 100}%`,
               left: `${((size - centerSize) / 2 / size) * 100}%`,
@@ -358,17 +215,17 @@ function ShareCard({
         </div>
 
         {/* Legend */}
-        <div className="flex flex-col gap-2 sm:gap-4">
+        <div className="flex flex-col gap-3 sm:gap-4">
           {results.map((option, index) => (
-            <div key={index} className="flex items-center gap-2 sm:gap-3">
+            <div key={index} className="flex items-center gap-3 sm:gap-4">
               <div
-                className="w-4 h-4 sm:w-5 sm:h-5 rounded flex-shrink-0"
+                className="w-5 h-5 sm:w-6 sm:h-6 rounded flex-shrink-0"
                 style={{ backgroundColor: getColor(option.text, index) }}
               />
-              <span className="text-[13px] sm:text-[16px] font-medium text-gray-700 min-w-[30px] sm:min-w-[36px]">
+              <span className="text-[15px] sm:text-[18px] font-medium text-gray-800 min-w-[32px] sm:min-w-[40px]">
                 {option.text}
               </span>
-              <span className="text-[12px] sm:text-[15px] text-gray-500">
+              <span className="text-[14px] sm:text-[16px] text-gray-500">
                 {option.votes} votes {option.percentage}%
               </span>
             </div>
@@ -376,7 +233,7 @@ function ShareCard({
 
           {/* Voted Message - inside legend area */}
           {votedOption && (
-            <p className="text-[13px] sm:text-[15px] font-medium text-gray-700 mt-1 sm:mt-2">
+            <p className="text-[14px] sm:text-[16px] font-medium text-gray-700 mt-2 sm:mt-3">
               I voted {votedOption}. What about you?
             </p>
           )}
@@ -399,9 +256,6 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
   const [showResults, setShowResults] = useState(false)
   const [nextPollSlug, setNextPollSlug] = useState<string | null>(null)
   const [nextPollCountrySlug, setNextPollCountrySlug] = useState<string | null>(null)
-  const [isCapturing, setIsCapturing] = useState(false)
-  const resultsRef = useRef<HTMLDivElement>(null)
-  const shareCardRef = useRef<HTMLDivElement>(null)
 
   // Fetch next poll that user hasn't voted on
   const fetchNextPoll = useCallback(async () => {
@@ -524,95 +378,45 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
     }
   }
 
-  const captureAndShare = async (platform: string) => {
-    if (!shareCardRef.current) return
+  const handleShare = (platform: string) => {
+    // Get voted option text
+    const votedText = votedOptionIndex !== null ? results[votedOptionIndex]?.text : ''
+    const shareText = votedText
+      ? `I voted ${votedText}. What about you?`
+      : `${poll.question} - See the results!`
 
-    try {
-      // Set capturing state to change background to white
-      setIsCapturing(true)
+    const pageUrl = window.location.href
+    const encodedUrl = encodeURIComponent(pageUrl)
+    const encodedText = encodeURIComponent(shareText)
 
-      // Small delay to ensure state update and image is loaded
-      await new Promise((resolve) => setTimeout(resolve, 150))
+    // Check if mobile
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 
-      const html2canvas = (await import('html2canvas')).default
-      const canvas = await html2canvas(shareCardRef.current, {
-        backgroundColor: 'white',
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-      })
-
-      // Reset capturing state
-      setIsCapturing(false)
-
-      // Convert to blob for potential download/sharing
-      const imageDataUrl = canvas.toDataURL('image/png')
-      console.log('Share image generated:', imageDataUrl.substring(0, 100))
-
-      // Get voted option text
-      const votedText = votedOptionIndex !== null ? results[votedOptionIndex]?.text : ''
-      const shareText = votedText
-        ? `I voted ${votedText}. What about you?`
-        : `${poll.question} - See the results!`
-
-      const url = encodeURIComponent(window.location.href)
-      const text = encodeURIComponent(shareText)
-
-      // Handle different platforms
-      switch (platform) {
-        case 'download':
-          // Download the image
-          const link = document.createElement('a')
-          link.download = `poll-results-${poll.slug}.png`
-          link.href = imageDataUrl
-          link.click()
-          break
-        case 'facebook':
-          window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`, '_blank')
-          break
-        case 'whatsapp':
-          window.open(`https://wa.me/?text=${text}%20${url}`, '_blank')
-          break
-        case 'twitter':
-          window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank')
-          break
-        case 'linkedin':
-          window.open(
-            `https://www.linkedin.com/shareArticle?mini=true&url=${url}&title=${text}`,
-            '_blank',
-          )
-          break
-      }
-    } catch (error) {
-      console.error('Error capturing screenshot:', error)
-      // Reset capturing state on error
-      setIsCapturing(false)
-      // Fallback to regular share
-      const url = encodeURIComponent(window.location.href)
-      const text = encodeURIComponent(poll.question)
-
-      switch (platform) {
-        case 'facebook':
-          window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank')
-          break
-        case 'whatsapp':
-          window.open(`https://wa.me/?text=${text}%20${url}`, '_blank')
-          break
-        case 'twitter':
-          window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank')
-          break
-        case 'linkedin':
-          window.open(
-            `https://www.linkedin.com/shareArticle?mini=true&url=${url}&title=${text}`,
-            '_blank',
-          )
-          break
-      }
+    switch (platform) {
+      case 'facebook':
+        // Facebook app doesn't have a direct URL scheme for sharing, use web
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`, '_blank')
+        break
+      case 'whatsapp':
+        // WhatsApp - use whatsapp:// on mobile for better app opening
+        if (isMobile) {
+          window.location.href = `whatsapp://send?text=${encodedText}%20${encodedUrl}`
+        } else {
+          window.open(`https://web.whatsapp.com/send?text=${encodedText}%20${encodedUrl}`, '_blank')
+        }
+        break
+      case 'twitter':
+        // Twitter/X - use intent URL which works on both mobile and desktop
+        window.open(`https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedText}`, '_blank')
+        break
+      case 'linkedin':
+        window.open(
+          `https://www.linkedin.com/shareArticle?mini=true&url=${encodedUrl}&title=${encodedText}`,
+          '_blank',
+        )
+        break
     }
   }
-
-  const colors = ['#6366f1', '#a3e635', '#f97316', '#ec4899', '#8b5cf6', '#14b8a6']
 
   if (isLoading) {
     return (
@@ -747,28 +551,28 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
             <h3 className="font-semibold text-gray-900 mb-3">Share Your Vote</h3>
             <div className="flex gap-3">
               <button
-                onClick={() => captureAndShare('facebook')}
+                onClick={() => handleShare('facebook')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <FacebookIcon />
                 <span className="text-[14px] font-medium hidden sm:inline">Facebook</span>
               </button>
               <button
-                onClick={() => captureAndShare('whatsapp')}
+                onClick={() => handleShare('whatsapp')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
               >
                 <WhatsAppIcon />
                 <span className="text-[14px] font-medium hidden sm:inline">Whatsapp</span>
               </button>
               <button
-                onClick={() => captureAndShare('twitter')}
+                onClick={() => handleShare('twitter')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
               >
                 <XTwitterIcon />
                 <span className="text-[14px] font-medium hidden sm:inline">Twitter</span>
               </button>
               <button
-                onClick={() => captureAndShare('linkedin')}
+                onClick={() => handleShare('linkedin')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors"
               >
                 <LinkedInIcon />
@@ -958,28 +762,28 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
             </button> */}
             <div className="flex gap-3">
               <button
-                onClick={() => captureAndShare('facebook')}
+                onClick={() => handleShare('facebook')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <FacebookIcon />
                 <span className="text-[14px] font-medium hidden sm:inline">Facebook</span>
               </button>
               <button
-                onClick={() => captureAndShare('whatsapp')}
+                onClick={() => handleShare('whatsapp')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
               >
                 <WhatsAppIcon />
                 <span className="text-[14px] font-medium hidden sm:inline">Whatsapp</span>
               </button>
               <button
-                onClick={() => captureAndShare('twitter')}
+                onClick={() => handleShare('twitter')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
               >
                 <XTwitterIcon />
                 <span className="text-[14px] font-medium hidden sm:inline">Twitter</span>
               </button>
               <button
-                onClick={() => captureAndShare('linkedin')}
+                onClick={() => handleShare('linkedin')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors"
               >
                 <LinkedInIcon />
@@ -1108,28 +912,6 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
         </>
       )}
 
-      {/* Hidden Share Card for capturing */}
-      {hasVoted && results.length > 0 && (
-        <div
-          style={{
-            position: 'fixed',
-            left: 0,
-            top: 0,
-            zIndex: -1,
-            opacity: 0,
-            pointerEvents: 'none',
-          }}
-        >
-          <div ref={shareCardRef}>
-            <ShareCard
-              question={poll.question}
-              results={results}
-              heroImageUrl={poll.heroImage?.url}
-              votedOption={votedOptionIndex !== null ? results[votedOptionIndex]?.text : null}
-            />
-          </div>
-        </div>
-      )}
     </div>
   )
 }
