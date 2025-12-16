@@ -158,6 +158,43 @@ export const Polls: CollectionConfig = {
       },
     },
     {
+      name: 'thingsToKnow',
+      type: 'group',
+      admin: {
+        description: 'Key facts shown in green box after voting',
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          admin: {
+            description: 'Title for the section (e.g., "5 Things To Know About Donald Trump")',
+          },
+        },
+        {
+          name: 'points',
+          type: 'array',
+          admin: {
+            description: 'Bullet points to display',
+          },
+          fields: [
+            {
+              name: 'point',
+              type: 'text',
+              required: true,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'moreFacts',
+      type: 'textarea',
+      admin: {
+        description: 'Additional facts shown in yellow box after voting',
+      },
+    },
+    {
       name: 'relatedPolls',
       type: 'relationship',
       relationTo: 'polls' as const,

@@ -104,7 +104,13 @@
 
 html {
   opacity: 1;
-  font-size: 90%; /* Makes all text appear at 90% of default size */
+  font-size: 100%; /* Larger base font size on mobile */
+}
+
+@media (min-width: 640px) {
+  html {
+    font-size: 90%; /* Makes all text appear at 90% of default size on larger screens */
+  }
 }
 
 html[data-theme='dark'] {

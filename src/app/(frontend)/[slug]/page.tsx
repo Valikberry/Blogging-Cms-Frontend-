@@ -14,7 +14,7 @@ import { getServerSideURL } from '@/utilities/getURL'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 import { HomeTemplate } from '@/components/HomeContent'
-import { CountryPage } from '@/components/CountryPage'
+import { redirect } from 'next/navigation'
 
 // Revalidate pages every 60 seconds
 export const revalidate = 60
@@ -145,15 +145,10 @@ export default async function Page({ params: paramsPromise }: Args) {
   // Check if it's a country
   const country = await queryCountryBySlug(slug)
 
-  // If it's a country, show the new Country page
+  // If it's a country, redirect to /[slug]/polls
   if (country) {
-    const countryData = {
-      id: country.id,
-      name: country.name,
-      slug: country.slug,
-      flag: typeof country.flag === 'object' && country.flag ? { url: country.flag.url } : null,
-    }
-    return <CountryPage country={countryData} />
+    const normalizedSlug = country.slug?.toLowerCase().replace(/\s+/g, '') || slug
+    redirect(`/${normalizedSlug}/polls`)
   }
 
   // Otherwise, treat it as a regular page

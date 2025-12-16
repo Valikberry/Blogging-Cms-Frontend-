@@ -142,32 +142,22 @@ export function AboutUs({ data: _data }: { data: AboutUsData }) {
         </p>
 
         {/* Site Managers */}
-        <p className="text-gray-700 mb-4 text-[15px]">
-          Alongside Q&A explainers,<u> we also turn key stories into simple voting polls</u> where
-          readers can instantly agree, disagree, or share their stance. This allows our audience to
-          engage with important issues in a fast, structured, and meaningful way.
+        <p className="mb-4 text-[15px]">
+          Site is managed by <u className="text-root">Valentine & Christine.</u>
         </p>
-        <p className="text-gray-700 mb-4 text-[15px]">
-          Founded by{' '}
-          <b className="text-root">
-            geopolitical enthusiasts and technologists Valentine and Christine,
-          </b>
-          <br></br>
-          <b>AskGeopolitics</b> uses custom LLM tools to extract essential questions and answers
-          from trusted sources. This supports our mission to deliver news that is{' '}
-          <span className="text-root">fast, structured, and easy to understand.</span>
-        </p>
-        <p className="text-gray-700 mb-4 text-[15px]">
-          We are a conservative-leaning news website, but our explainers aim to remain factual,
-          neutral, and free of personal opinion.
-        </p>
+
         {/* Our Goal Section */}
         <div className="mb-6">
-          <p className="font-semibold  mb-2 text-lg">Our Goal:</p>
-          <p >
-            Deliver the most important political news in a format people can understand in under 10
-            seconds.
-          </p>
+          <p className="font-semibold  text-root mb-2 text-lg">Our Goal:</p>
+          <ul className="list-disc list-inside space-y-2">
+            <li>
+              Deliver the most important political news in a format people can understand in under 10
+              seconds.
+            </li>
+            <li>
+              Have a tip or story idea? Email us at editor@askgeopolitics.com. To submit anonymously, click here.
+            </li>
+          </ul>
         </div>
 
         {/* Disclaimer Box */}
@@ -218,8 +208,8 @@ export function AboutUs({ data: _data }: { data: AboutUsData }) {
               <Image
                 src="/images/tips.png"
                 alt="Tips illustration"
-                width={80}
-                height={50}
+                width={44}
+                height={20}
                 className="object-contain"
               />
             </div>
@@ -228,9 +218,9 @@ export function AboutUs({ data: _data }: { data: AboutUsData }) {
 
         {/* Trendy Topics Section */}
         <div className="mb-8">
-          <div className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg ">
-            <Mail className="w-4 h-4" />
-            <span className="font-medium">Trendy Topics</span>
+          <div className="inline-flex items-center gap-2 border-b-2 border-indigo-600 pb-1 mb-3">
+            <Mail className="w-6 h-6 text-indigo-600" />
+            <span className="font-semibold text-xl sm:text-lg text-indigo-600">Trendy Topics</span>
           </div>
 
           <div className="border border-gray-200 rounded-lg overflow-hidden">

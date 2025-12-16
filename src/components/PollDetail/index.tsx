@@ -51,6 +51,11 @@ interface Poll {
     name: string
     slug: string
   } | null
+  thingsToKnow?: {
+    title?: string | null
+    points?: Array<{ point: string }> | null
+  } | null
+  moreFacts?: string | null
   relatedPolls?: Array<{
     id: string
     question: string
@@ -59,6 +64,7 @@ interface Poll {
     heroImage?: { url?: string | null; alt?: string | null } | null
   }>
   relatedPosts?: Array<{
+    source: any
     id: string
     title: string
     slug: string
@@ -142,11 +148,7 @@ function DonutChart({
 
   return (
     <div className="relative" style={{ width: size + 80, height: size + 40 }}>
-      <svg
-        width={size + 80}
-        height={size + 40}
-        className="overflow-visible"
-      >
+      <svg width={size + 80} height={size + 40} className="overflow-visible">
         <g transform={`translate(40, 20)`}>
           {/* Background track */}
           <path
@@ -174,8 +176,18 @@ function DonutChart({
           {segments.map((segment, index) => {
             const labelRadius = radius + strokeWidth / 2 + 25
             const labelPos = polarToCartesian(center, center, labelRadius, segment.midAngle)
-            const lineStart = polarToCartesian(center, center, radius + strokeWidth / 2 + 5, segment.midAngle)
-            const lineEnd = polarToCartesian(center, center, radius + strokeWidth / 2 + 18, segment.midAngle)
+            const lineStart = polarToCartesian(
+              center,
+              center,
+              radius + strokeWidth / 2 + 5,
+              segment.midAngle,
+            )
+            const lineEnd = polarToCartesian(
+              center,
+              center,
+              radius + strokeWidth / 2 + 18,
+              segment.midAngle,
+            )
 
             // Determine if label should be on left or right
             const isLeftSide = segment.midAngle > 180
@@ -218,15 +230,25 @@ function ShareCard({
   results,
   heroImageUrl,
   votedOption,
+  isCapturing = false,
 }: {
   question: string
   results: Array<{ text: string; votes: number; percentage: number }>
   heroImageUrl?: string | null
   votedOption?: string | null
+  isCapturing?: boolean
 }) {
-  const colors = ['#6366f1', '#a3e635', '#f97316', '#ec4899', '#8b5cf6', '#14b8a6']
-  const size = 200
-  const strokeWidth = 32
+  // Use green for Yes, red for No, then fallback colors
+  const getColor = (text: string, index: number) => {
+    const lowerText = text.toLowerCase()
+    if (lowerText === 'yes') return '#22c55e'
+    if (lowerText === 'no') return '#ef4444'
+    const fallbackColors = ['#6366f1', '#f97316', '#ec4899', '#8b5cf6', '#14b8a6']
+    return fallbackColors[index % fallbackColors.length]
+  }
+
+  const size = 180
+  const strokeWidth = 28
   const radius = (size - strokeWidth) / 2
   const circumference = 2 * Math.PI * radius
   const centerSize = size - strokeWidth * 2 - 8
@@ -239,7 +261,7 @@ function ShareCard({
     const dashOffset = circumference - (cumulativePercent / 100) * circumference
     cumulativePercent += percent
     return {
-      color: colors[index % colors.length],
+      color: getColor(option.text, index),
       dashArray: `${dashLength} ${circumference - dashLength}`,
       dashOffset: dashOffset,
       percent,
@@ -249,34 +271,52 @@ function ShareCard({
   return (
     <div
       style={{
-        width: '600px',
-        padding: '32px',
-        backgroundColor: '#f3f4f6',
+        width: '100%',
+        maxWidth: '600px',
+        padding: '24px 32px 28px 32px',
+        backgroundColor: isCapturing ? 'white' : '#f2f1f6ff',
         fontFamily: 'Arial, sans-serif',
+        // borderRadius: '12px',
       }}
     >
+      {/* Site URL */}
+      <p
+        style={{
+          fontSize: '12px',
+          fontWeight: '600',
+          color: '#6366f1',
+          textAlign: 'center' as const,
+          margin: '0 0 8px 0',
+          textTransform: 'uppercase' as const,
+          letterSpacing: '0.5px',
+        }}
+      >
+        ASKGEOPOLITICS.COM
+      </p>
+
       {/* Question */}
       <h1
         style={{
-          fontSize: '20px',
+          fontSize: '22px',
           fontWeight: 'bold',
           color: '#111827',
           textAlign: 'center' as const,
           margin: '0 0 24px 0',
-          wordSpacing: '4px',
+          lineHeight: '1.3',
         }}
       >
         {question}
       </h1>
 
       {/* Chart and Legend Container */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '32px' }}>
-        {/* Donut Chart - using div-based approach for better html2canvas compatibility */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '40px' }}>
+        {/* Donut Chart */}
         <div
           style={{
             position: 'relative',
             width: `${size}px`,
             height: `${size}px`,
+            flexShrink: 0,
           }}
         >
           {/* SVG Donut Ring */}
@@ -355,42 +395,44 @@ function ShareCard({
         </div>
 
         {/* Legend */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {results.map((option, index) => (
             <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <div
                 style={{
-                  width: '16px',
-                  height: '16px',
+                  width: '20px',
+                  height: '20px',
                   borderRadius: '4px',
-                  backgroundColor: colors[index % colors.length],
+                  backgroundColor: getColor(option.text, index),
                   flexShrink: 0,
                 }}
               />
-              <span style={{ fontSize: '16px', color: '#374151', minWidth: '40px' }}>
+              <span
+                style={{ fontSize: '16px', fontWeight: '500', color: '#374151', minWidth: '36px' }}
+              >
                 {option.text}
               </span>
-              <span style={{ fontSize: '16px', color: '#6b7280' }}>
-                {option.votes}&nbsp;votes&nbsp;{option.percentage}%
+              <span style={{ fontSize: '15px', color: '#6b7280' }}>
+                {option.votes} votes {option.percentage}%
               </span>
             </div>
           ))}
+
+          {/* Voted Message - inside legend area */}
+          {votedOption && (
+            <p
+              style={{
+                fontSize: '15px',
+                fontWeight: '500',
+                color: '#374151',
+                margin: '8px 0 0 0',
+              }}
+            >
+              I voted {votedOption}. What about you?
+            </p>
+          )}
         </div>
       </div>
-
-      {/* Voted Message */}
-      {votedOption && (
-        <p
-          style={{
-            fontSize: '16px',
-            color: '#374151',
-            textAlign: 'center' as const,
-            margin: '24px 0 0 0',
-          }}
-        >
-          I&nbsp;voted&nbsp;{votedOption}.&nbsp;What&nbsp;about&nbsp;you?
-        </p>
-      )}
     </div>
   )
 }
@@ -399,15 +441,16 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
   const [hasVoted, setHasVoted] = useState(false)
   const [votedOptionIndex, setVotedOptionIndex] = useState<number | null>(null)
   const [selectedOption, setSelectedOption] = useState<number | null>(null)
-  const [results, setResults] = useState<Array<{ text: string; votes: number; percentage: number }>>(
-    [],
-  )
+  const [results, setResults] = useState<
+    Array<{ text: string; votes: number; percentage: number }>
+  >([])
   const [totalVotes, setTotalVotes] = useState(poll.totalVotes)
   const [isLoading, setIsLoading] = useState(true)
   const [isVoting, setIsVoting] = useState(false)
   const [showResults, setShowResults] = useState(false)
   const [nextPollSlug, setNextPollSlug] = useState<string | null>(null)
   const [nextPollCountrySlug, setNextPollCountrySlug] = useState<string | null>(null)
+  const [isCapturing, setIsCapturing] = useState(false)
   const resultsRef = useRef<HTMLDivElement>(null)
   const shareCardRef = useRef<HTMLDivElement>(null)
 
@@ -536,17 +579,23 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
     if (!shareCardRef.current) return
 
     try {
-      // Small delay to ensure image is loaded
-      await new Promise((resolve) => setTimeout(resolve, 100))
+      // Set capturing state to change background to white
+      setIsCapturing(true)
+
+      // Small delay to ensure state update and image is loaded
+      await new Promise((resolve) => setTimeout(resolve, 150))
 
       const html2canvas = (await import('html2canvas')).default
       const canvas = await html2canvas(shareCardRef.current, {
-        backgroundColor: '#f3f4f6',
+        backgroundColor: 'white',
         scale: 2,
         useCORS: true,
         allowTaint: true,
         logging: false,
       })
+
+      // Reset capturing state
+      setIsCapturing(false)
 
       // Convert to blob for potential download/sharing
       const imageDataUrl = canvas.toDataURL('image/png')
@@ -555,7 +604,7 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
       // Get voted option text
       const votedText = votedOptionIndex !== null ? results[votedOptionIndex]?.text : ''
       const shareText = votedText
-        ? `I voted ${votedText}. What about you? ${poll.question}`
+        ? `I voted ${votedText}. What about you?`
         : `${poll.question} - See the results!`
 
       const url = encodeURIComponent(window.location.href)
@@ -588,6 +637,8 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
       }
     } catch (error) {
       console.error('Error capturing screenshot:', error)
+      // Reset capturing state on error
+      setIsCapturing(false)
       // Fallback to regular share
       const url = encodeURIComponent(window.location.href)
       const text = encodeURIComponent(poll.question)
@@ -629,10 +680,10 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
         <Link href="/" className="hover:text-gray-700">
           Home
         </Link>
-        {/* <ChevronRight className="w-4 h-4" />
+        <ChevronRight className="w-4 h-4" />
         <Link href={`/${countrySlug}`} className="hover:text-gray-700">
           {countrySlug}
-        </Link> */}
+        </Link>
         <ChevronRight className="w-4 h-4" />
         <span className="text-indigo-600">Poll</span>
       </nav>
@@ -674,19 +725,54 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
       {/* Options - show only before voting */}
       {!hasVoted && (
         <div className="space-y-3 mb-4">
-          {poll.options.map((option, index) => (
-            <button
-              key={index}
-              onClick={() => setSelectedOption(index)}
-              className={`w-full p-4 text-left text-lg rounded-lg border-2 transition-all ${
-                selectedOption === index
-                  ? 'border-indigo-600 bg-indigo-50'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              <span className="font-medium text-lg">{option.text}</span>
-            </button>
-          ))}
+          {poll.options.map((option, index) => {
+            const isYes = option.text.toLowerCase() === 'yes'
+            const isNo = option.text.toLowerCase() === 'no'
+            const isSelected = selectedOption === index
+
+            let buttonClasses = 'w-full p-4 text-left text-lg rounded-lg transition-all '
+
+            if (isYes) {
+              buttonClasses += isSelected
+                ? 'bg-green-600 text-white'
+                : 'bg-green-500 text-white hover:bg-green-600'
+            } else if (isNo) {
+              buttonClasses += isSelected
+                ? 'bg-red-600 text-white'
+                : 'bg-red-500 text-white hover:bg-red-600'
+            } else {
+              buttonClasses += isSelected
+                ? 'border-2 border-indigo-600 bg-indigo-50'
+                : 'border-2 border-gray-200 hover:border-gray-300'
+            }
+
+            return (
+              <button
+                key={index}
+                onClick={() => setSelectedOption(index)}
+                className={buttonClasses}
+              >
+                <span className="font-medium text-lg flex items-center justify-between">
+                  {option.text}
+                  {isSelected && (
+                    <svg
+                      className="w-6 h-6 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  )}
+                </span>
+              </button>
+            )
+          })}
         </div>
       )}
 
@@ -698,7 +784,7 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
       {/* Share Card - show after voting but before showing results */}
       {hasVoted && !showResults && results.length > 0 && (
         <div className="mb-6">
-          <div className="bg-gray-100 rounded-xl overflow-hidden">
+          <div className="rounded-xl overflow-hidden">
             <ShareCard
               question={poll.question}
               results={results}
@@ -744,8 +830,6 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
         </div>
       )}
 
-     
-
       {/* Action Buttons */}
       {!hasVoted ? (
         <button
@@ -756,14 +840,35 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
           {isVoting ? 'Voting...' : 'Vote'}
         </button>
       ) : !showResults ? (
-        /* After voting, before showing results - show related polls and posts */
+        /* After voting, before showing results - show related content */
         <>
-          {/* Similar Polls */}
+          {/* 5 Things To Know Section - Green */}
+          {poll.thingsToKnow && poll.thingsToKnow.points && poll.thingsToKnow.points.length > 0 && (
+            <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-green-600">✨</span>
+                <h3 className="font-semibold text-green-700">
+                  {poll.thingsToKnow.title || '5 Things To Know'}
+                </h3>
+              </div>
+              <p className="text-gray-700 text-sm mb-3">{poll.description}</p>
+              <ul className="space-y-2">
+                {poll.thingsToKnow.points.map((item, index) => (
+                  <li key={index} className="flex items-start gap-2 text-sm text-gray-700">
+                    <span className="text-green-600 mt-0.5">•</span>
+                    <span>{item.point}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Similar Polls Section */}
           {poll.relatedPolls && poll.relatedPolls.length > 0 && (
             <div className="mb-6">
-              <div className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg mb-4">
-                <span>&#9733;</span>
-                <span className="font-medium text-[14px]">Similar Polls</span>
+              <div className="inline-flex items-center gap-2 border-b-2 border-indigo-600 pb-1 mb-4">
+                <ListTodo className="w-5 h-5 text-indigo-600" />
+                <span className="font-semibold text-indigo-600">Similar Polls</span>
               </div>
               <div className="overflow-x-auto scrollbar-hide -mx-1 px-1">
                 <div className="flex gap-3 pb-2">
@@ -789,7 +894,7 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
                       </div>
                       <div className="p-2">
                         <p className="text-gray-600 text-[13px] line-clamp-2">
-                          {relatedPoll.description || relatedPoll.question}
+                          {relatedPoll.question}
                         </p>
                       </div>
                     </Link>
@@ -799,43 +904,75 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
             </div>
           )}
 
-          {/* Similar Topics (Related Posts) */}
+          {/* More Facts About This Poll - Yellow */}
+          {poll.moreFacts && (
+            <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-yellow-600">✨</span>
+                <h3 className="font-semibold text-yellow-700">More Facts About This Poll</h3>
+              </div>
+              <p className="text-gray-700 text-sm">{poll.moreFacts}</p>
+            </div>
+          )}
+
+          {/* Related Posts Section */}
           {poll.relatedPosts && poll.relatedPosts.length > 0 && (
-            <div>
-              <div className="inline-flex items-center gap-2 bg-indigo-600 text-white px-3 py-1.5 rounded-lg mb-2">
-                <span>&#9733;</span>
-                <span className="font-medium text-[14px]">Similar Topics</span>
+            <div className="mb-6">
+              <div className="inline-flex items-center gap-2 border-b-2 border-indigo-600 pb-1 mb-4">
+                <ListTodo className="w-5 h-5 text-indigo-600" />
+                <span className="font-semibold text-indigo-600">Related Posts</span>
               </div>
               <div className="border border-gray-200 rounded-lg overflow-hidden">
                 {poll.relatedPosts.map((post, index) => {
                   const formattedDate = post.publishedAt
-                    ? new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                    ? new Date(post.publishedAt).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                      })
                     : null
                   return (
-                    <div key={post.id} className={index > 0 ? 'border-t border-gray-200' : ''}>
-                      <Link
-                        href={`/${countrySlug}/${post.slug}`}
-                        className="block hover:bg-gray-50 transition-colors"
-                      >
-                        <div className="px-3 sm:px-6 py-3">
-                          <div className="flex items-center justify-between gap-2 sm:gap-4">
-                            <div className="flex gap-2 sm:gap-4 items-start flex-1 min-w-0">
-                              {formattedDate && (
-                                <span className="text-indigo-600 text-sm shrink-0 pt-0.5">
-                                  {formattedDate}
-                                </span>
-                              )}
-                              <div className="flex-1 min-w-0">
-                                <h3 className="text-gray-900 font-medium text-base leading-snug truncate">
-                                  {post.title}
-                                </h3>
+                    <div
+                          key={post.id}
+                          className={index > 0 ? 'border-t border-gray-200 py-1' : ''}
+                        >
+                          <Link
+                            href={`/${countrySlug}/${post.slug}`}
+                            className="block hover:bg-gray-50 transition-colors"
+                          >
+                            <div className="px-3 sm:px-6 py-1">
+                              <div className="flex items-center justify-between gap-2 sm:gap-4">
+                                <div className="flex gap-2 sm:gap-4 items-start flex-1 min-w-0">
+                                  <span className="text-indigo-600  text-sm sm:text-sm shrink-0 pt-0.5">
+                                    {formattedDate}
+                                  </span>
+                                  <div className="flex-1 min-w-0">
+                                    <h3 className="text-gray-900 font-medium text-base sm:text-base leading-snug truncate">
+                                      {post.title}
+                                    </h3>
+                                    {post.source && (
+                                      <p className="text-sm text-gray-500 mt-1">
+                                        From {post.source}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                                <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 shrink-0" />
+                                {/* {imageUrl ? (
+                                  <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                                    <Image
+                                      src={imageUrl}
+                                      alt={post.heroImage?.alt || post.title}
+                                      fill
+                                      className="object-cover"
+                                    />
+                                  </div>
+                                ) : (
+                                  <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 shrink-0" />
+                                )} */}
                               </div>
                             </div>
-                            <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 shrink-0" />
-                          </div>
+                          </Link>
                         </div>
-                      </Link>
-                    </div>
                   )
                 })}
               </div>
@@ -846,7 +983,11 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
         <>
           {/* After showing results - show Take Another Poll button */}
           <Link
-            href={nextPollSlug && nextPollCountrySlug ? `/${nextPollCountrySlug}/poll/${nextPollSlug}` : `/${countrySlug}?tab=polls`}
+            href={
+              nextPollSlug && nextPollCountrySlug
+                ? `/${nextPollCountrySlug}/poll/${nextPollSlug}`
+                : `/polls`
+            }
             className="flex items-center justify-center gap-2 w-full py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors mb-6"
           >
             <ListTodo className="w-5 h-5" />
@@ -977,10 +1118,7 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
                 {poll.relatedPosts.map((post, index) => {
                   const imageUrl = post.heroImage?.url
                   return (
-                    <div
-                      key={post.id}
-                      className={index > 0 ? 'border-t border-gray-200 py-1' : ''}
-                    >
+                    <div key={post.id} className={index > 0 ? 'border-t border-gray-200 py-1' : ''}>
                       <Link
                         href={`/${countrySlug}/${post.slug}`}
                         className="block hover:bg-gray-50 transition-colors"

@@ -76,7 +76,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({ data, countries = [] }) =>
                     continentCountries.map((country: Country) => (
                       <Link
                         key={country.id}
-                        href={`/${continent?.slug}/${country.slug}`}
+                        href={`/${country.slug}/polls`}
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
                       >
                         {country.name}

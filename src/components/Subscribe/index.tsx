@@ -236,9 +236,9 @@ export function Subscribe() {
 
         {/* Trendy Topics Section */}
         <div className="mb-8">
-          <div className="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg">
-            <Mail className="w-4 h-4" />
-            <span className="font-medium">Trendy Topics</span>
+          <div className="inline-flex items-center gap-2 border-b-2 border-indigo-600 pb-1 mb-3">
+            <Mail className="w-6 h-6 text-indigo-600" />
+            <span className="font-semibold text-xl sm:text-lg text-indigo-600">Trendy Topics</span>
           </div>
 
           <div className="border border-gray-200 rounded-lg overflow-hidden">

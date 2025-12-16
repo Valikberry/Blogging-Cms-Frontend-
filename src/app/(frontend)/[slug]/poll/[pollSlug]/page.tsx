@@ -119,6 +119,11 @@ export default async function PollPage({ params: paramsPromise }: Args) {
       name: pollCountry.name,
       slug: pollCountry.slug || '',
     } : null,
+    thingsToKnow: poll.thingsToKnow ? {
+      title: poll.thingsToKnow.title || null,
+      points: poll.thingsToKnow.points?.map((p: any) => ({ point: p.point })) || null,
+    } : null,
+    moreFacts: poll.moreFacts || null,
     relatedPolls: (poll.relatedPolls?.map((rp: any) => {
       if (typeof rp !== 'object') return null
       const rpImage = typeof rp.heroImage === 'object' ? rp.heroImage : null
@@ -139,6 +144,7 @@ export default async function PollPage({ params: paramsPromise }: Args) {
         slug: rp.slug || '',
         excerpt: rp.excerpt || null,
         publishedAt: rp.publishedAt || null,
+        source: rp.source || null,
         heroImage: rpImage ? { url: rpImage.url || null, alt: rpImage.alt || null } : null,
       }
     }).filter((item): item is NonNullable<typeof item> => item !== null)) || [],

@@ -213,7 +213,7 @@ export function HomePage() {
             <nav className="flex justify-between items-center px-1">
               {/* Country Badge */}
               <Link
-                href={`/${section.country.slug}`}
+                href={`/${section.country.slug}/polls`}
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-base font-medium hover:bg-indigo-700 transition-colors whitespace-nowrap"
               >
                 {section.country.flag?.url && (
@@ -229,14 +229,14 @@ export function HomePage() {
               </Link>
               <div className="flex gap-3 sm:gap-8 min-w-max">
                 <Link
-                  href={`/${section.country.slug}`}
+                  href={`/${section.country.slug}/news`}
                   className="flex items-center gap-1.5 pb-3 text-base sm:text-base font-medium transition-colors relative whitespace-nowrap text-gray-600 hover:text-gray-900"
                 >
                   <FileText className="w-4 h-4 sm:w-4 sm:h-4" />
                   <h3>News</h3>
                 </Link>
                 <Link
-                  href={`/${section.country.slug}?tab=polls`}
+                  href={`/${section.country.slug}/polls`}
                   className="flex items-center gap-1.5 pb-3 text-base sm:text-base font-medium transition-colors relative whitespace-nowrap text-gray-600 hover:text-gray-900"
                 >
                   <BarChart3 className="w-4 h-4 sm:w-4 sm:h-4" />
@@ -299,9 +299,9 @@ export function HomePage() {
 
               {/* Trendy Topics */}
               <div>
-                <div className="inline-flex items-center gap-2 bg-indigo-600 text-white px-3 py-1.5 rounded-lg">
-                  <Mail className="w-4 h-4" />
-                  <span className="font-medium text-[14px]">Trendy Topics</span>
+                <div className="inline-flex items-center gap-2 border-b-2 border-indigo-600 pb-1 mb-3">
+                  <Mail className="w-6 h-6 text-indigo-600" />
+                  <span className="font-semibold text-xl sm:text-lg text-indigo-600">Trendy Topics</span>
                 </div>
 
                 <div className="border border-gray-200 rounded-lg overflow-hidden">

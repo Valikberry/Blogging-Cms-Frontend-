@@ -915,6 +915,28 @@ export interface Poll {
    */
   closedAt?: string | null;
   /**
+   * Key facts shown in green box after voting
+   */
+  thingsToKnow?: {
+    /**
+     * Title for the section (e.g., "5 Things To Know About Donald Trump")
+     */
+    title?: string | null;
+    /**
+     * Bullet points to display
+     */
+    points?:
+      | {
+          point: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  /**
+   * Additional facts shown in yellow box after voting
+   */
+  moreFacts?: string | null;
+  /**
    * Related polls to show after voting
    */
   relatedPolls?: (string | Poll)[] | null;
@@ -1562,6 +1584,18 @@ export interface PollsSelect<T extends boolean = true> {
   status?: T;
   publishedAt?: T;
   closedAt?: T;
+  thingsToKnow?:
+    | T
+    | {
+        title?: T;
+        points?:
+          | T
+          | {
+              point?: T;
+              id?: T;
+            };
+      };
+  moreFacts?: T;
   relatedPolls?: T;
   relatedPosts?: T;
   meta?:

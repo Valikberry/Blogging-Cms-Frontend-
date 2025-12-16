@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import {
   Search,
   FileText,
@@ -49,21 +49,16 @@ interface Country {
 
 interface CountryPageProps {
   country: Country
+  initialTab?: TabType
 }
 
 type TabType = 'news' | 'stories' | 'polls'
 
-export function CountryPage({ country }: CountryPageProps) {
-  const searchParams = useSearchParams()
+export function CountryPage({ country, initialTab = 'polls' }: CountryPageProps) {
+  const router = useRouter()
+  const pathname = usePathname()
   const [searchQuery, setSearchQuery] = useState('')
-  const [activeTab, setActiveTab] = useState<TabType>(() => {
-    // Initialize from URL if available
-    const tab = searchParams.get('tab')
-    if (tab === 'polls' || tab === 'stories' || tab === 'news') {
-      return tab
-    }
-    return 'polls'
-  })
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab)
   const [posts, setPosts] = useState<Post[]>([])
   const [polls, setPolls] = useState<Poll[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -123,13 +118,12 @@ export function CountryPage({ country }: CountryPageProps) {
     setCurrentPage(1)
   }, [activeTab])
 
-  // Sync tab state with URL changes
-  useEffect(() => {
-    const tab = searchParams.get('tab')
-    if (tab === 'polls' || tab === 'stories' || tab === 'news') {
-      setActiveTab(tab)
-    }
-  }, [searchParams])
+  // Handle tab change with URL update
+  const handleTabChange = (tab: TabType) => {
+    const normalizedSlug = country.slug.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()
+    setActiveTab(tab)
+    router.push(`/${normalizedSlug}/${tab}`, { scroll: false })
+  }
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -187,22 +181,10 @@ export function CountryPage({ country }: CountryPageProps) {
           Home
         </Link>
         <ChevronRight className="w-4 h-4" />
-        <span className="text-indigo-600"> </span>
+        <span className="text-indigo-600">{country.name} Hub </span>
       </nav>
-      {/* Page Title */}
-      <div className="text-center mb-6">
-        <h1 className="text-gray-900 text-2xl sm:text-[20px] font-bold mb-2">
-          {`${country.name} politics explained through questions and polls`}
-          <span className="text-indigo-600">?</span>
-        </h1>
-        <p className="text-gray-600 text-lg sm:text-base">
-          AskGeopolitics turns big geopolitical stories into unbiased political questions and quick
-          polls,so you can see the facts and where people stand.
-        </p>
-      </div>
-
       {/* Search Bar */}
-      <div className="mb-6">
+      <div className="mt-6">
         <form onSubmit={handleSearch} className="relative max-w-xl mx-auto">
           <input
             type="text"
@@ -219,12 +201,23 @@ export function CountryPage({ country }: CountryPageProps) {
           </button>
         </form>
       </div>
+      {/* Page Title */}
+      <div className="text-center py-3 mb-6">
+        {/* <h1 className="text-gray-900 text-2xl sm:text-[20px] font-bold mb-2">
+          {`${country.name} politics explained through questions and polls`}
+          <span className="text-indigo-600">?</span>
+        </h1> */}
+        <p className="text-gray-600 text-lg sm:text-base">
+          AskGeopolitics turns big geopolitical stories into unbiased political questions and quick
+          polls,so you can see the facts and where people stand.
+        </p>
+      </div>
 
       {/* Tabs and Country Badge */}
       <div className="flex items-center justify-between mb-4 border-b border-gray-200">
         <div className="flex items-center gap-4">
           <button
-            onClick={() => setActiveTab('news')}
+            onClick={() => handleTabChange('news')}
             className={`flex items-center gap-2 pb-2 mb-[-1px] text-[15px] font-medium transition-colors ${
               activeTab === 'news'
                 ? 'text-indigo-600 border-b-2 border-indigo-600'
@@ -235,7 +228,7 @@ export function CountryPage({ country }: CountryPageProps) {
             <h3> News</h3>
           </button>
           <button
-            onClick={() => setActiveTab('stories')}
+            onClick={() => handleTabChange('stories')}
             className={`flex items-center gap-2 pb-2 mb-[-1px] text-[15px] font-medium transition-colors ${
               activeTab === 'stories'
                 ? 'text-indigo-600 border-b-2 border-indigo-600'
@@ -246,7 +239,7 @@ export function CountryPage({ country }: CountryPageProps) {
             <h3> Stories</h3>
           </button>
           <button
-            onClick={() => setActiveTab('polls')}
+            onClick={() => handleTabChange('polls')}
             className={`flex items-center gap-2 pb-2 mb-[-1px] text-[15px] font-medium transition-colors ${
               activeTab === 'polls'
                 ? 'text-indigo-600 border-b-2 border-indigo-600'
