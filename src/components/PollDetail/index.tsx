@@ -134,11 +134,11 @@ function ShareCard({
   })
 
   return (
-    <div className="w-full max-w-[600px] px-4 py-5 sm:px-8 sm:py-8 bg-white rounded-xl">
+    <div className="w-full max-w-[600px] px-4 py-5 sm:px-8 sm:py-8 bg-indigo-50 rounded-sm">
       {/* Site URL */}
-      <p className="text-[11px] sm:text-[13px] font-bold text-indigo-500 text-center mb-1 sm:mb-2 uppercase tracking-wider">
+      {/* <p className="text-[11px] sm:text-[13px] font-bold text-indigo-500 text-center mb-1 sm:mb-2 uppercase tracking-wider">
         ASKGEOPOLITICS.COM
-      </p>
+      </p> */}
 
       {/* Question */}
       <h1 className="text-[18px] sm:text-[24px] font-bold text-gray-900 text-center mb-5 sm:mb-8 leading-snug">
