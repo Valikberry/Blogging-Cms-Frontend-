@@ -13,6 +13,7 @@ type Args = {
     slug: string
     pollSlug: string
   }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
 // Cache poll query - tries slug first, then ID
@@ -164,8 +165,9 @@ export default async function PollPage({ params: paramsPromise }: Args) {
   return <PollDetail poll={pollData} countrySlug={countrySlug} />
 }
 
-export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
+export async function generateMetadata({ params: paramsPromise, searchParams: searchParamsPromise }: Args): Promise<Metadata> {
   const { pollSlug, slug: countrySlug } = await paramsPromise
+  const searchParams = await searchParamsPromise
   const poll = await queryPollBySlugOrId(pollSlug)
   const siteUrl = getServerSideURL()
 
@@ -175,9 +177,14 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
     }
   }
 
+  // Check if user has voted (passed via query param when sharing)
+  const votedOption = typeof searchParams.voted === 'string' ? searchParams.voted : null
+
   const canonicalUrl = `${siteUrl}/${countrySlug}/poll/${pollSlug}`
-  // Use dynamic OG image that shows poll results
-  const ogImageUrl = `${siteUrl}/api/og/poll?id=${pollSlug}`
+  // Use dynamic OG image - include voted param if present to show results image
+  const ogImageUrl = votedOption
+    ? `${siteUrl}/api/og/poll?id=${pollSlug}&voted=${encodeURIComponent(votedOption)}`
+    : `${siteUrl}/api/og/poll?id=${pollSlug}`
 
   return {
     title: `${poll.question} `,

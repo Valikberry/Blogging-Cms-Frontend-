@@ -383,9 +383,15 @@ export function PollDetail({ poll, countrySlug }: PollDetailProps) {
     const votedText = votedOptionIndex !== null ? results[votedOptionIndex]?.text : ''
     const shareText = votedText
       ? `I voted ${votedText}. What about you?`
-      : `${poll.question} - See the results!`
+      : `${poll.question} - Vote now!`
 
-    const pageUrl = window.location.href
+    // Build share URL with voted parameter if user has voted
+    // This tells the OG image generator to show the results image instead of vote image
+    const baseUrl = window.location.origin
+    const pollPath = window.location.pathname
+    const pageUrl = votedText
+      ? `${baseUrl}${pollPath}?voted=${encodeURIComponent(votedText)}`
+      : window.location.href
     const encodedUrl = encodeURIComponent(pageUrl)
     const encodedText = encodeURIComponent(shareText)
 
